@@ -1,7 +1,7 @@
 import { type Demand } from '../components/DemandCard';
 
-const BIN_ID = import.meta.env.VITE_JSONBIN_BIN_ID;
-const API_KEY = import.meta.env.VITE_JSONBIN_API_KEY;
+const BIN_ID = '690605e5ae596e708f3c7bc5';
+const API_KEY = '$2a$10$/XmOGvx8./SZzV3qMzQ5i.6FjBjS4toNbeaEFzX2D8QPUddyM6VR2';
 const BASE_URL = 'https://api.jsonbin.io/v3';
 
 interface DB {
