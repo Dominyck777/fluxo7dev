@@ -1,0 +1,362 @@
+.header-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-icon svg {
+  display: block;
+}
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-black);
+}
+
+/* Header */
+.dashboard-header {
+  background-color: var(--color-dark-gray);
+  border-bottom: 2px solid var(--color-orange);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-logo {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.logo-fluxo { color: #f05902; }
+.logo-7 { color: #ffaa33; }
+.logo-dev { color: #91b0b0; }
+
+.logout-button {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.95rem;
+  background-color: transparent;
+  border: 2px solid var(--color-orange);
+  color: var(--color-orange);
+}
+
+.logout-button:hover {
+  background-color: var(--color-orange);
+  color: var(--color-white);
+}
+
+/* Main Content */
+.dashboard-main {
+  flex: 1;
+  padding: 2rem 1.5rem;
+}
+
+.dashboard-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Content Header */
+.content-header {
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  font-size: 2rem;
+  color: var(--color-orange);
+  margin-bottom: 1.5rem;
+}
+
+/* Status Counters */
+.status-counters {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.counter-item {
+  background: linear-gradient(180deg, #0b0b0b 0%, #111111 100%);
+  border: 1px solid rgba(255, 107, 0, 0.35);
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.counter-item:hover {
+  border-color: var(--color-orange);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 107, 0, 0.25), 0 0 0 1px rgba(255, 107, 0, 0.15) inset;
+}
+
+.counter-item.total {
+  border-color: var(--color-orange);
+}
+
+.counter-item.pendente {
+  border-color: rgba(255, 23, 68, 0.3);
+}
+
+.counter-item.andamento {
+  border-color: rgba(255, 214, 0, 0.3);
+}
+
+.counter-item.concluido {
+  border-color: rgba(0, 200, 83, 0.3);
+}
+
+.counter-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.counter-item.pendente .counter-icon {
+  color: #FF1744;
+}
+
+.counter-item.andamento .counter-icon {
+  color: #FFD600;
+}
+
+.counter-item.concluido .counter-icon {
+  color: #00C853;
+}
+
+.counter-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-white);
+}
+
+.counter-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.filter-group label {
+  color: var(--color-orange);
+  font-weight: 600;
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+.dev-filter,
+.status-filter,
+.priority-filter {
+  min-width: 180px;
+  padding: 0.7rem 1rem;
+  font-size: 1rem;
+}
+
+.new-demand-button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Demands Grid */
+.demands-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+/* Empty State */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 1.5rem;
+}
+
+.empty-state p {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+/* Footer */
+.dashboard-footer {
+  background-color: var(--color-dark-gray);
+  border-top: 2px solid var(--color-orange);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.dashboard-footer p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}
+
+.version {
+  color: var(--color-orange);
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+/* Success Notification */
+.success-notification {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  background-color: #00C853;
+  color: var(--color-white);
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 200, 83, 0.3);
+  font-weight: 600;
+  z-index: 1001;
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .status-counters {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .demands-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .header-logo {
+    font-size: 1.5rem;
+  }
+  
+  .logout-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .page-title {
+    font-size: 1.75rem;
+  }
+  
+  .status-counters {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .counter-item {
+    padding: 0.75rem;
+  }
+  
+  .counter-value {
+    font-size: 1.5rem;
+  }
+  
+  .counter-label {
+    font-size: 0.75rem;
+  }
+  
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filters {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .filter-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .dev-filter,
+  .status-filter {
+    width: 100%;
+  }
+  
+  .new-demand-button {
+    width: 100%;
+  }
+  
+  .demands-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content {
+    padding: 0 1rem;
+  }
+  
+  .header-logo {
+    font-size: 1.25rem;
+  }
+  
+  .logout-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  
+  .dashboard-main {
+    padding: 1.5rem 1rem;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .success-notification {
+    top: 1rem;
+    right: 1rem;
+    left: 1rem;
+    text-align: center;
+  }
+}

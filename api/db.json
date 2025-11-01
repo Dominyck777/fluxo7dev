@@ -1,0 +1,18 @@
+{
+  "devs": [
+    "Dominyck",
+    "Kallew",
+    "Talison"
+  ],
+  "projects": [
+    "F7 Arena",
+    "F7 Barber"
+  ],
+  "priorities": [
+    "Baixa",
+    "Média",
+    "Alta",
+    "Urgente"
+  ],
+  "demands": []
+}
