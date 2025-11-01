@@ -4,7 +4,8 @@ import Modal from './Modal';
 import NewDemandForm from './NewDemandForm';
 import EditDemandForm from './EditDemandForm';
 import ConfirmDialog from './ConfirmDialog';
-import { apiClient } from '../utils/api-client';
+import Loading from './Loading';
+import { jsonbinClient } from '../utils/jsonbin-client';
 import './Dashboard.css';
 
 interface DashboardProps {
@@ -14,6 +15,7 @@ interface DashboardProps {
 
 const Dashboard = ({ onLogout }: DashboardProps) => {
   const [selectedDev, setSelectedDev] = useState<string>('Todos');
+  const [selectedProject, setSelectedProject] = useState<string>('Todos');
   const [selectedStatus, setSelectedStatus] = useState<string>('Todos');
   const [selectedPriority, setSelectedPriority] = useState<string>('Todas');
   const [demands, setDemands] = useState<Demand[]>([]);
@@ -26,20 +28,24 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<string | number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+  const [completingId, setCompletingId] = useState<string | number | null>(null);
 
   // Load devs, projects, demands from API or localStorage
   useEffect(() => {
     let mounted = true;
     (async () => {
       const [config, demands] = await Promise.all([
-        apiClient.getConfig(),
-        apiClient.getDemands(),
+        jsonbinClient.getConfig(),
+        jsonbinClient.getDemands(),
       ]);
       if (!mounted) return;
       setDevs(config.devs || []);
       setProjects(config.projects || []);
       setPriorities(config.priorities || []);
       setDemands(demands);
+      setIsLoading(false);
     })();
     return () => {
       mounted = false;
@@ -48,8 +54,19 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
 
   // (Removido) Persistência via localStorage substituída pela API
 
-  // Sort demands by date (most recent first)
+  // Sort demands: Pendentes first (by priority), then Concluídas at the end
+  const priorityOrder = { 'Urgente': 0, 'Alta': 1, 'Média': 2, 'Baixa': 3 };
   const sortedDemands = [...demands].sort((a, b) => {
+    // First, separate by status: Pendente comes before Concluído
+    if (a.status !== b.status) {
+      return a.status === 'Pendente' ? -1 : 1;
+    }
+    
+    // Within same status, sort by priority
+    const priorityDiff = priorityOrder[a.prioridade] - priorityOrder[b.prioridade];
+    if (priorityDiff !== 0) return priorityDiff;
+    
+    // If same priority, sort by date (most recent first)
     const dateA = a.dataCriacao ? new Date(a.dataCriacao).getTime() : 0;
     const dateB = b.dataCriacao ? new Date(b.dataCriacao).getTime() : 0;
     return dateB - dateA;
@@ -57,23 +74,33 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
 
   const filteredDemands = sortedDemands.filter(demand => {
     const matchesDev = selectedDev === 'Todos' || demand.desenvolvedor === selectedDev;
+    const matchesProject = selectedProject === 'Todos' || demand.projeto === selectedProject;
     const matchesStatus = selectedStatus === 'Todos' || demand.status === selectedStatus;
     const matchesPriority = selectedPriority === 'Todas' || demand.prioridade === selectedPriority;
-    return matchesDev && matchesStatus && matchesPriority;
+    return matchesDev && matchesProject && matchesStatus && matchesPriority;
   });
 
-  // Count demands by status
+  // Separate pending and completed demands
+  const pendingDemands = filteredDemands.filter(d => d.status === 'Pendente');
+  const completedDemands = filteredDemands.filter(d => d.status === 'Concluído');
+
+  // Count demands by status (from all demands)
   const statusCounts = {
     total: demands.length,
     pendente: demands.filter(d => d.status === 'Pendente').length,
-    andamento: demands.filter(d => d.status === 'Em Andamento').length,
     concluido: demands.filter(d => d.status === 'Concluído').length
   };
 
-  const pct = (n: number) => {
-    if (statusCounts.total === 0) return '0%';
-    return `${Math.round((n / statusCounts.total) * 100)}%`;
-  };
+  // Calculate completion rate based on filtered demands (dev and project filters)
+  const demandsForRate = demands.filter(demand => {
+    const matchesDev = selectedDev === 'Todos' || demand.desenvolvedor === selectedDev;
+    const matchesProject = selectedProject === 'Todos' || demand.projeto === selectedProject;
+    return matchesDev && matchesProject;
+  });
+  
+  const completionRate = demandsForRate.length > 0 
+    ? Math.round((demandsForRate.filter(d => d.status === 'Concluído').length / demandsForRate.length) * 100) 
+    : 0;
 
   const showSuccessNotification = (message: string) => {
     setSuccessMessage(message);
@@ -82,11 +109,16 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
   };
 
   const handleCreateDemand = async (newDemand: Omit<Demand, 'id'>) => {
-    const payload = { ...newDemand, dataCriacao: new Date().toISOString() };
-    const created = await apiClient.createDemand(payload);
-    setDemands(prev => [created, ...prev]);
-    setIsModalOpen(false);
-    showSuccessNotification('Demanda criada com sucesso!');
+    setIsCreating(true);
+    try {
+      const payload = { ...newDemand, dataCriacao: new Date().toISOString() };
+      const created = await jsonbinClient.createDemand(payload);
+      setDemands(prev => [created, ...prev]);
+      setIsModalOpen(false);
+      showSuccessNotification('Demanda criada com sucesso!');
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const handleEditDemand = (demand: Demand) => {
@@ -95,11 +127,22 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
   };
 
   const handleUpdateDemand = async (updatedDemand: Demand) => {
-    const saved = await apiClient.updateDemand(updatedDemand);
+    const saved = await jsonbinClient.updateDemand(updatedDemand);
     setDemands(prev => prev.map(d => d.id === saved.id ? saved : d));
     setIsEditModalOpen(false);
     setEditingDemand(null);
     showSuccessNotification('Demanda atualizada com sucesso!');
+  };
+
+  const handleCompleteDemand = async (updatedDemand: Demand) => {
+    setCompletingId(updatedDemand.id);
+    try {
+      const saved = await jsonbinClient.updateDemand(updatedDemand);
+      setDemands(prev => prev.map(d => d.id === saved.id ? saved : d));
+      showSuccessNotification('Demanda concluída com sucesso!');
+    } finally {
+      setCompletingId(null);
+    }
   };
 
   const handleDeleteDemand = (id: string | number) => {
@@ -108,7 +151,7 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
 
   const confirmDeleteDemand = async () => {
     if (confirmDelete) {
-      await apiClient.deleteDemand(confirmDelete);
+      await jsonbinClient.deleteDemand(confirmDelete);
       setDemands(prev => prev.filter(d => d.id !== confirmDelete));
       setConfirmDelete(null);
       showSuccessNotification('Demanda excluída com sucesso!');
@@ -120,9 +163,12 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
       <header className="dashboard-header" role="banner">
         <div className="header-content">
           <span className="header-icon" aria-hidden="true">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="7" r="4" stroke="#ffaa33" strokeWidth="2"/>
-              <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="#f05902" strokeWidth="2" strokeLinecap="round"/>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="3" width="18" height="18" rx="2" stroke="#f05902" strokeWidth="2"/>
+              <path d="M8 8L10 10L8 12" stroke="#ffaa33" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 12H16" stroke="#91b0b0" strokeWidth="2" strokeLinecap="round"/>
+              <circle cx="18" cy="18" r="4" fill="#1a1a1a" stroke="#f05902" strokeWidth="1.5"/>
+              <path d="M18 16V20M16 18H20" stroke="#ffaa33" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
           </span>
           <h1 className="header-logo">
@@ -143,34 +189,48 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
       <main className="dashboard-main" role="main">
         <div className="dashboard-content">
           <div className="content-header">
-            <h2 className="page-title">Demandas</h2>
-            
             {/* Status Counters */}
-            <div className="status-counters" role="region" aria-label="Contadores de status das demandas">
-              <div className="counter-item total">
-                <span className="counter-value">{statusCounts.total}</span>
-                <span className="counter-label">Demandas Totais</span>
+            <div className="summary-cards">
+              <div className="summary-card card-total">
+                <div className="card-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" fill="none"/>
+                    <path d="M12 12L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M12 12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <div className="card-content">
+                  <h3>Taxa de Conclusão</h3>
+                  <p className="card-number">{completionRate}%</p>
+                </div>
               </div>
-              <div className="counter-item pendente">
-                <span className="counter-icon">⏸</span>
-                <span className="counter-value">{statusCounts.pendente}</span>
-                <span className="counter-label">Pendente</span>
-                <span className="counter-sublabel">{pct(statusCounts.pendente)} do total</span>
+              
+              <div className="summary-card card-pendente">
+                <div className="card-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M12 7V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <div className="card-content">
+                  <h3>Pendentes</h3>
+                  <p className="card-number">{statusCounts.pendente}</p>
+                </div>
               </div>
-              <div className="counter-item andamento">
-                <span className="counter-icon">⏱</span>
-                <span className="counter-value">{statusCounts.andamento}</span>
-                <span className="counter-label">Em Andamento</span>
-                <span className="counter-sublabel">{pct(statusCounts.andamento)} do total</span>
-              </div>
-              <div className="counter-item concluido">
-                <span className="counter-icon">✓</span>
-                <span className="counter-value">{statusCounts.concluido}</span>
-                <span className="counter-label">Concluído</span>
-                <span className="counter-sublabel">{pct(statusCounts.concluido)} do total</span>
+              
+              <div className="summary-card card-concluido">
+                <div className="card-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M8 12L11 15L16 9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div className="card-content">
+                  <h3>Concluídas</h3>
+                  <p className="card-number">{statusCounts.concluido}</p>
+                </div>
               </div>
             </div>
-            
             <div className="controls">
               <div className="filters">
                 <div className="filter-group">
@@ -187,6 +247,21 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
                     ))}
                   </select>
                 </div>
+
+                <div className="filter-group">
+                  <label htmlFor="project-filter">Projeto:</label>
+                  <select
+                    id="project-filter"
+                    value={selectedProject}
+                    onChange={(e) => setSelectedProject(e.target.value)}
+                    className="project-filter"
+                  >
+                    <option value="Todos">Todos</option>
+                    {projects.map((project) => (
+                      <option key={project} value={project}>{project}</option>
+                    ))}
+                  </select>
+                </div>
                 
                 <div className="filter-group">
                   <label htmlFor="status-filter">Status:</label>
@@ -198,7 +273,6 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
                   >
                     <option value="Todos">Todos</option>
                     <option value="Pendente">Pendente</option>
-                    <option value="Em Andamento">Em Andamento</option>
                     <option value="Concluído">Concluído</option>
                   </select>
                 </div>
@@ -229,28 +303,53 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
             </div>
           </div>
 
-          <div className="demands-grid">
-            {filteredDemands.length > 0 ? (
-              filteredDemands.map(demand => (
-                <DemandCard 
-                  key={demand.id} 
-                  demand={demand}
-                  onEdit={handleEditDemand}
-                  onDelete={handleDeleteDemand}
-                />
-              ))
-            ) : (
-              <div className="empty-state">
-                <p>Nenhuma demanda encontrada</p>
+          {/* Demandas Pendentes */}
+          {(selectedStatus === 'Todos' || selectedStatus === 'Pendente') && (
+            <div className="demands-section">
+              <h3 className="section-title">Demandas Pendentes</h3>
+              <div className="demands-grid">
+                {isLoading ? (
+                  <Loading message="Carregando demandas..." />
+                ) : pendingDemands.length > 0 ? (
+                  pendingDemands.map(demand => (
+                    <DemandCard 
+                      key={demand.id} 
+                      demand={demand}
+                      onEdit={handleEditDemand}
+                      onDelete={handleDeleteDemand}
+                      onComplete={handleCompleteDemand}
+                      isCompleting={completingId === demand.id}
+                    />
+                  ))
+                ) : (
+                  <div className="empty-state">
+                    <p>Nenhuma demanda pendente</p>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* Demandas Concluídas */}
+          {completedDemands.length > 0 && (
+            <div className="demands-section completed-section">
+              <h3 className="section-title">Demandas Concluídas ({completedDemands.length})</h3>
+              <div className="demands-grid">
+                {completedDemands.map(demand => (
+                  <DemandCard 
+                    key={demand.id} 
+                    demand={demand}
+                    onEdit={handleEditDemand}
+                    onDelete={handleDeleteDemand}
+                    onComplete={handleCompleteDemand}
+                    isCompleting={completingId === demand.id}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </main>
-
-      <footer className="dashboard-footer">
-        <p>&copy; 2025 Fluxo7 Dev. Todos os direitos reservados. <span className="version">v1.0</span></p>
-      </footer>
 
       {/* Modal de Nova Demanda */}
       <Modal
@@ -259,15 +358,39 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
         title="Nova Demanda"
       >
         {!devs || !projects || !priorities || devs.length === 0 || projects.length === 0 || priorities.length === 0 ? (
-          <div aria-live="polite">Carregando listas de desenvolvedores, projetos e prioridades...</div>
+          <Loading message="Carregando formulário..." />
         ) : (
-          <NewDemandForm
-            onSubmit={handleCreateDemand}
-            onCancel={() => setIsModalOpen(false)}
-            devs={devs}
-            projects={projects}
-            priorities={priorities}
-          />
+          <div style={{ position: 'relative' }}>
+            <div style={{ opacity: isCreating ? 0.3 : 1, pointerEvents: isCreating ? 'none' : 'auto', transition: 'opacity 0.3s', filter: isCreating ? 'blur(2px)' : 'none' }}>
+              <NewDemandForm
+                onSubmit={handleCreateDemand}
+                onCancel={() => setIsModalOpen(false)}
+                devs={devs}
+                projects={projects}
+                priorities={priorities}
+              />
+            </div>
+            {isCreating && (
+              <div style={{ 
+                position: 'absolute', 
+                top: '50%', 
+                left: '50%', 
+                transform: 'translate(-50%, -50%)',
+                fontSize: '1.5rem',
+                fontWeight: 700,
+                color: 'var(--color-orange)',
+                textAlign: 'center',
+                background: 'rgba(0, 0, 0, 0.9)',
+                padding: '2rem 3rem',
+                borderRadius: '12px',
+                border: '2px solid var(--color-orange)',
+                boxShadow: '0 8px 32px rgba(255, 107, 0, 0.4)',
+                zIndex: 10
+              }}>
+                ⏳ Criando demanda...
+              </div>
+            )}
+          </div>
         )}
       </Modal>
 

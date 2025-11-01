@@ -133,10 +133,9 @@ const EditDemandForm = ({ demand, onSubmit, onCancel, devs, projects, priorities
         <select
           id="status"
           value={formData.status}
-          onChange={(e) => handleChange('status', e.target.value as 'Pendente' | 'Em Andamento' | 'Concluído')}
+          onChange={(e) => handleChange('status', e.target.value as 'Pendente' | 'Concluído')}
         >
           <option value="Pendente">Pendente</option>
-          <option value="Em Andamento">Em Andamento</option>
           <option value="Concluído">Concluído</option>
         </select>
       </div>

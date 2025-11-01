@@ -1,3 +1,54 @@
+# Fluxo7 Dev - Sistema de Gerenciamento de Demandas
+
+Sistema de gerenciamento de demandas de desenvolvimento com React + TypeScript + Vite.
+
+## 🚀 Configuração
+
+### 1. Instalar dependências
+```bash
+npm install
+```
+
+### 2. Configurar variáveis de ambiente
+
+Crie um arquivo `.env` na raiz do projeto:
+
+```env
+VITE_JSONBIN_BIN_ID=seu_bin_id_aqui
+VITE_JSONBIN_API_KEY=sua_api_key_aqui
+```
+
+### 3. Rodar localmente
+```bash
+npm run dev
+```
+
+### 4. Deploy na Vercel
+
+**Importante:** Configure as variáveis de ambiente na Vercel:
+1. Acesse seu projeto na Vercel
+2. Vá em **Settings** → **Environment Variables**
+3. Adicione:
+   - `VITE_JSONBIN_BIN_ID` = seu bin ID
+   - `VITE_JSONBIN_API_KEY` = sua API key
+
+```bash
+vercel --prod
+```
+
+## 📦 Tecnologias
+
+- React 19
+- TypeScript
+- Vite
+- JSONBin.io (persistência de dados)
+
+## 🔐 Credenciais
+
+- **Senha de login:** `f740028922`
+
+---
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

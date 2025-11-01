@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { type Demand } from './DemandCard';
 import './NewDemandForm.css';
 
@@ -66,6 +66,28 @@ const NewDemandForm = ({ onSubmit, onCancel, devs, projects, priorities }: NewDe
     }
   };
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // ESC to cancel
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onCancel();
+      }
+      // Ctrl+Enter or Cmd+Enter to submit
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        const form = document.querySelector('.new-demand-form') as HTMLFormElement;
+        if (form) {
+          form.requestSubmit();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onCancel]);
+
   return (
     <form onSubmit={handleSubmit} className="new-demand-form">
       <div className="form-field">
@@ -112,10 +134,11 @@ const NewDemandForm = ({ onSubmit, onCancel, devs, projects, priorities }: NewDe
         </label>
         <textarea
           id="descricao"
-          placeholder="Descreva a demanda..."
           value={formData.descricao}
           onChange={(e) => handleChange('descricao', e.target.value)}
+          placeholder="Descreva a demanda..."
           className={errors.descricao ? 'error' : ''}
+          autoFocus
           rows={5}
         />
         {errors.descricao && (
@@ -145,10 +168,9 @@ const NewDemandForm = ({ onSubmit, onCancel, devs, projects, priorities }: NewDe
         <select
           id="status"
           value={formData.status}
-          onChange={(e) => handleChange('status', e.target.value as 'Pendente' | 'Em Andamento' | 'Concluído')}
+          onChange={(e) => handleChange('status', e.target.value as 'Pendente' | 'Concluído')}
         >
           <option value="Pendente">Pendente</option>
-          <option value="Em Andamento">Em Andamento</option>
           <option value="Concluído">Concluído</option>
         </select>
       </div>
@@ -160,12 +182,14 @@ const NewDemandForm = ({ onSubmit, onCancel, devs, projects, priorities }: NewDe
           className="btn-cancel"
         >
           Cancelar
+          <span className="keyboard-badge">ESC</span>
         </button>
         <button
           type="submit"
           className="btn-submit"
         >
           Criar Demanda
+          <span className="keyboard-badge">Ctrl+Enter</span>
         </button>
       </div>
     </form>

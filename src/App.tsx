@@ -7,7 +7,9 @@ const AUTH_KEY = 'fluxo7dev_auth';
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Carrega estado de autenticação ao montar
+  // Carrega estado de autenticação do localStorage ao montar
+  // Mantém o usuário logado mesmo após fechar o navegador
+  // Só é limpo ao fazer logout ou limpar o cache do navegador
   useEffect(() => {
     const auth = localStorage.getItem(AUTH_KEY);
     if (auth === 'true') {

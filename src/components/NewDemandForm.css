@@ -1,7 +1,15 @@
 .new-demand-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem 1.5rem;
+}
+
+.new-demand-form .form-field:nth-child(3) {
+  grid-column: 1 / -1;
+}
+
+.new-demand-form .form-actions {
+  grid-column: 1 / -1;
 }
 
 .form-field {
@@ -11,13 +19,16 @@
 }
 
 .form-field label {
-  color: var(--color-orange);
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 600;
-  font-size: 1.05rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .required {
-  color: #FF1744;
+  color: var(--color-orange);
+  font-weight: 700;
 }
 
 .form-field input,
@@ -25,12 +36,13 @@
 .form-field select {
   width: 100%;
   padding: 0.85rem;
-  font-size: 1.05rem;
+  font-size: 1rem;
   border-radius: 8px;
-  border: 2px solid var(--color-orange);
-  background-color: var(--color-black);
+  border: 2px solid rgba(255, 107, 0, 0.3);
+  background-color: rgba(20, 20, 20, 0.8);
   color: var(--color-white);
   transition: all 0.3s ease;
+  font-weight: 500;
 }
 
 .form-field textarea {
@@ -40,12 +52,20 @@
   line-height: 1.5;
 }
 
+.form-field input:hover,
+.form-field textarea:hover,
+.form-field select:hover {
+  border-color: rgba(255, 107, 0, 0.5);
+  background-color: rgba(30, 30, 30, 0.9);
+}
+
 .form-field input:focus,
 .form-field textarea:focus,
 .form-field select:focus {
   outline: none;
-  border-color: var(--color-orange-hover);
-  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+  border-color: var(--color-orange);
+  background-color: rgba(30, 30, 30, 0.95);
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.15);
 }
 
 .form-field input.error,
@@ -77,42 +97,72 @@
 
 .btn-cancel,
 .btn-submit {
-  padding: 0.75rem 1.5rem;
+  padding: 0.85rem 2rem;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-  border: 2px solid;
+  border: 2px solid transparent;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.keyboard-badge {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .btn-cancel {
-  background-color: transparent;
-  border-color: rgba(255, 255, 255, 0.3);
-  color: rgba(255, 255, 255, 0.7);
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.9) 0%, rgba(20, 20, 20, 0.9) 100%);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .btn-cancel:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.5);
-  color: var(--color-white);
+  border-color: rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, rgba(40, 40, 40, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .btn-submit {
-  background-color: var(--color-orange);
+  background: linear-gradient(135deg, #f05902 0%, #ff6b00 100%);
   border-color: var(--color-orange);
   color: var(--color-white);
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
 }
 
 .btn-submit:hover {
-  background-color: var(--color-orange-hover);
+  background: linear-gradient(135deg, #ff6b00 0%, #ff8533 100%);
   border-color: var(--color-orange-hover);
   transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
+  .new-demand-form {
+    grid-template-columns: 1fr;
+  }
+  
+  .new-demand-form .form-field:nth-child(3) {
+    grid-column: 1;
+  }
+  
+  .new-demand-form .form-actions {
+    grid-column: 1;
+  }
+  
   .form-field label {
     font-size: 1rem;
   }

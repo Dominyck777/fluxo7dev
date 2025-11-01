@@ -20,23 +20,35 @@
 .login-header {
   text-align: center;
   margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.login-icon {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .login-logo {
   font-size: 2.5rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin: 0;
   letter-spacing: -0.5px;
 }
 
 .logo-fluxo { color: #f05902; }
 .logo-7 { color: #ffaa33; }
 .logo-dev { color: #91b0b0; }
-
-.login-subtitle {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.95rem;
-}
 
 .login-form {
   display: flex;
