@@ -30,7 +30,7 @@ export const getInitialDemands = (): Demand[] => {
       desenvolvedor: 'Dev 1',
       projeto: 'Sistema de Login',
       descricao: 'Implementar autenticação com JWT e refresh tokens para maior segurança',
-      status: 'Em Andamento',
+      status: 'Pendente',
       prioridade: 'Alta',
       dataCriacao: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString()
     },
@@ -66,7 +66,7 @@ export const getInitialDemands = (): Demand[] => {
       desenvolvedor: 'Dev 4',
       projeto: 'App Mobile',
       descricao: 'Desenvolver aplicativo mobile em React Native',
-      status: 'Em Andamento',
+      status: 'Pendente',
       prioridade: 'Alta',
       dataCriacao: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString()
     }
