@@ -193,24 +193,22 @@
 }
 
 .status-badge {
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.5px;
+  color: white;
 }
 
 .status-pendente {
-  background-color: #DC2626;
-  color: #FFFFFF;
-  border: none;
+  background-color: #F59E0B;
+  color: #1a1a1a;
 }
 
 .status-concluido {
-  background-color: #059669;
+  background-color: #10B981;
   color: #FFFFFF;
   border: none;
 }
