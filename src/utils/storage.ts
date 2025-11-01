@@ -31,6 +31,7 @@ export const getInitialDemands = (): Demand[] => {
       projeto: 'Sistema de Login',
       descricao: 'Implementar autenticação com JWT e refresh tokens para maior segurança',
       status: 'Em Andamento',
+      prioridade: 'Alta',
       dataCriacao: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
@@ -39,6 +40,7 @@ export const getInitialDemands = (): Demand[] => {
       projeto: 'API de Pagamentos',
       descricao: 'Integração com gateway de pagamento e webhooks',
       status: 'Pendente',
+      prioridade: 'Urgente',
       dataCriacao: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
@@ -47,6 +49,7 @@ export const getInitialDemands = (): Demand[] => {
       projeto: 'Dashboard Analytics',
       descricao: 'Criar dashboard com gráficos e métricas em tempo real',
       status: 'Concluído',
+      prioridade: 'Média',
       dataCriacao: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
@@ -55,6 +58,7 @@ export const getInitialDemands = (): Demand[] => {
       projeto: 'Módulo de Relatórios',
       descricao: 'Desenvolver sistema de geração de relatórios em PDF',
       status: 'Pendente',
+      prioridade: 'Baixa',
       dataCriacao: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
@@ -63,6 +67,7 @@ export const getInitialDemands = (): Demand[] => {
       projeto: 'App Mobile',
       descricao: 'Desenvolver aplicativo mobile em React Native',
       status: 'Em Andamento',
+      prioridade: 'Alta',
       dataCriacao: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString()
     }
   ];
