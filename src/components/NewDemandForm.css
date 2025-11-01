@@ -173,6 +173,10 @@
     padding: 0.75rem;
     font-size: 1rem;
   }
+  
+  .keyboard-badge {
+    display: none;
+  }
 }
 
 @media (max-width: 480px) {
