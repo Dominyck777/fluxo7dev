@@ -84,22 +84,25 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
   const pendingDemands = filteredDemands.filter(d => d.status === 'Pendente');
   const completedDemands = filteredDemands.filter(d => d.status === 'Concluído');
 
-  // Count demands by status (from all demands)
-  const statusCounts = {
-    total: demands.length,
-    pendente: demands.filter(d => d.status === 'Pendente').length,
-    concluido: demands.filter(d => d.status === 'Concluído').length
-  };
-
-  // Calculate completion rate based on filtered demands (dev and project filters)
-  const demandsForRate = demands.filter(demand => {
+  // Calculate stats based on filtered demands (all filters applied)
+  const demandsForStats = demands.filter(demand => {
     const matchesDev = selectedDev === 'Todos' || demand.desenvolvedor === selectedDev;
     const matchesProject = selectedProject === 'Todos' || demand.projeto === selectedProject;
-    return matchesDev && matchesProject;
+    const matchesStatus = selectedStatus === 'Todos' || demand.status === selectedStatus;
+    const matchesPriority = selectedPriority === 'Todas' || demand.prioridade === selectedPriority;
+    return matchesDev && matchesProject && matchesStatus && matchesPriority;
   });
+
+  // Count demands by status (from filtered demands)
+  const statusCounts = {
+    total: demandsForStats.length,
+    pendente: demandsForStats.filter(d => d.status === 'Pendente').length,
+    concluido: demandsForStats.filter(d => d.status === 'Concluído').length
+  };
   
-  const completionRate = demandsForRate.length > 0 
-    ? Math.round((demandsForRate.filter(d => d.status === 'Concluído').length / demandsForRate.length) * 100) 
+  // Calculate completion rate based on filtered demands
+  const completionRate = demandsForStats.length > 0 
+    ? Math.round((statusCounts.concluido / demandsForStats.length) * 100) 
     : 0;
 
   const showSuccessNotification = (message: string) => {
@@ -201,7 +204,13 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
                 </div>
                 <div className="card-content">
                   <h3>Taxa de Conclusão</h3>
-                  <p className="card-number">{completionRate}%</p>
+                  {isLoading ? (
+                    <div className="card-loading">
+                      <div className="loading-spinner-small"></div>
+                    </div>
+                  ) : (
+                    <p className="card-number">{completionRate}%</p>
+                  )}
                 </div>
               </div>
               
@@ -214,7 +223,13 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
                 </div>
                 <div className="card-content">
                   <h3>Pendentes</h3>
-                  <p className="card-number">{statusCounts.pendente}</p>
+                  {isLoading ? (
+                    <div className="card-loading">
+                      <div className="loading-spinner-small"></div>
+                    </div>
+                  ) : (
+                    <p className="card-number">{statusCounts.pendente}</p>
+                  )}
                 </div>
               </div>
               
@@ -227,7 +242,13 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
                 </div>
                 <div className="card-content">
                   <h3>Concluídas</h3>
-                  <p className="card-number">{statusCounts.concluido}</p>
+                  {isLoading ? (
+                    <div className="card-loading">
+                      <div className="loading-spinner-small"></div>
+                    </div>
+                  ) : (
+                    <p className="card-number">{statusCounts.concluido}</p>
+                  )}
                 </div>
               </div>
             </div>
