@@ -1,0 +1,17 @@
+{
+  "name": "fluxo7dev-notification-server",
+  "version": "1.0.0",
+  "description": "Servidor local para notificações PowerShell",
+  "main": "notification-server.js",
+  "scripts": {
+    "start": "node notification-server.js",
+    "dev": "nodemon notification-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

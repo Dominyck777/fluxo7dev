@@ -6,6 +6,7 @@ import EditDemandForm from './EditDemandForm';
 import ConfirmDialog from './ConfirmDialog';
 import Loading from './Loading';
 import { jsonbinClient, type Developer } from '../utils/jsonbin-client';
+import { notificationService } from '../utils/notification-service';
 import './Dashboard.css';
 
 interface DashboardProps {
@@ -48,11 +49,12 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
       setPriorities(config.priorities || []);
       setDemands(demands);
       setIsLoading(false);
+      
     })();
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [currentUser]);
 
   // (Removido) Persistência via localStorage substituída pela API
 
@@ -123,6 +125,11 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
       setDemands(prev => [created, ...prev]);
       setIsModalOpen(false);
       showSuccessNotification('Demanda criada com sucesso!');
+      
+      // Enviar notificação para o desenvolvedor atribuído
+      if (created.desenvolvedor !== currentUser.name) {
+        await notificationService.notifyNewDemand(created, created.desenvolvedor);
+      }
     } finally {
       setIsCreating(false);
     }
@@ -162,6 +169,20 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
       setDemands(prev => prev.filter(d => d.id !== confirmDelete));
       setConfirmDelete(null);
       showSuccessNotification('Demanda excluída com sucesso!');
+    }
+  };
+
+  const handleTestNotification = async () => {
+    const message = `Teste de notificação do sistema Fluxo7 Dev! Enviado por ${currentUser.name}`;
+    
+    // Testa Web Push primeiro
+    if (notificationService.isWebPushSupported()) {
+      await notificationService.testWebPush();
+      showSuccessNotification('🔔 Notificação Web Push enviada!');
+    } else {
+      // Fallback para outros métodos
+      await notificationService.notifyAllUsers(message, devs);
+      showSuccessNotification('Notificação de teste enviada!');
     }
   };
 
@@ -323,13 +344,32 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
                 </div>
               </div>
               
-              <button 
-                className="new-demand-button"
-                onClick={() => setIsModalOpen(true)}
-                aria-label="Criar nova demanda"
-              >
-                Nova Demanda +
-              </button>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <button 
+                  className="test-notification-button"
+                  onClick={handleTestNotification}
+                  aria-label="Testar notificação para todos"
+                  style={{
+                    padding: '0.75rem 1rem',
+                    fontSize: '0.9rem',
+                    backgroundColor: 'transparent',
+                    border: '2px solid #10B981',
+                    color: '#10B981',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  🔔 Teste Notificação
+                </button>
+                <button 
+                  className="new-demand-button"
+                  onClick={() => setIsModalOpen(true)}
+                  aria-label="Criar nova demanda"
+                >
+                  Nova Demanda +
+                </button>
+              </div>
             </div>
           </div>
 
