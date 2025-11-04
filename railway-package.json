@@ -1,7 +1,7 @@
 {
   "name": "fluxo7dev-push-server",
   "version": "1.0.0",
-  "description": "Servidor Push para notificações offline",
+  "description": "Servidor Push para notificações offline - Railway Deploy",
   "main": "push-server.cjs",
   "scripts": {
     "start": "node push-server.cjs",
@@ -12,7 +12,7 @@
     "cors": "^2.8.5",
     "web-push": "^3.6.6"
   },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

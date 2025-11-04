@@ -7,6 +7,7 @@ import ConfirmDialog from './ConfirmDialog';
 import Loading from './Loading';
 import { jsonbinClient, type Developer } from '../utils/jsonbin-client';
 import { notificationService } from '../utils/notification-service';
+import { pollingService } from '../utils/polling-service';
 import './Dashboard.css';
 
 interface DashboardProps {
@@ -50,9 +51,22 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
       setDemands(demands);
       setIsLoading(false);
       
+      // Inicializa Push Server para o usuário atual
+      notificationService.initializePushServer(currentUser.name).then((success) => {
+        if (success) {
+          console.log('🚀 Push Server ativo para:', currentUser.name);
+        } else {
+          console.log('⚠️ Push Server falhou, usando polling como fallback');
+          // Fallback para polling se Push Server falhar
+          pollingService.setCurrentUser(currentUser.name);
+          pollingService.start();
+        }
+      });
     })();
     return () => {
       mounted = false;
+      // Para o polling quando o componente é desmontado
+      pollingService.stop();
     };
   }, [currentUser]);
 
@@ -173,17 +187,22 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
   };
 
   const handleTestNotification = async () => {
-    const message = `Teste de notificação do sistema Fluxo7 Dev! Enviado por ${currentUser.name}`;
+    // Testa Push Server primeiro
+    const serverAvailable = await notificationService.testPushServerConnection();
     
-    // Testa Web Push primeiro
-    if (notificationService.isWebPushSupported()) {
-      await notificationService.testWebPush();
-      showSuccessNotification('🔔 Notificação Web Push enviada!');
+    if (serverAvailable) {
+      await notificationService.testPushServer();
+      showSuccessNotification('🚀 Notificação Push Server enviada!');
     } else {
-      // Fallback para outros métodos
-      await notificationService.notifyAllUsers(message, devs);
-      showSuccessNotification('Notificação de teste enviada!');
+      // Fallback para polling
+      await pollingService.simulateNewDemand();
+      showSuccessNotification('🔔 Notificação de teste enviada via polling!');
     }
+  };
+
+  const handleCheckNewDemands = async () => {
+    await pollingService.checkNow();
+    showSuccessNotification('✅ Verificação manual de novas demandas realizada!');
   };
 
   return (
@@ -344,11 +363,11 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
                 </div>
               </div>
               
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
                 <button 
                   className="test-notification-button"
                   onClick={handleTestNotification}
-                  aria-label="Testar notificação para todos"
+                  aria-label="Testar notificação"
                   style={{
                     padding: '0.75rem 1rem',
                     fontSize: '0.9rem',
@@ -360,7 +379,24 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
                     transition: 'all 0.3s ease'
                   }}
                 >
-                  🔔 Teste Notificação
+                  🔔 Teste
+                </button>
+                <button 
+                  className="check-demands-button"
+                  onClick={handleCheckNewDemands}
+                  aria-label="Verificar novas demandas"
+                  style={{
+                    padding: '0.75rem 1rem',
+                    fontSize: '0.9rem',
+                    backgroundColor: 'transparent',
+                    border: '2px solid #F59E0B',
+                    color: '#F59E0B',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  🔍 Verificar
                 </button>
                 <button 
                   className="new-demand-button"

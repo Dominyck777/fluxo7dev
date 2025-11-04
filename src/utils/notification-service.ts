@@ -1,10 +1,11 @@
 import { type Demand } from '../components/DemandCard';
 import { webPushService } from './web-push-service';
+import { pushClient } from './push-client';
 
 interface NotificationConfig {
   enabled: boolean;
   lastCheck: string;
-  method: 'powershell' | 'webpush' | 'none';
+  method: 'powershell' | 'webpush' | 'pushserver' | 'none';
 }
 
 class NotificationService {
@@ -27,7 +28,7 @@ class NotificationService {
     return {
       enabled: true,
       lastCheck: new Date().toISOString(),
-      method: 'webpush'
+      method: 'pushserver'
     };
   }
 
@@ -79,6 +80,7 @@ class NotificationService {
     if (!this.config.enabled) return;
 
     const message = `Nova demanda atribuída: "${demand.descricao}" no projeto ${demand.projeto}`;
+    const title = `🚀 Nova Demanda - ${assignedUser}`;
     
     switch (this.config.method) {
       case 'powershell':
@@ -86,7 +88,7 @@ class NotificationService {
         break;
       case 'webpush':
         await this.sendWebPushNotification({
-          title: `🚀 Nova Demanda - ${assignedUser}`,
+          title,
           body: message,
           tag: `demand-${demand.id}`,
           data: {
@@ -94,6 +96,13 @@ class NotificationService {
             assignedUser,
             type: 'new_demand'
           }
+        });
+        break;
+      case 'pushserver':
+        await this.sendPushServerNotification(assignedUser, title, message, {
+          demandId: demand.id,
+          assignedUser,
+          type: 'new_demand'
         });
         break;
       default:
@@ -105,6 +114,7 @@ class NotificationService {
     if (!this.config.enabled) return;
 
     console.log(`📢 Enviando notificação para todos os usuários: ${message}`);
+    const title = '📢 Fluxo7 Dev - Comunicado';
     
     switch (this.config.method) {
       case 'powershell':
@@ -115,13 +125,19 @@ class NotificationService {
         break;
       case 'webpush':
         await this.sendWebPushNotification({
-          title: '📢 Fluxo7 Dev - Comunicado',
+          title,
           body: message,
           tag: 'broadcast-notification',
           data: {
             type: 'broadcast',
             users
           }
+        });
+        break;
+      case 'pushserver':
+        await this.sendPushServerBroadcast(title, message, {
+          type: 'broadcast',
+          users
         });
         break;
       default:
@@ -142,7 +158,7 @@ class NotificationService {
     return this.config.method;
   }
 
-  setMethod(method: 'powershell' | 'webpush' | 'none') {
+  setMethod(method: 'powershell' | 'webpush' | 'pushserver' | 'none') {
     this.config.method = method;
     this.saveConfig();
   }
@@ -202,17 +218,103 @@ class NotificationService {
   getWebPushPermission(): NotificationPermission {
     return webPushService.getPermissionStatus();
   }
+
+  // Métodos do Push Server
+  async initializePushServer(userId: string): Promise<boolean> {
+    try {
+      const initialized = await pushClient.initialize(userId);
+      if (initialized) {
+        const subscribed = await pushClient.subscribe();
+        if (subscribed) {
+          console.log('✅ Push Server inicializado e subscription criada para:', userId);
+          return true;
+        }
+      }
+      return false;
+    } catch (error) {
+      console.error('❌ Erro ao inicializar Push Server:', error);
+      return false;
+    }
+  }
+
+  async sendPushServerNotification(userId: string, title: string, body: string, data?: any): Promise<boolean> {
+    try {
+      const success = await pushClient.notifyUser(userId, title, body, data);
+      if (success) {
+        console.log(`✅ Notificação Push Server enviada para ${userId}:`, title);
+      } else {
+        console.log(`⚠️ Falha na notificação Push Server para ${userId}`);
+      }
+      return success;
+    } catch (error) {
+      console.error('❌ Erro ao enviar notificação Push Server:', error);
+      return false;
+    }
+  }
+
+  async sendPushServerBroadcast(title: string, body: string, data?: any): Promise<boolean> {
+    try {
+      const success = await pushClient.notifyAll(title, body, data);
+      if (success) {
+        console.log('✅ Broadcast Push Server enviado:', title);
+      } else {
+        console.log('⚠️ Falha no broadcast Push Server');
+      }
+      return success;
+    } catch (error) {
+      console.error('❌ Erro no broadcast Push Server:', error);
+      return false;
+    }
+  }
+
+  async testPushServer(): Promise<void> {
+    const userId = pushClient.getCurrentUserId();
+    if (userId) {
+      await this.sendPushServerNotification(
+        userId,
+        '🔔 Teste Push Server',
+        'Sistema de notificações offline funcionando perfeitamente!',
+        { type: 'test' }
+      );
+    }
+  }
+
+  async getPushServerActiveUsers(): Promise<string[]> {
+    try {
+      return await pushClient.getActiveUsers();
+    } catch (error) {
+      console.error('❌ Erro ao obter usuários ativos:', error);
+      return [];
+    }
+  }
+
+  isPushServerSupported(): boolean {
+    return pushClient.isSupported();
+  }
+
+  async testPushServerConnection(): Promise<boolean> {
+    return await pushClient.testConnection();
+  }
 }
 
 export const notificationService = new NotificationService();
+export { pushClient };
 
-// Inicializa Web Push automaticamente se suportado
+// Inicializa sistema de notificações automaticamente
 if (typeof window !== 'undefined') {
-  notificationService.initializeWebPush().then((success) => {
-    if (success) {
-      console.log('🔔 Sistema de notificações Web Push ativo!');
+  // Tenta Push Server primeiro, depois Web Push como fallback
+  pushClient.testConnection().then((serverAvailable) => {
+    if (serverAvailable) {
+      console.log('🚀 Push Server disponível - notificações offline ativas!');
     } else {
-      console.log('⚠️ Web Push não disponível, usando fallbacks');
+      console.log('⚠️ Push Server indisponível, usando Web Push local');
+      notificationService.initializeWebPush().then((success) => {
+        if (success) {
+          console.log('🔔 Sistema de notificações Web Push ativo!');
+        } else {
+          console.log('⚠️ Web Push não disponível, usando fallbacks');
+        }
+      });
     }
   });
 }
