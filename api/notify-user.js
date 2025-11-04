@@ -1,4 +1,4 @@
-// Vercel Function - Notify User
+// Vercel Function - Notify User (Multi-Device)
 import webpush from 'web-push';
 
 // Configuração VAPID
@@ -13,8 +13,8 @@ webpush.setVapidDetails(
   vapidKeys.privateKey
 );
 
-// Simulação de banco de dados (em produção usar Redis/DB)
-let userSubscriptions = {};
+// Banco de dados simulado (compartilhado com subscribe.js)
+let userSubscriptions = {}; // { userId: [subscription1, subscription2, ...] }
 
 export default async function handler(req, res) {
   // CORS
@@ -39,14 +39,74 @@ export default async function handler(req, res) {
     return;
   }
   
-  // Por enquanto, simula sucesso (sem subscription real)
-  console.log(`🔔 Notificação simulada para ${userId}: ${title}`);
+  // Verifica se usuário tem subscriptions
+  const subscriptions = userSubscriptions[userId];
   
-  res.status(200).json({
-    success: true,
-    message: `Notificação enviada para ${userId}`,
+  if (!subscriptions || subscriptions.length === 0) {
+    console.log(`⚠️ Usuário ${userId} não possui dispositivos ativos`);
+    return res.status(404).json({
+      error: `Usuário ${userId} não possui dispositivos conectados`,
+      suggestion: 'Usuário precisa fazer login e permitir notificações'
+    });
+  }
+  
+  const payload = JSON.stringify({
     title,
     body,
-    note: 'Simulado - implementação completa requer banco de dados'
+    icon: '/favicon.svg',
+    badge: '/favicon.svg',
+    tag: 'fluxo7-notification',
+    requireInteraction: true,
+    data: data || {},
+    timestamp: Date.now()
+  });
+  
+  let sent = 0;
+  let failed = 0;
+  const results = [];
+  
+  // Envia para TODOS os dispositivos do usuário
+  for (let i = 0; i < subscriptions.length; i++) {
+    const subscription = subscriptions[i];
+    const deviceInfo = subscription.deviceInfo || `Dispositivo ${i + 1}`;
+    
+    try {
+      await webpush.sendNotification(subscription, payload);
+      console.log(`✅ Notificação enviada para ${userId} (${deviceInfo}): ${title}`);
+      results.push({ device: deviceInfo, status: 'success' });
+      sent++;
+      
+      // Pequeno delay entre envios
+      await new Promise(resolve => setTimeout(resolve, 100));
+    } catch (error) {
+      console.error(`❌ Falha para ${userId} (${deviceInfo}):`, error.message);
+      results.push({ device: deviceInfo, status: 'failed', error: error.message });
+      failed++;
+      
+      // Remove subscription inválida
+      if (error.statusCode === 410 || error.statusCode === 404) {
+        subscriptions.splice(i, 1);
+        i--; // Ajusta índice após remoção
+        console.log(`🗑️ Subscription removida: ${userId} (${deviceInfo})`);
+      }
+    }
+  }
+  
+  // Atualiza subscriptions (remove as inválidas)
+  if (subscriptions.length === 0) {
+    delete userSubscriptions[userId];
+  }
+  
+  res.status(200).json({
+    success: sent > 0,
+    message: `Notificação processada para ${userId}`,
+    title,
+    body,
+    devices: {
+      sent,
+      failed,
+      total: sent + failed
+    },
+    results
   });
 }

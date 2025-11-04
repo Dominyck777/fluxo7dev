@@ -1,5 +1,5 @@
-// Vercel Function - Subscribe User
-let userSubscriptions = {};
+// Vercel Function - Subscribe User (Multi-Device)
+let userSubscriptions = {}; // { userId: [subscription1, subscription2, ...] }
 
 export default function handler(req, res) {
   // CORS
@@ -17,19 +17,42 @@ export default function handler(req, res) {
     return;
   }
   
-  const { userId, subscription } = req.body;
+  const { userId, subscription, deviceInfo } = req.body;
   
   if (!userId || !subscription) {
     res.status(400).json({ error: 'userId e subscription obrigatórios' });
     return;
   }
   
-  userSubscriptions[userId] = subscription;
-  console.log(`✅ Subscription registrada: ${userId}`);
+  // Inicializa array se não existir
+  if (!userSubscriptions[userId]) {
+    userSubscriptions[userId] = [];
+  }
+  
+  // Adiciona info do dispositivo
+  const subscriptionWithDevice = {
+    ...subscription,
+    deviceInfo: deviceInfo || 'Unknown Device',
+    timestamp: new Date().toISOString(),
+    endpoint: subscription.endpoint // Para identificar duplicatas
+  };
+  
+  // Remove subscription duplicada (mesmo endpoint)
+  userSubscriptions[userId] = userSubscriptions[userId].filter(
+    sub => sub.endpoint !== subscription.endpoint
+  );
+  
+  // Adiciona nova subscription
+  userSubscriptions[userId].push(subscriptionWithDevice);
+  
+  console.log(`✅ Subscription registrada: ${userId} (${deviceInfo || 'Unknown'})`);
+  console.log(`📱 Total dispositivos para ${userId}: ${userSubscriptions[userId].length}`);
   
   res.status(200).json({
     success: true,
     message: `Subscription registrada para ${userId}`,
+    deviceInfo: deviceInfo || 'Unknown Device',
+    totalDevices: userSubscriptions[userId].length,
     totalUsers: Object.keys(userSubscriptions).length
   });
 }

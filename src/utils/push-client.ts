@@ -62,6 +62,9 @@ class PushClient {
         applicationServerKey: this.urlBase64ToUint8Array(this.vapidPublicKey) as BufferSource
       });
 
+      // Detecta tipo de dispositivo
+      const deviceInfo = this.getDeviceInfo();
+      
       // Registra subscription no servidor
       const response = await fetch(`${this.serverUrl}/api/subscribe`, {
         method: 'POST',
@@ -70,7 +73,8 @@ class PushClient {
         },
         body: JSON.stringify({
           userId: this.currentUserId,
-          subscription: subscription.toJSON()
+          subscription: subscription.toJSON(),
+          deviceInfo
         })
       });
 
@@ -196,6 +200,35 @@ class PushClient {
 
   getCurrentUserId(): string | null {
     return this.currentUserId;
+  }
+
+  // Detecta informações do dispositivo
+  private getDeviceInfo(): string {
+    if (typeof window === 'undefined') return 'Server';
+    
+    const userAgent = navigator.userAgent;
+    
+    // Detecta mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    
+    // Detecta sistema operacional
+    let os = 'Unknown OS';
+    if (/Windows/i.test(userAgent)) os = 'Windows';
+    else if (/Mac/i.test(userAgent)) os = 'macOS';
+    else if (/Linux/i.test(userAgent)) os = 'Linux';
+    else if (/Android/i.test(userAgent)) os = 'Android';
+    else if (/iPhone|iPad|iPod/i.test(userAgent)) os = 'iOS';
+    
+    // Detecta browser
+    let browser = 'Unknown Browser';
+    if (/Chrome/i.test(userAgent) && !/Edge/i.test(userAgent)) browser = 'Chrome';
+    else if (/Firefox/i.test(userAgent)) browser = 'Firefox';
+    else if (/Safari/i.test(userAgent) && !/Chrome/i.test(userAgent)) browser = 'Safari';
+    else if (/Edge/i.test(userAgent)) browser = 'Edge';
+    
+    // Monta descrição do dispositivo
+    const deviceType = isMobile ? '📱 Mobile' : '💻 Desktop';
+    return `${deviceType} - ${os} (${browser})`;
   }
 }
 
