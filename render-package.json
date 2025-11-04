@@ -1,0 +1,21 @@
+{
+  "name": "fluxo7dev-push-server-render",
+  "version": "1.0.0",
+  "description": "Push Server para Fluxo7 Dev - Deploy Render",
+  "main": "render-server.js",
+  "scripts": {
+    "start": "node render-server.js",
+    "dev": "node render-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "web-push": "^3.6.6"
+  },
+  "engines": {
+    "node": "18.x"
+  },
+  "keywords": ["push", "notifications", "express", "fluxo7dev"],
+  "author": "Fluxo7 Dev Team",
+  "license": "MIT"
+}

@@ -5,16 +5,20 @@ class PushClient {
   private currentUserId: string | null = null;
 
   private getServerUrl(): string {
-    // Em produção, usa Railway; em desenvolvimento, usa localhost
+    // Em desenvolvimento, usa localhost se disponível
     if (typeof window !== 'undefined') {
       const hostname = window.location.hostname;
       if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        // Tenta servidor local primeiro, senão usa Vercel Functions
         return 'http://localhost:3003';
       }
+      
+      // Em produção, usa Vercel Functions (mesmo domínio)
+      return window.location.origin;
     }
     
-    // URL do Railway (atualizada com deploy real)
-    return 'https://fluxo7dev-production.up.railway.app';
+    // Fallback para Vercel
+    return 'https://fluxo7dev.vercel.app';
   }
 
   async initialize(userId: string): Promise<boolean> {
@@ -22,7 +26,7 @@ class PushClient {
     
     try {
       // Obtém a chave pública VAPID do servidor
-      const response = await fetch(`${this.serverUrl}/vapid-public-key`);
+      const response = await fetch(`${this.serverUrl}/api/vapid-public-key`);
       const data = await response.json();
       this.vapidPublicKey = data.publicKey;
       
@@ -59,7 +63,7 @@ class PushClient {
       });
 
       // Registra subscription no servidor
-      const response = await fetch(`${this.serverUrl}/subscribe`, {
+      const response = await fetch(`${this.serverUrl}/api/subscribe`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +89,7 @@ class PushClient {
 
   async notifyUser(userId: string, title: string, body: string, data?: any): Promise<boolean> {
     try {
-      const response = await fetch(`${this.serverUrl}/notify-user`, {
+      const response = await fetch(`${this.serverUrl}/api/notify-user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -118,7 +122,7 @@ class PushClient {
 
   async notifyAll(title: string, body: string, data?: any): Promise<boolean> {
     try {
-      const response = await fetch(`${this.serverUrl}/notify-all`, {
+      const response = await fetch(`${this.serverUrl}/api/notify-all`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -147,7 +151,7 @@ class PushClient {
 
   async getActiveUsers(): Promise<string[]> {
     try {
-      const response = await fetch(`${this.serverUrl}/active-users`);
+      const response = await fetch(`${this.serverUrl}/api/active-users`);
       const data = await response.json();
       return data.users || [];
     } catch (error) {
@@ -158,7 +162,7 @@ class PushClient {
 
   async testConnection(): Promise<boolean> {
     try {
-      const response = await fetch(`${this.serverUrl}/health`);
+      const response = await fetch(`${this.serverUrl}/api/health`);
       const data = await response.json();
       console.log('🔗 Conexão com Push Server:', data.message);
       return response.ok;
