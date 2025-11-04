@@ -8,11 +8,12 @@ interface NewDemandFormProps {
   devs: string[];
   projects: string[];
   priorities: string[];
+  defaultDeveloper?: string;
 }
 
-const NewDemandForm = ({ onSubmit, onCancel, devs, projects, priorities }: NewDemandFormProps) => {
+const NewDemandForm = ({ onSubmit, onCancel, devs, projects, priorities, defaultDeveloper }: NewDemandFormProps) => {
   const [formData, setFormData] = useState({
-    desenvolvedor: devs[0] || '',
+    desenvolvedor: defaultDeveloper || devs[0] || '',
     projeto: projects[0] || '',
     descricao: '',
     status: 'Pendente' as const,
@@ -45,7 +46,7 @@ const NewDemandForm = ({ onSubmit, onCancel, devs, projects, priorities }: NewDe
       onSubmit(formData);
       // Reset form
       setFormData({
-        desenvolvedor: devs[0] || '',
+        desenvolvedor: defaultDeveloper || devs[0] || '',
         projeto: projects[0] || '',
         descricao: '',
         status: 'Pendente',

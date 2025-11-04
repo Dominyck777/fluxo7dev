@@ -6,8 +6,6 @@ import EditDemandForm from './EditDemandForm';
 import ConfirmDialog from './ConfirmDialog';
 import Loading from './Loading';
 import { jsonbinClient, type Developer } from '../utils/jsonbin-client';
-import { notificationService } from '../utils/notification-service';
-import { pollingService } from '../utils/polling-service';
 import './Dashboard.css';
 
 interface DashboardProps {
@@ -17,7 +15,7 @@ interface DashboardProps {
 
 
 const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
-  const [selectedDev, setSelectedDev] = useState<string>('Todos');
+  const [selectedDev, setSelectedDev] = useState<string>(currentUser.name);
   const [selectedProject, setSelectedProject] = useState<string>('Todos');
   const [selectedStatus, setSelectedStatus] = useState<string>('Todos');
   const [selectedPriority, setSelectedPriority] = useState<string>('Todas');
@@ -50,23 +48,9 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
       setPriorities(config.priorities || []);
       setDemands(demands);
       setIsLoading(false);
-      
-      // Inicializa Push Server para o usuário atual
-      notificationService.initializePushServer(currentUser.name).then((success) => {
-        if (success) {
-          console.log('🚀 Push Server ativo para:', currentUser.name);
-        } else {
-          console.log('⚠️ Push Server falhou, usando polling como fallback');
-          // Fallback para polling se Push Server falhar
-          pollingService.setCurrentUser(currentUser.name);
-          pollingService.start();
-        }
-      });
     })();
     return () => {
       mounted = false;
-      // Para o polling quando o componente é desmontado
-      pollingService.stop();
     };
   }, [currentUser]);
 
@@ -139,11 +123,6 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
       setDemands(prev => [created, ...prev]);
       setIsModalOpen(false);
       showSuccessNotification('Demanda criada com sucesso!');
-      
-      // Enviar notificação para o desenvolvedor atribuído
-      if (created.desenvolvedor !== currentUser.name) {
-        await notificationService.notifyNewDemand(created, created.desenvolvedor);
-      }
     } finally {
       setIsCreating(false);
     }
@@ -186,24 +165,6 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
     }
   };
 
-  const handleTestNotification = async () => {
-    // Testa Push Server primeiro
-    const serverAvailable = await notificationService.testPushServerConnection();
-    
-    if (serverAvailable) {
-      await notificationService.testPushServer();
-      showSuccessNotification('🚀 Notificação Push Server enviada!');
-    } else {
-      // Fallback para polling
-      await pollingService.simulateNewDemand();
-      showSuccessNotification('🔔 Notificação de teste enviada via polling!');
-    }
-  };
-
-  const handleCheckNewDemands = async () => {
-    await pollingService.checkNow();
-    showSuccessNotification('✅ Verificação manual de novas demandas realizada!');
-  };
 
   return (
     <div className="dashboard">
@@ -363,49 +324,13 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
                 </div>
               </div>
               
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                <button 
-                  className="test-notification-button"
-                  onClick={handleTestNotification}
-                  aria-label="Testar notificação"
-                  style={{
-                    padding: '0.75rem 1rem',
-                    fontSize: '0.9rem',
-                    backgroundColor: 'transparent',
-                    border: '2px solid #10B981',
-                    color: '#10B981',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  🔔 Teste
-                </button>
-                <button 
-                  className="check-demands-button"
-                  onClick={handleCheckNewDemands}
-                  aria-label="Verificar novas demandas"
-                  style={{
-                    padding: '0.75rem 1rem',
-                    fontSize: '0.9rem',
-                    backgroundColor: 'transparent',
-                    border: '2px solid #F59E0B',
-                    color: '#F59E0B',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  🔍 Verificar
-                </button>
-                <button 
-                  className="new-demand-button"
-                  onClick={() => setIsModalOpen(true)}
-                  aria-label="Criar nova demanda"
-                >
-                  Nova Demanda +
-                </button>
-              </div>
+              <button 
+                className="new-demand-button"
+                onClick={() => setIsModalOpen(true)}
+                aria-label="Criar nova demanda"
+              >
+                Nova Demanda +
+              </button>
             </div>
           </div>
 
@@ -487,6 +412,7 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
                 devs={devs}
                 projects={projects}
                 priorities={priorities}
+                defaultDeveloper={currentUser.name}
               />
             </div>
             {isCreating && (
