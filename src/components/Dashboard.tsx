@@ -18,6 +18,7 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
   const [selectedProject, setSelectedProject] = useState<string>('Todos');
   const [selectedStatus, setSelectedStatus] = useState<string>('Todos');
   const [selectedPriority, setSelectedPriority] = useState<string>('Todas');
+  const [searchDescription, setSearchDescription] = useState<string>('');
   const [demands, setDemands] = useState<Demand[]>([]);
   const [devs, setDevs] = useState<string[]>([]);
   const [projects, setProjects] = useState<string[]>([]);
@@ -77,7 +78,8 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
     const matchesProject = selectedProject === 'Todos' || demand.projeto === selectedProject;
     const matchesStatus = selectedStatus === 'Todos' || demand.status === selectedStatus;
     const matchesPriority = selectedPriority === 'Todas' || demand.prioridade === selectedPriority;
-    return matchesDev && matchesProject && matchesStatus && matchesPriority;
+    const matchesDescription = searchDescription === '' || demand.descricao.toLowerCase().includes(searchDescription.toLowerCase());
+    return matchesDev && matchesProject && matchesStatus && matchesPriority && matchesDescription;
   });
 
   // Separate pending and completed demands
@@ -90,7 +92,8 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
     const matchesProject = selectedProject === 'Todos' || demand.projeto === selectedProject;
     const matchesStatus = selectedStatus === 'Todos' || demand.status === selectedStatus;
     const matchesPriority = selectedPriority === 'Todas' || demand.prioridade === selectedPriority;
-    return matchesDev && matchesProject && matchesStatus && matchesPriority;
+    const matchesDescription = searchDescription === '' || demand.descricao.toLowerCase().includes(searchDescription.toLowerCase());
+    return matchesDev && matchesProject && matchesStatus && matchesPriority && matchesDescription;
   });
 
   // Count demands by status (from filtered demands)
@@ -328,6 +331,19 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
           {(selectedStatus === 'Todos' || selectedStatus === 'Pendente') && (
             <div className="demands-section">
               <h3 className="section-title">Demandas Pendentes</h3>
+              <div className="search-container">
+                <div className="filter-group">
+                  <label htmlFor="search-description">Buscar:</label>
+                  <input
+                    type="text"
+                    id="search-description"
+                    value={searchDescription}
+                    onChange={(e) => setSearchDescription(e.target.value)}
+                    placeholder="Digite para buscar na descrição..."
+                    className="search-input"
+                  />
+                </div>
+              </div>
               <div className="demands-grid">
                 {isLoading ? (
                   <Loading message="Carregando demandas..." />

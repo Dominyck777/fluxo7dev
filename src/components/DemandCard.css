@@ -178,6 +178,7 @@
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -193,24 +194,48 @@
 }
 
 .status-badge {
-  padding: 0.4rem 0.75rem;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 0.85rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: white;
+  letter-spacing: 0.8px;
+  border: 2px solid;
+  background: transparent;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
 }
 
 .status-pendente {
-  background-color: #F59E0B;
-  color: #1a1a1a;
+  border-color: #F59E0B;
+  color: #F59E0B;
+  background: rgba(245, 158, 11, 0.1);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
 }
 
 .status-concluido {
-  background-color: #10B981;
-  color: #FFFFFF;
-  border: none;
+  border-color: #10B981;
+  color: #10B981;
+  background: rgba(16, 185, 129, 0.1);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+/* Status Badge Hover Effects */
+.status-badge {
+  transition: all 0.3s ease;
+}
+
+.status-pendente:hover {
+  background: rgba(245, 158, 11, 0.2);
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+  transform: scale(1.05);
+}
+
+.status-concluido:hover {
+  background: rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+  transform: scale(1.05);
 }
 
 /* Priority Badges */

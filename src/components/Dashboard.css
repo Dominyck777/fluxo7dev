@@ -345,6 +345,38 @@
   box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
 }
 
+/* Search Container */
+.search-container {
+  margin-bottom: 1.5rem;
+}
+
+.search-input {
+  min-width: 300px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  background-color: rgba(20, 20, 20, 0.8);
+  border: 2px solid rgba(255, 107, 0, 0.3);
+  border-radius: 8px;
+  color: var(--color-white);
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.search-input:hover {
+  border-color: var(--color-orange);
+  background-color: rgba(30, 30, 30, 0.9);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-orange);
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
 .new-demand-button {
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
@@ -514,7 +546,8 @@
   .dev-filter,
   .project-filter,
   .status-filter,
-  .priority-filter {
+  .priority-filter,
+  .search-input {
     width: 100%;
     min-width: unset;
     padding: 0.6rem 0.75rem;
@@ -564,7 +597,8 @@
   }
   
   .dev-filter,
-  .status-filter {
+  .status-filter,
+  .search-input {
     width: 100%;
   }
   
