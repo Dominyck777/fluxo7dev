@@ -4,8 +4,16 @@ const BIN_ID = '690605e5ae596e708f3c7bc5';
 const API_KEY = '$2a$10$/XmOGvx8./SZzV3qMzQ5i.6FjBjS4toNbeaEFzX2D8QPUddyM6VR2';
 const BASE_URL = 'https://api.jsonbin.io/v3';
 
+export interface Developer {
+  id: string;
+  name: string;
+  password: string;
+  role: 'admin' | 'developer';
+  active: boolean;
+}
+
 interface DB {
-  devs: string[];
+  devs: Developer[];
   projects: string[];
   priorities: string[];
   demands: Demand[];
@@ -45,10 +53,20 @@ export const jsonbinClient = {
   async getConfig() {
     const db = await readBin();
     return {
-      devs: db.devs,
+      devs: db.devs.filter(dev => dev.active).map(dev => dev.name),
       projects: db.projects,
       priorities: db.priorities,
     };
+  },
+
+  async authenticateUser(userId: string, password: string): Promise<Developer | null> {
+    const db = await readBin();
+    const user = db.devs.find(dev => 
+      dev.id === userId && 
+      dev.password === password && 
+      dev.active
+    );
+    return user || null;
   },
 
   async getDemands(): Promise<Demand[]> {

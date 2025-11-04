@@ -35,6 +35,33 @@
   gap: 0.75rem;
 }
 
+.header-user-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.user-name {
+  color: var(--color-white);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.user-role {
+  color: var(--color-orange);
+  font-weight: 500;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .header-logo {
   font-size: 1.75rem;
   font-weight: 700;
@@ -619,6 +646,14 @@
   
   .header-logo {
     font-size: 1.25rem;
+  }
+  
+  .header-user-section {
+    gap: 0.5rem;
+  }
+  
+  .user-info {
+    display: none;
   }
   
   .logout-button {

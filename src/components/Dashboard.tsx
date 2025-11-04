@@ -5,15 +5,16 @@ import NewDemandForm from './NewDemandForm';
 import EditDemandForm from './EditDemandForm';
 import ConfirmDialog from './ConfirmDialog';
 import Loading from './Loading';
-import { jsonbinClient } from '../utils/jsonbin-client';
+import { jsonbinClient, type Developer } from '../utils/jsonbin-client';
 import './Dashboard.css';
 
 interface DashboardProps {
   onLogout: () => void;
+  currentUser: Developer;
 }
 
 
-const Dashboard = ({ onLogout }: DashboardProps) => {
+const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
   const [selectedDev, setSelectedDev] = useState<string>('Todos');
   const [selectedProject, setSelectedProject] = useState<string>('Todos');
   const [selectedStatus, setSelectedStatus] = useState<string>('Todos');
@@ -182,13 +183,18 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
             <span className="logo-7">7</span>
             <span className="logo-dev"> Dev</span>
           </h1>
-          <button 
-            onClick={onLogout} 
-            className="logout-button"
-            aria-label="Sair do sistema"
-          >
-            Sair
-          </button>
+          <div className="header-user-section">
+            <div className="user-info">
+              <span className="user-name">Olá, {currentUser.name}</span>
+            </div>
+            <button 
+              onClick={onLogout} 
+              className="logout-button"
+              aria-label="Sair do sistema"
+            >
+              Sair
+            </button>
+          </div>
         </div>
       </header>
 

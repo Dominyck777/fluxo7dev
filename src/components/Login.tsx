@@ -1,22 +1,42 @@
 import { useState, type FormEvent } from 'react';
+import { jsonbinClient, type Developer } from '../utils/jsonbin-client';
 import './Login.css';
 
 interface LoginProps {
-  onLogin: () => void;
+  onLogin: (user: Developer) => void;
 }
 
 const Login = ({ onLogin }: LoginProps) => {
+  const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
-    if (password === 'f740028922') {
-      onLogin();
-    } else {
-      setError('Senha incorreta. Tente novamente.');
-      setPassword('');
+    if (!userId.trim() || !password.trim()) {
+      setError('Por favor, preencha todos os campos.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      const user = await jsonbinClient.authenticateUser(userId.toLowerCase(), password);
+      
+      if (user) {
+        onLogin(user);
+      } else {
+        setError('Usuário ou senha incorretos. Tente novamente.');
+        setPassword('');
+      }
+    } catch (error) {
+      setError('Erro ao conectar com o servidor. Tente novamente.');
+      console.error('Login error:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -42,7 +62,24 @@ const Login = ({ onLogin }: LoginProps) => {
         
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
-            <label htmlFor="password">Senha de Acesso</label>
+            <label htmlFor="userId">Usuário</label>
+            <input
+              type="text"
+              id="userId"
+              value={userId}
+              onChange={(e) => {
+                setUserId(e.target.value);
+                setError('');
+              }}
+              placeholder="Digite seu usuário"
+              autoFocus
+              required
+              disabled={isLoading}
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="password">Senha</label>
             <input
               type="password"
               id="password"
@@ -51,16 +88,16 @@ const Login = ({ onLogin }: LoginProps) => {
                 setPassword(e.target.value);
                 setError('');
               }}
-              placeholder="Digite a senha"
-              autoFocus
+              placeholder="Digite sua senha"
               required
+              disabled={isLoading}
             />
           </div>
           
           {error && <div className="error-message">{error}</div>}
           
-          <button type="submit" className="login-button">
-            Entrar
+          <button type="submit" className="login-button" disabled={isLoading}>
+            {isLoading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
       </div>
