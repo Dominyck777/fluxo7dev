@@ -72,17 +72,46 @@
 .logo-7 { color: #ffaa33; }
 .logo-dev { color: #91b0b0; }
 
+.financial-button {
+  padding: 0.5rem;
+  font-size: 1.2rem;
+  background-color: transparent;
+  border: 2px solid var(--color-orange);
+  color: var(--color-orange);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+}
+
+.financial-button:hover {
+  background-color: var(--color-orange);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+}
+
 .logout-button {
   padding: 0.5rem 1.25rem;
   font-size: 0.95rem;
   background-color: transparent;
   border: 2px solid var(--color-orange);
   color: var(--color-orange);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  height: 44px;
 }
 
 .logout-button:hover {
   background-color: var(--color-orange);
   color: var(--color-white);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
 }
 
 /* Main Content */
@@ -112,7 +141,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .summary-card {
@@ -132,33 +161,33 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
-/* Card Total - Azul */
+/* Card Total - Roxo/Violeta */
 .card-total {
-  border-color: #3B82F6;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+  border-color: #8B5CF6;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.05) 100%);
 }
 
 .card-total:hover {
-  border-color: #60A5FA;
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+  border-color: #A78BFA;
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
 }
 
 .card-total .card-icon {
-  color: #3B82F6;
+  color: #8B5CF6;
 }
 
 /* Card Pendente - Amarelo */
-.card-pendente {
+.card-pending {
   border-color: #F59E0B;
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.05) 100%);
 }
 
-.card-pendente:hover {
+.card-pending:hover {
   border-color: #FBBF24;
   box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
 }
 
-.card-pendente .card-icon {
+.card-pending .card-icon {
   color: #F59E0B;
 }
 
@@ -177,19 +206,34 @@
   color: #8B5CF6;
 }
 
-/* Card Concluído - Verde */
-.card-concluido {
+/* Card Concluídas - Verde */
+.card-completed {
   border-color: #10B981;
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
 }
 
-.card-concluido:hover {
+.card-completed:hover {
   border-color: #34D399;
   box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
 }
 
-.card-concluido .card-icon {
+.card-completed .card-icon {
   color: #10B981;
+}
+
+/* Card Taxa de Conclusão - Azul */
+.card-completion {
+  border-color: #3B82F6;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+}
+
+.card-completion:hover {
+  border-color: #60A5FA;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+}
+
+.card-completion .card-icon {
+  color: #3B82F6;
 }
 
 .summary-card .card-icon {
@@ -517,9 +561,20 @@
     font-size: 1.5rem;
   }
   
+  .financial-button {
+    min-width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+  }
+  
   .logout-button {
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
+    height: 40px;
+  }
+  
+  .header-user-section {
+    gap: 0.75rem;
   }
   
   .page-title {
@@ -656,9 +711,17 @@
     display: none;
   }
   
+  .financial-button {
+    min-width: 36px;
+    height: 36px;
+    font-size: 1rem;
+    padding: 0.4rem;
+  }
+  
   .logout-button {
     padding: 0.4rem 0.8rem;
     font-size: 0.85rem;
+    height: 36px;
   }
   
   .dashboard-main {
@@ -674,5 +737,106 @@
     right: 1rem;
     left: 1rem;
     text-align: center;
+  }
+}
+
+/* Skeleton Loading */
+.skeleton-card {
+  background: #2a2a2a !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+.skeleton-icon {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 107, 0, 0.3);
+  border-radius: 4px;
+  animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+.skeleton-text {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+.skeleton-title {
+  height: 16px;
+  width: 80%;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-number {
+  height: 24px;
+  width: 60%;
+}
+
+/* Skeleton para demandas */
+.demand-skeleton {
+  background: #2a2a2a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+.skeleton-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.skeleton-title-large {
+  height: 20px;
+  width: 70%;
+}
+
+.skeleton-actions {
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+}
+
+.skeleton-body {
+  margin-bottom: 1rem;
+}
+
+.skeleton-line {
+  height: 14px;
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+
+.skeleton-line-short {
+  height: 14px;
+  width: 60%;
+}
+
+.skeleton-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skeleton-tag {
+  height: 20px;
+  width: 80px;
+  border-radius: 10px;
+}
+
+.skeleton-date {
+  height: 14px;
+  width: 60px;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
   }
 }

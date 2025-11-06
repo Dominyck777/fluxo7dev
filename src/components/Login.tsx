@@ -24,9 +24,23 @@ const Login = ({ onLogin }: LoginProps) => {
     setError('');
     
     try {
+      // 1. Autenticar usuário
       const user = await jsonbinClient.authenticateUser(userId.toLowerCase(), password);
       
       if (user) {
+        // 2. Pré-carregar dados em paralelo durante o splash
+        const [config, demands, transactions] = await Promise.all([
+          jsonbinClient.getConfig(),
+          jsonbinClient.getDemands(),
+          jsonbinClient.getTransactions()
+        ]);
+        
+        // 3. Armazenar dados no localStorage para acesso rápido
+        localStorage.setItem('preloaded_config', JSON.stringify(config));
+        localStorage.setItem('preloaded_demands', JSON.stringify(demands));
+        localStorage.setItem('preloaded_transactions', JSON.stringify(transactions));
+        
+        // 4. Fazer login após carregar tudo
         onLogin(user);
       } else {
         setError('Usuário ou senha incorretos. Tente novamente.');
@@ -97,7 +111,7 @@ const Login = ({ onLogin }: LoginProps) => {
           {error && <div className="error-message">{error}</div>}
           
           <button type="submit" className="login-button" disabled={isLoading}>
-            {isLoading ? 'Entrando...' : 'Entrar'}
+            {isLoading ? 'Carregando dados...' : 'Entrar'}
           </button>
         </form>
       </div>

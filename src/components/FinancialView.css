@@ -1,0 +1,1077 @@
+.financial-view {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-black);
+  color: var(--color-white);
+}
+
+/* Loading */
+.loading-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.loading-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 107, 0, 0.1) 0%, transparent 70%);
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  z-index: 1;
+  text-align: center;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.loading-icon {
+  font-size: 4rem;
+  animation: bounce 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(255, 107, 0, 0.5));
+}
+
+.loading-spinner-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(255, 107, 0, 0.2);
+  border-top: 4px solid var(--color-orange);
+  border-radius: 50%;
+  animation: spin 1.5s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(255, 107, 0, 0.3));
+}
+
+.loading-dots {
+  position: absolute;
+  display: flex;
+  gap: 0.5rem;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.loading-dots span {
+  width: 8px;
+  height: 8px;
+  background: var(--color-orange);
+  border-radius: 50%;
+  animation: dotPulse 1.5s ease-in-out infinite;
+  box-shadow: 0 0 10px rgba(255, 107, 0, 0.5);
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.loading-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-white);
+  margin: 0;
+  background: linear-gradient(135deg, var(--color-orange), #ffaa33);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.loading-subtitle {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-weight: 400;
+  animation: fadeInOut 2s ease-in-out infinite;
+}
+
+/* Animações */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes dotPulse {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    background-position: -200% center;
+  }
+  50% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes fadeInOut {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Skeleton para transações */
+.transaction-skeleton {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1rem;
+  padding: 1rem;
+  background: #2a2a2a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+.skeleton-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.skeleton-value {
+  width: 80px;
+  height: 20px;
+}
+
+/* Header */
+.financial-header {
+  background-color: var(--color-dark-gray);
+  border-bottom: 2px solid var(--color-orange);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.back-button {
+  background: transparent;
+  border: 2px solid var(--color-orange);
+  color: var(--color-orange);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: var(--color-orange);
+  color: var(--color-white);
+  transform: scale(1.05);
+}
+
+.financial-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-white);
+}
+
+.financial-user {
+  color: var(--color-white);
+  font-weight: 600;
+}
+
+/* Content */
+.financial-content {
+  flex: 1;
+  padding: 2rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Summary Cards */
+.financial-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.summary-card {
+  background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* Card Entradas - Verde */
+.entradas-card {
+  border-color: #00ff99;
+  background: linear-gradient(135deg, rgba(0, 255, 153, 0.1) 0%, rgba(0, 255, 153, 0.05) 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 255, 153, 0.2);
+}
+
+.entradas-card:hover {
+  border-color: #33ffaa;
+  box-shadow: 0 8px 24px rgba(0, 255, 153, 0.3);
+  transform: translateY(-4px);
+}
+
+.entradas-card .card-icon {
+  color: #00ff99;
+}
+
+/* Card Saídas - Vermelho */
+.saidas-card {
+  border-color: #ff4d4d;
+  background: linear-gradient(135deg, rgba(255, 77, 77, 0.1) 0%, rgba(255, 77, 77, 0.05) 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 77, 77, 0.2);
+}
+
+.saidas-card:hover {
+  border-color: #ff6666;
+  box-shadow: 0 8px 24px rgba(255, 77, 77, 0.3);
+  transform: translateY(-4px);
+}
+
+.saidas-card .card-icon {
+  color: #ff4d4d;
+}
+
+/* Card Lucro - Azul */
+.lucro-card {
+  border-color: #3399ff;
+  background: linear-gradient(135deg, rgba(51, 153, 255, 0.1) 0%, rgba(51, 153, 255, 0.05) 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(51, 153, 255, 0.2);
+}
+
+.lucro-card:hover {
+  border-color: #66b3ff;
+  box-shadow: 0 8px 24px rgba(51, 153, 255, 0.3);
+  transform: translateY(-4px);
+}
+
+.lucro-card .card-icon {
+  color: #3399ff;
+}
+
+.summary-card .card-icon {
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.summary-card .card-content {
+  flex: 1;
+}
+
+.summary-card .card-content h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 0.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-card .card-number {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--color-white);
+  margin: 0;
+}
+
+/* Botão Nova Movimentação */
+.new-transaction-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.new-transaction-button {
+  background: linear-gradient(135deg, var(--color-orange) 0%, #ff8533 100%);
+  border: none;
+  color: var(--color-white);
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.new-transaction-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 107, 0, 0.4);
+  background: linear-gradient(135deg, #ff8533 0%, var(--color-orange) 100%);
+}
+
+.new-transaction-button:active {
+  transform: translateY(0);
+}
+
+/* Seção de Transações */
+.transactions-section {
+  margin-top: 2rem;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--color-white);
+  border-bottom: 2px solid var(--color-orange);
+  padding-bottom: 0.5rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.1rem;
+}
+
+.transactions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.transaction-item {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
+  gap: 1rem;
+  align-items: center;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.transaction-item:hover {
+  background: #2a2a2a;
+  transform: translateX(4px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.transaction-item.entrada {
+  border-left: 4px solid #00ff99;
+}
+
+.transaction-item.saída {
+  border-left: 4px solid #ff4d4d;
+}
+
+.transaction-icon {
+  font-size: 1.5rem;
+}
+
+.transaction-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.transaction-description {
+  font-weight: 600;
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.recurring-badge {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  cursor: help;
+}
+
+.transaction-project {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.transaction-value {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.transaction-item.entrada .transaction-value {
+  color: #00ff99;
+}
+
+.transaction-item.saída .transaction-value {
+  color: #ff4d4d;
+}
+
+.transaction-date {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+/* Botões de Ação das Transações */
+.transaction-actions {
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.transaction-item:hover .transaction-actions {
+  opacity: 1;
+}
+
+.transaction-action-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.transaction-action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-orange);
+  transform: scale(1.1);
+}
+
+.transaction-action-btn.delete-btn:hover {
+  color: #ff4d4d;
+  background-color: rgba(255, 77, 77, 0.1);
+}
+
+/* Formulário Nova Transação */
+.new-transaction-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--color-white);
+  font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select {
+  padding: 0.75rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: #2a2a2a;
+  color: var(--color-white);
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--color-orange);
+}
+
+/* Campo de Recorrência */
+.recurring-group {
+  margin: 0.5rem 0;
+  width: fit-content;
+}
+
+.recurring-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+}
+
+.recurring-checkbox {
+  width: 12px;
+  height: 12px;
+  accent-color: var(--color-orange);
+  cursor: pointer;
+}
+
+.recurring-text {
+  user-select: none;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.cancel-button {
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.cancel-button:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: var(--color-white);
+}
+
+.submit-button {
+  padding: 0.75rem 1.5rem;
+  background: var(--color-orange);
+  border: none;
+  color: var(--color-white);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.submit-button:hover {
+  background: var(--color-orange-hover);
+  transform: translateY(-1px);
+}
+
+/* Notificação de Sucesso */
+.success-notification {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+  z-index: 1000;
+  font-weight: 600;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Diálogo de Confirmação */
+.confirm-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.confirm-dialog {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  border: 2px solid var(--color-orange);
+  animation: scaleIn 0.3s ease-out;
+}
+
+.confirm-dialog h3 {
+  margin: 0 0 1rem 0;
+  color: var(--color-white);
+  font-size: 1.25rem;
+}
+
+.confirm-dialog p {
+  margin: 0 0 2rem 0;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.delete-button {
+  padding: 0.75rem 1.5rem;
+  background: #ff4d4d;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.delete-button:hover {
+  background: #ff3333;
+  transform: translateY(-1px);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .financial-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .lucro-card {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .financial-header {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .financial-title {
+    font-size: 1.5rem;
+  }
+  
+  .financial-content {
+    padding: 1.5rem 1rem;
+  }
+  
+  .financial-summary {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .lucro-card {
+    grid-column: auto;
+  }
+  
+  .summary-card {
+    padding: 1.25rem;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .card-icon {
+    order: 2;
+    font-size: 2rem;
+  }
+  
+  .card-content {
+    order: 1;
+    text-align: left;
+  }
+  
+  .card-number {
+    font-size: 1.25rem;
+  }
+  
+  .loading-icon {
+    font-size: 3rem;
+  }
+  
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .loading-title {
+    font-size: 1.75rem;
+  }
+  
+  .loading-subtitle {
+    font-size: 1rem;
+  }
+  
+  .transaction-item {
+    grid-template-columns: auto 1fr auto auto;
+    gap: 0.75rem;
+  }
+  
+  .transaction-date {
+    grid-row: 2;
+    grid-column: 2;
+    font-size: 0.8rem;
+  }
+  
+  .transaction-actions {
+    opacity: 1; /* Sempre visível em mobile */
+  }
+  
+  .transaction-action-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 0.9rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .cancel-button,
+  .submit-button {
+    width: 100%;
+  }
+  
+}
+
+@media (max-width: 480px) {
+  .financial-header {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  
+  .back-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  .financial-title {
+    font-size: 1.25rem;
+  }
+  
+  .financial-user {
+    font-size: 0.9rem;
+  }
+  
+  .financial-content {
+    padding: 1rem 0.75rem;
+  }
+  
+  .summary-card {
+    padding: 1rem;
+  }
+  
+  .card-number {
+    font-size: 1.1rem;
+  }
+  
+  .new-transaction-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .loading-content {
+    gap: 1.5rem;
+    padding: 1rem;
+  }
+  
+  .loading-icon {
+    font-size: 2.5rem;
+  }
+  
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .loading-title {
+    font-size: 1.5rem;
+  }
+  
+  .loading-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .transaction-item {
+    padding: 0.75rem;
+    grid-template-columns: auto 1fr auto;
+  }
+  
+  .transaction-value {
+    grid-row: 2;
+    grid-column: 2;
+    text-align: right;
+  }
+  
+  .transaction-actions {
+    grid-row: 1;
+    grid-column: 3;
+    opacity: 1;
+  }
+  
+  .transaction-action-btn {
+    width: 20px;
+    height: 20px;
+    font-size: 0.8rem;
+  }
+  
+  .success-notification {
+    top: 1rem;
+    right: 1rem;
+    left: 1rem;
+    text-align: center;
+  }
+}
+
+/* Formulário de Nova Movimentação */
+.new-transaction-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group select {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  background-color: rgba(20, 20, 20, 0.8);
+  border: 2px solid rgba(255, 107, 0, 0.3);
+  border-radius: 8px;
+  color: var(--color-white);
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.form-group input:hover,
+.form-group select:hover {
+  border-color: var(--color-orange);
+  background-color: rgba(30, 30, 30, 0.9);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--color-orange);
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Campo recorrente */
+.recurring-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.recurring-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 1rem !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  width: fit-content;
+}
+
+.recurring-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.recurring-text {
+  color: var(--color-white);
+  font-weight: 500;
+}
+
+.recurring-help {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  font-style: italic;
+  margin-left: 0;
+  line-height: 1.3;
+}
+
+/* Botões do formulário */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.cancel-button,
+.submit-button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.cancel-button {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.cancel-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: var(--color-white);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.submit-button {
+  background: linear-gradient(135deg, var(--color-orange) 0%, #ff8533 100%);
+  color: var(--color-white);
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+}
+
+.submit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 107, 0, 0.4);
+}
+
+/* Responsividade do formulário */
+@media (max-width: 768px) {
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .cancel-button,
+  .submit-button {
+    width: 100%;
+  }
+}

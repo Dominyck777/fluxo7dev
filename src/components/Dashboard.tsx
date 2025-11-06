@@ -5,6 +5,7 @@ import NewDemandForm from './NewDemandForm';
 import EditDemandForm from './EditDemandForm';
 import ConfirmDialog from './ConfirmDialog';
 import Loading from './Loading';
+import FinancialView from './FinancialView';
 import { jsonbinClient, type Developer } from '../utils/jsonbin-client';
 import './Dashboard.css';
 
@@ -15,6 +16,7 @@ interface DashboardProps {
 
 
 const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
+  const [currentView, setCurrentView] = useState<'dashboard' | 'financial'>('dashboard');
   const [selectedDev, setSelectedDev] = useState<string>(currentUser.name);
   const [selectedProject, setSelectedProject] = useState<string>('Todos');
   const [selectedStatus, setSelectedStatus] = useState<string>('Todos');
@@ -34,20 +36,50 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
   const [isCreating, setIsCreating] = useState(false);
   const [completingId, setCompletingId] = useState<string | number | null>(null);
 
-  // Load devs, projects, demands from API or localStorage
+  // Load devs, projects, demands from preloaded data or API
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const [config, demands] = await Promise.all([
-        jsonbinClient.getConfig(),
-        jsonbinClient.getDemands(),
-      ]);
-      if (!mounted) return;
-      setDevs(config.devs || []);
-      setProjects(config.projects || []);
-      setPriorities(config.priorities || []);
-      setDemands(demands);
-      setIsLoading(false);
+      try {
+        // Tentar usar dados pré-carregados primeiro
+        const preloadedConfig = localStorage.getItem('preloaded_config');
+        const preloadedDemands = localStorage.getItem('preloaded_demands');
+        
+        if (preloadedConfig && preloadedDemands) {
+          // Usar dados pré-carregados (carregamento instantâneo)
+          const config = JSON.parse(preloadedConfig);
+          const demands = JSON.parse(preloadedDemands);
+          
+          if (!mounted) return;
+          setDevs(config.devs || []);
+          setProjects(config.projects || []);
+          setPriorities(config.priorities || []);
+          setDemands(demands);
+          setIsLoading(false);
+          
+          // Limpar dados pré-carregados após uso
+          localStorage.removeItem('preloaded_config');
+          localStorage.removeItem('preloaded_demands');
+        } else {
+          // Fallback: carregar da API se não houver dados pré-carregados
+          // Isso só acontece quando o usuário atualiza a página
+          const [config, demands] = await Promise.all([
+            jsonbinClient.getConfig(),
+            jsonbinClient.getDemands(),
+          ]);
+          if (!mounted) return;
+          setDevs(config.devs || []);
+          setProjects(config.projects || []);
+          setPriorities(config.priorities || []);
+          setDemands(demands);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
     })();
     return () => {
       mounted = false;
@@ -166,6 +198,16 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
   };
 
 
+  // Renderização condicional baseada na view atual
+  if (currentView === 'financial') {
+    return (
+      <FinancialView 
+        onBack={() => setCurrentView('dashboard')}
+        currentUser={currentUser}
+      />
+    );
+  }
+
   return (
     <div className="dashboard">
       <header className="dashboard-header" role="banner">
@@ -189,6 +231,14 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
               <span className="user-name">Olá, {currentUser.name}</span>
             </div>
             <button 
+              onClick={() => setCurrentView('financial')}
+              className="financial-button"
+              aria-label="Visualização financeira"
+              title="Financeiro"
+            >
+              💰
+            </button>
+            <button 
               onClick={onLogout} 
               className="logout-button"
               aria-label="Sair do sistema"
@@ -204,63 +254,59 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
           <div className="content-header">
             {/* Status Counters */}
             <div className="summary-cards">
-              <div className="summary-card card-total">
-                <div className="card-icon">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" fill="none"/>
-                    <path d="M12 12L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                    <path d="M12 12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                </div>
-                <div className="card-content">
-                  <h3>Taxa de Conclusão</h3>
-                  {isLoading ? (
-                    <div className="card-loading">
-                      <div className="loading-spinner-small"></div>
+              {isLoading ? (
+                // Skeleton loading para os cards
+                <>
+                  <div className="summary-card skeleton-card">
+                    <div className="skeleton-icon"></div>
+                    <div className="card-content">
+                      <div className="skeleton-text skeleton-title"></div>
+                      <div className="skeleton-text skeleton-number"></div>
                     </div>
-                  ) : (
-                    <p className="card-number">{completionRate}%</p>
-                  )}
-                </div>
-              </div>
-              
-              <div className="summary-card card-pendente">
-                <div className="card-icon">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
-                    <path d="M12 7V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                </div>
-                <div className="card-content">
-                  <h3>Pendentes</h3>
-                  {isLoading ? (
-                    <div className="card-loading">
-                      <div className="loading-spinner-small"></div>
+                  </div>
+                  <div className="summary-card skeleton-card">
+                    <div className="skeleton-icon"></div>
+                    <div className="card-content">
+                      <div className="skeleton-text skeleton-title"></div>
+                      <div className="skeleton-text skeleton-number"></div>
                     </div>
-                  ) : (
-                    <p className="card-number">{statusCounts.pendente}</p>
-                  )}
-                </div>
-              </div>
-              
-              <div className="summary-card card-concluido">
-                <div className="card-icon">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
-                    <path d="M8 12L11 15L16 9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <div className="card-content">
-                  <h3>Concluídas</h3>
-                  {isLoading ? (
-                    <div className="card-loading">
-                      <div className="loading-spinner-small"></div>
+                  </div>
+                  <div className="summary-card skeleton-card">
+                    <div className="skeleton-icon"></div>
+                    <div className="card-content">
+                      <div className="skeleton-text skeleton-title"></div>
+                      <div className="skeleton-text skeleton-number"></div>
                     </div>
-                  ) : (
-                    <p className="card-number">{statusCounts.concluido}</p>
-                  )}
-                </div>
-              </div>
+                  </div>
+                </>
+              ) : (
+                // Cards normais com dados
+                <>
+                  <div className="summary-card card-completion">
+                    <div className="card-icon">📊</div>
+                    <div className="card-content">
+                      <h3>Taxa de Conclusão</h3>
+                      <div className="card-number">{completionRate}%</div>
+                    </div>
+                  </div>
+                  
+                  <div className="summary-card card-pending">
+                    <div className="card-icon">⏳</div>
+                    <div className="card-content">
+                      <h3>Pendentes</h3>
+                      <div className="card-number">{statusCounts.pendente}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="summary-card card-completed">
+                    <div className="card-icon">✅</div>
+                    <div className="card-content">
+                      <h3>Concluídas</h3>
+                      <div className="card-number">{statusCounts.concluido}</div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
             <div className="controls">
               <div className="filters">
@@ -353,7 +399,54 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
               </div>
               <div className="demands-grid">
                 {isLoading ? (
-                  <Loading message="Carregando demandas..." />
+                  // Skeleton cards para demandas
+                  <>
+                    <div className="demand-skeleton">
+                      <div className="skeleton-header">
+                        <div className="skeleton-text skeleton-title-large"></div>
+                        <div className="skeleton-actions"></div>
+                      </div>
+                      <div className="skeleton-body">
+                        <div className="skeleton-text skeleton-line"></div>
+                        <div className="skeleton-text skeleton-line"></div>
+                        <div className="skeleton-text skeleton-line-short"></div>
+                      </div>
+                      <div className="skeleton-footer">
+                        <div className="skeleton-text skeleton-tag"></div>
+                        <div className="skeleton-text skeleton-date"></div>
+                      </div>
+                    </div>
+                    <div className="demand-skeleton">
+                      <div className="skeleton-header">
+                        <div className="skeleton-text skeleton-title-large"></div>
+                        <div className="skeleton-actions"></div>
+                      </div>
+                      <div className="skeleton-body">
+                        <div className="skeleton-text skeleton-line"></div>
+                        <div className="skeleton-text skeleton-line"></div>
+                        <div className="skeleton-text skeleton-line-short"></div>
+                      </div>
+                      <div className="skeleton-footer">
+                        <div className="skeleton-text skeleton-tag"></div>
+                        <div className="skeleton-text skeleton-date"></div>
+                      </div>
+                    </div>
+                    <div className="demand-skeleton">
+                      <div className="skeleton-header">
+                        <div className="skeleton-text skeleton-title-large"></div>
+                        <div className="skeleton-actions"></div>
+                      </div>
+                      <div className="skeleton-body">
+                        <div className="skeleton-text skeleton-line"></div>
+                        <div className="skeleton-text skeleton-line"></div>
+                        <div className="skeleton-text skeleton-line-short"></div>
+                      </div>
+                      <div className="skeleton-footer">
+                        <div className="skeleton-text skeleton-tag"></div>
+                        <div className="skeleton-text skeleton-date"></div>
+                      </div>
+                    </div>
+                  </>
                 ) : pendingDemands.length > 0 ? (
                   pendingDemands.map(demand => (
                     <DemandCard 

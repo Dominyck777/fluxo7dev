@@ -1,4 +1,5 @@
 import { type Demand } from '../components/DemandCard';
+import { type Transaction } from '../components/FinancialView';
 
 const BIN_ID = '690605e5ae596e708f3c7bc5';
 const API_KEY = '$2a$10$/XmOGvx8./SZzV3qMzQ5i.6FjBjS4toNbeaEFzX2D8QPUddyM6VR2';
@@ -17,6 +18,7 @@ interface DB {
   projects: string[];
   priorities: string[];
   demands: Demand[];
+  transactions: Transaction[];
 }
 
 async function readBin(): Promise<DB> {
@@ -99,5 +101,46 @@ export const jsonbinClient = {
     const db = await readBin();
     db.demands = db.demands.filter((d) => d.id !== id);
     await updateBin(db);
+  },
+
+  // Métodos para Transações Financeiras
+  async getTransactions(): Promise<Transaction[]> {
+    const db = await readBin();
+    return db.transactions || [];
+  },
+
+  async createTransaction(data: Omit<Transaction, 'id'>): Promise<Transaction> {
+    const db = await readBin();
+    const newTransaction: Transaction = {
+      ...data,
+      id: Date.now(),
+    };
+    if (!db.transactions) {
+      db.transactions = [];
+    }
+    db.transactions.push(newTransaction);
+    await updateBin(db);
+    return newTransaction;
+  },
+
+  async updateTransaction(data: Transaction): Promise<Transaction> {
+    const db = await readBin();
+    if (!db.transactions) {
+      db.transactions = [];
+    }
+    const index = db.transactions.findIndex((t) => t.id === data.id);
+    if (index !== -1) {
+      db.transactions[index] = data;
+      await updateBin(db);
+    }
+    return data;
+  },
+
+  async deleteTransaction(id: string | number): Promise<void> {
+    const db = await readBin();
+    if (db.transactions) {
+      db.transactions = db.transactions.filter((t) => t.id !== id);
+      await updateBin(db);
+    }
   },
 };
