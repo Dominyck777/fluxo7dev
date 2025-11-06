@@ -147,6 +147,18 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
     setTimeout(() => setShowSuccess(false), 3000);
   };
 
+  const refreshDemands = async () => {
+    setIsLoading(true);
+    try {
+      const demandsData = await jsonbinClient.getDemands();
+      setDemands(demandsData);
+    } catch (error) {
+      console.error('Erro ao atualizar demandas:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleCreateDemand = async (newDemand: Omit<Demand, 'id'>) => {
     setIsCreating(true);
     try {
@@ -333,9 +345,11 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
                     onChange={(e) => setSelectedDev(e.target.value)}
                     className="dev-filter"
                   >
-                    <option value="Todos">Todos</option>
+                    <option value="">Todos</option>
                     {devs.map((dev) => (
-                      <option key={dev} value={dev}>{dev}</option>
+                      <option key={dev} value={dev}>
+                        {dev}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -398,7 +412,17 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
           {/* Demandas Pendentes */}
           {(selectedStatus === 'Todos' || selectedStatus === 'Pendente') && (
             <div className="demands-section">
-              <h3 className="section-title">Demandas Pendentes</h3>
+              <div className="section-header">
+                <h3 className="section-title">Demandas Pendentes</h3>
+                <button
+                  className="refresh-button"
+                  onClick={refreshDemands}
+                  aria-label="Atualizar demandas"
+                  title="Atualizar lista de demandas"
+                >
+                  🔄
+                </button>
+              </div>
               <div className="search-container">
                 <div className="filter-group">
                   <label htmlFor="search-description">Buscar:</label>
@@ -485,7 +509,17 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
           {/* Demandas Concluídas */}
           {completedDemands.length > 0 && (
             <div className="demands-section completed-section">
-              <h3 className="section-title">Demandas Concluídas ({completedDemands.length})</h3>
+              <div className="section-header">
+                <h3 className="section-title">Demandas Concluídas ({completedDemands.length})</h3>
+                <button
+                  className="refresh-button"
+                  onClick={refreshDemands}
+                  aria-label="Atualizar demandas"
+                  title="Atualizar lista de demandas"
+                >
+                  🔄
+                </button>
+              </div>
               <div className="demands-grid">
                 {completedDemands.map(demand => (
                   <DemandCard 

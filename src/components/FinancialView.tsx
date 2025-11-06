@@ -22,6 +22,9 @@ interface FinancialViewProps {
 const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Função para gerar transações recorrentes
@@ -146,28 +149,87 @@ const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
 
   const handleCreateTransaction = async (newTransaction: Omit<Transaction, 'id'>) => {
     try {
-      const transactionWithId = {
-        ...newTransaction,
-        id: Date.now().toString()
-      };
-
-      // Gerar transações recorrentes se necessário
-      const allTransactions = [...transactions, transactionWithId];
-      const updatedTransactions = generateRecurringTransactions(allTransactions);
+      // Criar a transação no JSONBin
+      const createdTransaction = await jsonbinClient.createTransaction(newTransaction);
       
-      // Salvar no JSONBin
-      for (const transaction of updatedTransactions) {
-        if (!transactions.find(t => t.id === transaction.id)) {
-          await jsonbinClient.createTransaction(transaction);
-        }
-      }
-      
+      // Atualizar o estado local
+      const updatedTransactions = [...transactions, createdTransaction];
       setTransactions(updatedTransactions);
+      
       setIsModalOpen(false);
-      alert('Movimentação criada com sucesso!');
+      
+      // Recarregar as transações para garantir sincronização
+      const allTransactions = await jsonbinClient.getTransactions();
+      setTransactions(allTransactions);
+      
     } catch (error) {
       console.error('Erro ao criar movimentação:', error);
       alert('Erro ao criar movimentação. Tente novamente.');
+    }
+  };
+
+  const handleEditTransaction = (transaction: Transaction) => {
+    setEditingTransaction(transaction);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateTransaction = async (updatedTransaction: Transaction) => {
+    try {
+      await jsonbinClient.updateTransaction(updatedTransaction);
+      
+      // Atualizar estado local
+      const updatedTransactions = transactions.map(t => 
+        t.id === updatedTransaction.id ? updatedTransaction : t
+      );
+      setTransactions(updatedTransactions);
+      
+      setIsEditModalOpen(false);
+      setEditingTransaction(null);
+      
+      // Recarregar para sincronizar
+      const allTransactions = await jsonbinClient.getTransactions();
+      setTransactions(allTransactions);
+      
+    } catch (error) {
+      console.error('Erro ao atualizar movimentação:', error);
+      alert('Erro ao atualizar movimentação. Tente novamente.');
+    }
+  };
+
+  const handleDeleteTransaction = (id: string | number) => {
+    setConfirmDelete(id);
+  };
+
+  const confirmDeleteTransaction = async () => {
+    if (!confirmDelete) return;
+    
+    try {
+      await jsonbinClient.deleteTransaction(confirmDelete);
+      
+      // Atualizar estado local
+      const updatedTransactions = transactions.filter(t => t.id !== confirmDelete);
+      setTransactions(updatedTransactions);
+      setConfirmDelete(null);
+      
+      // Recarregar para sincronizar
+      const allTransactions = await jsonbinClient.getTransactions();
+      setTransactions(allTransactions);
+      
+    } catch (error) {
+      console.error('Erro ao excluir movimentação:', error);
+      alert('Erro ao excluir movimentação. Tente novamente.');
+    }
+  };
+
+  const refreshTransactions = async () => {
+    setIsLoading(true);
+    try {
+      const allTransactions = await jsonbinClient.getTransactions();
+      setTransactions(allTransactions);
+    } catch (error) {
+      console.error('Erro ao atualizar movimentações:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -239,7 +301,16 @@ const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
 
         {/* Lista de Movimentações */}
         <div className="transactions-section">
-          <h2 className="section-title">Movimentações do Mês</h2>
+          <div className="section-header">
+            <h2 className="section-title">Movimentações do Mês</h2>
+            <button 
+              onClick={refreshTransactions}
+              className="refresh-transactions-button"
+              title="Atualizar movimentações"
+            >
+              🔄
+            </button>
+          </div>
           {isLoading ? (
             // Skeleton loading para transações
             <div className="transactions-list">
@@ -265,6 +336,23 @@ const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
                   key={transaction.id} 
                   className={`transaction-item ${transaction.type.toLowerCase()}`}
                 >
+                  <div className="transaction-actions">
+                    <button 
+                      onClick={() => handleEditTransaction(transaction)}
+                      className="transaction-action-btn edit-btn"
+                      title="Editar movimentação"
+                    >
+                      ✏️
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteTransaction(transaction.id)}
+                      className="transaction-action-btn delete-btn"
+                      title="Excluir movimentação"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                  
                   <div className="transaction-icon">
                     {transaction.type === 'Entrada' ? '💵' : '💸'}
                   </div>
@@ -307,6 +395,54 @@ const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
           />
         </Modal>
       )}
+
+      {/* Modal Editar Movimentação */}
+      {isEditModalOpen && editingTransaction && (
+        <Modal 
+          isOpen={isEditModalOpen} 
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingTransaction(null);
+          }}
+          title="Editar Movimentação"
+        >
+          <EditTransactionForm 
+            transaction={editingTransaction}
+            onSubmit={handleUpdateTransaction}
+            onCancel={() => {
+              setIsEditModalOpen(false);
+              setEditingTransaction(null);
+            }}
+          />
+        </Modal>
+      )}
+
+      {/* Modal Confirmar Exclusão */}
+      {confirmDelete && (
+        <Modal 
+          isOpen={!!confirmDelete} 
+          onClose={() => setConfirmDelete(null)}
+          title="Confirmar Exclusão"
+        >
+          <div className="confirm-delete-modal">
+            <p>Tem certeza que deseja excluir esta movimentação?</p>
+            <div className="confirm-actions">
+              <button 
+                onClick={() => setConfirmDelete(null)}
+                className="cancel-button"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={confirmDeleteTransaction}
+                className="delete-confirm-button"
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };
@@ -314,6 +450,13 @@ const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
 // Componente do formulário de nova transação
 interface NewTransactionFormProps {
   onSubmit: (transaction: Omit<Transaction, 'id'>) => void;
+  onCancel: () => void;
+}
+
+// Componente do formulário de edição de transação
+interface EditTransactionFormProps {
+  transaction: Transaction;
+  onSubmit: (transaction: Transaction) => void;
   onCancel: () => void;
 }
 
@@ -428,6 +571,122 @@ const NewTransactionForm = ({ onSubmit, onCancel }: NewTransactionFormProps) => 
         </button>
         <button type="submit" className="submit-button">
           Salvar Movimentação
+        </button>
+      </div>
+    </form>
+  );
+};
+
+const EditTransactionForm = ({ transaction, onSubmit, onCancel }: EditTransactionFormProps) => {
+  const [type, setType] = useState<'Entrada' | 'Saída'>(transaction.type);
+  const [value, setValue] = useState(transaction.value.toString());
+  const [description, setDescription] = useState(transaction.description);
+  const [project, setProject] = useState(transaction.project);
+  const [isRecurring, setIsRecurring] = useState(transaction.isRecurring || false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!value || !description || !project) {
+      alert('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    const numericValue = parseFloat(value.replace(',', '.'));
+    if (isNaN(numericValue) || numericValue <= 0) {
+      alert('Por favor, insira um valor válido.');
+      return;
+    }
+
+    onSubmit({
+      ...transaction,
+      type,
+      value: numericValue,
+      description,
+      project,
+      isRecurring
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="new-transaction-form">
+      <div className="form-group">
+        <label htmlFor="edit-type">Tipo *</label>
+        <select 
+          id="edit-type"
+          value={type} 
+          onChange={(e) => setType(e.target.value as 'Entrada' | 'Saída')}
+          required
+        >
+          <option value="Entrada">💵 Entrada</option>
+          <option value="Saída">💸 Saída</option>
+        </select>
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="edit-value">Valor *</label>
+        <input
+          type="number"
+          id="edit-value"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="0,00"
+          step="0.01"
+          min="0"
+          required
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="edit-description">Descrição *</label>
+        <input
+          type="text"
+          id="edit-description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Descrição da movimentação"
+          required
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="edit-project">Projeto *</label>
+        <input
+          type="text"
+          id="edit-project"
+          value={project}
+          onChange={(e) => setProject(e.target.value)}
+          placeholder="Nome do projeto"
+          required
+        />
+      </div>
+
+      <div className="form-group recurring-group">
+        <label className="recurring-label">
+          <input
+            type="checkbox"
+            checked={isRecurring}
+            onChange={(e) => setIsRecurring(e.target.checked)}
+            className="recurring-checkbox"
+          />
+          <span className="recurring-text">
+            Mensal
+          </span>
+        </label>
+        <small className="recurring-help">
+          {isRecurring 
+            ? "Esta movimentação será repetida automaticamente todo mês" 
+            : "Marque para repetir esta movimentação mensalmente"
+          }
+        </small>
+      </div>
+
+      <div className="form-actions">
+        <button type="button" onClick={onCancel} className="cancel-button">
+          Cancelar
+        </button>
+        <button type="submit" className="submit-button">
+          Atualizar Movimentação
         </button>
       </div>
     </form>
