@@ -16,16 +16,19 @@ export interface Transaction {
 
 interface FinancialViewProps {
   onBack: () => void;
-  currentUser: { name: string };
+  onLogout: () => void;
 }
 
-const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
+const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Função para gerar transações recorrentes
   const generateRecurringTransactions = (transactions: Transaction[]) => {
@@ -148,6 +151,7 @@ const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
   const lucroPercentual = totalEntradas > 0 ? ((totalEntradas - totalSaidas) / totalEntradas * 100) : 0;
 
   const handleCreateTransaction = async (newTransaction: Omit<Transaction, 'id'>) => {
+    setIsCreating(true);
     try {
       // Criar a transação no JSONBin
       const createdTransaction = await jsonbinClient.createTransaction(newTransaction);
@@ -165,6 +169,8 @@ const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
     } catch (error) {
       console.error('Erro ao criar movimentação:', error);
       alert('Erro ao criar movimentação. Tente novamente.');
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -174,6 +180,7 @@ const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
   };
 
   const handleUpdateTransaction = async (updatedTransaction: Transaction) => {
+    setIsEditing(true);
     try {
       await jsonbinClient.updateTransaction(updatedTransaction);
       
@@ -193,6 +200,8 @@ const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
     } catch (error) {
       console.error('Erro ao atualizar movimentação:', error);
       alert('Erro ao atualizar movimentação. Tente novamente.');
+    } finally {
+      setIsEditing(false);
     }
   };
 
@@ -203,6 +212,7 @@ const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
   const confirmDeleteTransaction = async () => {
     if (!confirmDelete) return;
     
+    setIsDeleting(true);
     try {
       await jsonbinClient.deleteTransaction(confirmDelete);
       
@@ -218,6 +228,8 @@ const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
     } catch (error) {
       console.error('Erro ao excluir movimentação:', error);
       alert('Erro ao excluir movimentação. Tente novamente.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -257,9 +269,13 @@ const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
           ← Voltar
         </button>
         <h1 className="financial-title">💰 Financeiro</h1>
-        <div className="financial-user">
-          <span>Olá, {currentUser.name}</span>
-        </div>
+        <button 
+          onClick={onLogout}
+          className="logout-button"
+          aria-label="Sair do sistema"
+        >
+          🚪 Sair
+        </button>
       </header>
 
       <div className="financial-content">
@@ -396,6 +412,7 @@ const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
           <NewTransactionForm 
             onSubmit={handleCreateTransaction}
             onCancel={() => setIsModalOpen(false)}
+            isLoading={isCreating}
           />
         </Modal>
       )}
@@ -417,6 +434,7 @@ const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
               setIsEditModalOpen(false);
               setEditingTransaction(null);
             }}
+            isLoading={isEditing}
           />
         </Modal>
       )}
@@ -428,22 +446,49 @@ const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
           onClose={() => setConfirmDelete(null)}
           title="Confirmar Exclusão"
         >
-          <div className="confirm-delete-modal">
-            <p>Tem certeza que deseja excluir esta movimentação?</p>
-            <div className="confirm-actions">
-              <button 
-                onClick={() => setConfirmDelete(null)}
-                className="cancel-button"
-              >
-                Cancelar
-              </button>
-              <button 
-                onClick={confirmDeleteTransaction}
-                className="delete-confirm-button"
-              >
-                Excluir
-              </button>
+          <div className="confirm-delete-modal" style={{ position: 'relative' }}>
+            <div style={{ 
+              opacity: isDeleting ? 0.3 : 1, 
+              pointerEvents: isDeleting ? 'none' : 'auto', 
+              transition: 'opacity 0.3s', 
+              filter: isDeleting ? 'blur(2px)' : 'none' 
+            }}>
+              <p>Tem certeza que deseja excluir esta movimentação?</p>
+              <div className="confirm-actions">
+                <button 
+                  onClick={() => setConfirmDelete(null)}
+                  className="cancel-button"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={confirmDeleteTransaction}
+                  className="delete-confirm-button"
+                >
+                  Excluir
+                </button>
+              </div>
             </div>
+            {isDeleting && (
+              <div style={{ 
+                position: 'absolute', 
+                top: '50%', 
+                left: '50%', 
+                transform: 'translate(-50%, -50%)',
+                fontSize: '1.2rem',
+                fontWeight: 700,
+                color: '#dc2626',
+                textAlign: 'center',
+                background: 'rgba(0, 0, 0, 0.9)',
+                padding: '1.5rem 2.5rem',
+                borderRadius: '8px',
+                border: '2px solid #dc2626',
+                boxShadow: '0 8px 32px rgba(220, 38, 38, 0.4)',
+                zIndex: 10
+              }}>
+                ⏳ Excluindo...
+              </div>
+            )}
           </div>
         </Modal>
       )}
@@ -455,6 +500,7 @@ const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
 interface NewTransactionFormProps {
   onSubmit: (transaction: Omit<Transaction, 'id'>) => void;
   onCancel: () => void;
+  isLoading?: boolean;
 }
 
 // Componente do formulário de edição de transação
@@ -462,9 +508,10 @@ interface EditTransactionFormProps {
   transaction: Transaction;
   onSubmit: (transaction: Transaction) => void;
   onCancel: () => void;
+  isLoading?: boolean;
 }
 
-const NewTransactionForm = ({ onSubmit, onCancel }: NewTransactionFormProps) => {
+const NewTransactionForm = ({ onSubmit, onCancel, isLoading = false }: NewTransactionFormProps) => {
   const [type, setType] = useState<'Entrada' | 'Saída'>('Entrada');
   const [value, setValue] = useState('');
   const [description, setDescription] = useState('');
@@ -497,9 +544,16 @@ const NewTransactionForm = ({ onSubmit, onCancel }: NewTransactionFormProps) => 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="new-transaction-form">
-      <div className="form-group">
-        <label htmlFor="type">Tipo *</label>
+    <div style={{ position: 'relative' }}>
+      <div style={{ 
+        opacity: isLoading ? 0.3 : 1, 
+        pointerEvents: isLoading ? 'none' : 'auto', 
+        transition: 'opacity 0.3s', 
+        filter: isLoading ? 'blur(2px)' : 'none' 
+      }}>
+        <form onSubmit={handleSubmit} className="new-transaction-form">
+          <div className="form-group">
+            <label htmlFor="type">Tipo *</label>
         <select 
           id="type"
           value={type} 
@@ -577,11 +631,33 @@ const NewTransactionForm = ({ onSubmit, onCancel }: NewTransactionFormProps) => 
           Salvar Movimentação
         </button>
       </div>
-    </form>
+        </form>
+      </div>
+      {isLoading && (
+        <div style={{ 
+          position: 'absolute', 
+          top: '50%', 
+          left: '50%', 
+          transform: 'translate(-50%, -50%)',
+          fontSize: '1.5rem',
+          fontWeight: 700,
+          color: 'var(--color-orange)',
+          textAlign: 'center',
+          background: 'rgba(0, 0, 0, 0.9)',
+          padding: '2rem 3rem',
+          borderRadius: '12px',
+          border: '2px solid var(--color-orange)',
+          boxShadow: '0 8px 32px rgba(255, 107, 0, 0.4)',
+          zIndex: 10
+        }}>
+          ⏳ Criando movimentação...
+        </div>
+      )}
+    </div>
   );
 };
 
-const EditTransactionForm = ({ transaction, onSubmit, onCancel }: EditTransactionFormProps) => {
+const EditTransactionForm = ({ transaction, onSubmit, onCancel, isLoading = false }: EditTransactionFormProps) => {
   const [type, setType] = useState<'Entrada' | 'Saída'>(transaction.type);
   const [value, setValue] = useState(transaction.value.toString());
   const [description, setDescription] = useState(transaction.description);
@@ -613,7 +689,14 @@ const EditTransactionForm = ({ transaction, onSubmit, onCancel }: EditTransactio
   };
 
   return (
-    <form onSubmit={handleSubmit} className="new-transaction-form">
+    <div style={{ position: 'relative' }}>
+      <div style={{ 
+        opacity: isLoading ? 0.3 : 1, 
+        pointerEvents: isLoading ? 'none' : 'auto', 
+        transition: 'opacity 0.3s', 
+        filter: isLoading ? 'blur(2px)' : 'none' 
+      }}>
+        <form onSubmit={handleSubmit} className="new-transaction-form">
       <div className="form-group">
         <label htmlFor="edit-type">Tipo *</label>
         <select 
@@ -693,7 +776,29 @@ const EditTransactionForm = ({ transaction, onSubmit, onCancel }: EditTransactio
           Atualizar Movimentação
         </button>
       </div>
-    </form>
+        </form>
+      </div>
+      {isLoading && (
+        <div style={{ 
+          position: 'absolute', 
+          top: '50%', 
+          left: '50%', 
+          transform: 'translate(-50%, -50%)',
+          fontSize: '1.5rem',
+          fontWeight: 700,
+          color: 'var(--color-orange)',
+          textAlign: 'center',
+          background: 'rgba(0, 0, 0, 0.9)',
+          padding: '2rem 3rem',
+          borderRadius: '12px',
+          border: '2px solid var(--color-orange)',
+          boxShadow: '0 8px 32px rgba(255, 107, 0, 0.4)',
+          zIndex: 10
+        }}>
+          ⏳ Salvando alterações...
+        </div>
+      )}
+    </div>
   );
 };
 

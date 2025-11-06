@@ -34,6 +34,8 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
   const [confirmDelete, setConfirmDelete] = useState<string | number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [completingId, setCompletingId] = useState<string | number | null>(null);
 
   // Load devs, projects, demands from preloaded data or API
@@ -178,11 +180,16 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
   };
 
   const handleUpdateDemand = async (updatedDemand: Demand) => {
-    const saved = await jsonbinClient.updateDemand(updatedDemand);
-    setDemands(prev => prev.map(d => d.id === saved.id ? saved : d));
-    setIsEditModalOpen(false);
-    setEditingDemand(null);
-    showSuccessNotification('Demanda atualizada com sucesso!');
+    setIsEditing(true);
+    try {
+      const saved = await jsonbinClient.updateDemand(updatedDemand);
+      setDemands(prev => prev.map(d => d.id === saved.id ? saved : d));
+      setIsEditModalOpen(false);
+      setEditingDemand(null);
+      showSuccessNotification('Demanda atualizada com sucesso!');
+    } finally {
+      setIsEditing(false);
+    }
   };
 
   const handleCompleteDemand = async (updatedDemand: Demand) => {
@@ -202,10 +209,15 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
 
   const confirmDeleteDemand = async () => {
     if (confirmDelete) {
-      await jsonbinClient.deleteDemand(confirmDelete);
-      setDemands(prev => prev.filter(d => d.id !== confirmDelete));
-      setConfirmDelete(null);
-      showSuccessNotification('Demanda excluída com sucesso!');
+      setIsDeleting(true);
+      try {
+        await jsonbinClient.deleteDemand(confirmDelete);
+        setDemands(prev => prev.filter(d => d.id !== confirmDelete));
+        setConfirmDelete(null);
+        showSuccessNotification('Demanda excluída com sucesso!');
+      } finally {
+        setIsDeleting(false);
+      }
     }
   };
 
@@ -215,7 +227,7 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
     return (
       <FinancialView 
         onBack={() => setCurrentView('dashboard')}
-        currentUser={currentUser}
+        onLogout={onLogout}
       />
     );
   }
@@ -255,7 +267,7 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
               className="logout-button"
               aria-label="Sair do sistema"
             >
-              Sair
+              🚪 Sair
             </button>
           </div>
         </div>
@@ -609,6 +621,7 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
             devs={devs}
             projects={projects}
             priorities={priorities}
+            isLoading={isEditing}
           />
         </Modal>
       )}
@@ -620,6 +633,7 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
         message="Tem certeza que deseja excluir esta demanda? Esta ação não pode ser desfeita."
         onConfirm={confirmDeleteDemand}
         onCancel={() => setConfirmDelete(null)}
+        isLoading={isDeleting}
       />
 
       {/* Mensagem de Sucesso */}

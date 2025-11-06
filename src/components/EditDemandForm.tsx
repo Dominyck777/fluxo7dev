@@ -9,9 +9,10 @@ interface EditDemandFormProps {
   devs: string[];
   projects: string[];
   priorities: string[];
+  isLoading?: boolean;
 }
 
-const EditDemandForm = ({ demand, onSubmit, onCancel, devs, projects, priorities }: EditDemandFormProps) => {
+const EditDemandForm = ({ demand, onSubmit, onCancel, devs, projects, priorities, isLoading = false }: EditDemandFormProps) => {
   const [formData, setFormData] = useState<Demand>(demand);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -54,7 +55,14 @@ const EditDemandForm = ({ demand, onSubmit, onCancel, devs, projects, priorities
   };
 
   return (
-    <form onSubmit={handleSubmit} className="new-demand-form">
+    <div style={{ position: 'relative' }}>
+      <div style={{ 
+        opacity: isLoading ? 0.3 : 1, 
+        pointerEvents: isLoading ? 'none' : 'auto', 
+        transition: 'opacity 0.3s', 
+        filter: isLoading ? 'blur(2px)' : 'none' 
+      }}>
+        <form onSubmit={handleSubmit} className="new-demand-form">
       <div className="form-field">
         <label htmlFor="desenvolvedor">
           Desenvolvedor <span className="required">*</span>
@@ -166,7 +174,29 @@ const EditDemandForm = ({ demand, onSubmit, onCancel, devs, projects, priorities
           Salvar Alterações
         </button>
       </div>
-    </form>
+        </form>
+      </div>
+      {isLoading && (
+        <div style={{ 
+          position: 'absolute', 
+          top: '50%', 
+          left: '50%', 
+          transform: 'translate(-50%, -50%)',
+          fontSize: '1.5rem',
+          fontWeight: 700,
+          color: 'var(--color-orange)',
+          textAlign: 'center',
+          background: 'rgba(0, 0, 0, 0.9)',
+          padding: '2rem 3rem',
+          borderRadius: '12px',
+          border: '2px solid var(--color-orange)',
+          boxShadow: '0 8px 32px rgba(255, 107, 0, 0.4)',
+          zIndex: 10
+        }}>
+          ⏳ Salvando alterações...
+        </div>
+      )}
+    </div>
   );
 };
 
