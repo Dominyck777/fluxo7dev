@@ -345,7 +345,7 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
                     onChange={(e) => setSelectedDev(e.target.value)}
                     className="dev-filter"
                   >
-                    <option value="">Todos</option>
+                    <option value="Todos">Todos</option>
                     {devs.map((dev) => (
                       <option key={dev} value={dev}>
                         {dev}
