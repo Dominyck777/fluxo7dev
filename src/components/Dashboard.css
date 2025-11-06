@@ -460,7 +460,7 @@
   padding: 0.5rem;
   font-size: 1rem;
   background-color: rgba(59, 130, 246, 0.1);
-  border: 2px solid rgba(59, 130, 246, 0.3);
+  border: none;
   color: #3B82F6;
   border-radius: 6px;
   cursor: pointer;
@@ -475,7 +475,6 @@
 
 .refresh-button:hover {
   background-color: rgba(59, 130, 246, 0.2);
-  border-color: #3B82F6;
   transform: rotate(180deg);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }

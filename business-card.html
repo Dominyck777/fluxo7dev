@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F7Dev - Cartão de Visita</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .business-card {
+            width: 400px;
+            height: 240px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 16px;
+            border: 2px solid rgba(255, 107, 0, 0.3);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .business-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.6),
+                0 0 0 1px rgba(255, 107, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        .business-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 0, 0.8), transparent);
+        }
+        
+        .business-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 107, 0, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .card-header {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff6b00 0%, #ff8533 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+        }
+        
+        .company-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ff6b00;
+            letter-spacing: -0.5px;
+        }
+        
+        .tagline {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+        
+        .card-footer {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .contact-icon {
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 107, 0, 0.2);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff6b00;
+            font-size: 0.8rem;
+        }
+        
+        .contact-text {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .email-link {
+            color: #ff6b00;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .email-link:hover {
+            color: #ff8533;
+        }
+        
+        .phone-number {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Efeito de brilho */
+        .shine {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .business-card:hover .shine {
+            left: 100%;
+        }
+        
+        /* Versão para impressão */
+        @media print {
+            body {
+                background: white;
+                margin: 0;
+                padding: 1cm;
+            }
+            
+            .business-card {
+                width: 8.5cm;
+                height: 5.4cm;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="business-card">
+        <div class="shine"></div>
+        
+        <div class="card-header">
+            <div class="logo">
+                <div class="logo-icon">F7</div>
+                <div>
+                    <div class="company-name">F7Dev</div>
+                    <div class="tagline">Desenvolvimento & Soluções</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-footer">
+            <div class="contact-info">
+                <div class="contact-item">
+                    <div class="contact-icon">📧</div>
+                    <div class="contact-text">
+                        <a href="mailto:fluxo7team@gmail.com" class="email-link">fluxo7team@gmail.com</a>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon">📱</div>
+                    <div class="contact-text phone-number">+55 34 9893-6088</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Adiciona interatividade ao cartão
+        const card = document.querySelector('.business-card');
+        
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateX = (y - centerY) / 10;
+            const rotateY = (centerX - x) / 10;
+            
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-5px)`;
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+        });
+    </script>
+</body>
+</html>
