@@ -281,14 +281,14 @@
 /* Summary Cards */
 .financial-summary {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
 
 .summary-card {
   background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
-  border: 2px solid transparent;
+  border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: 1.5rem;
   display: flex;
@@ -352,6 +352,23 @@
 
 .lucro-card .card-icon {
   color: #3399ff;
+}
+
+/* Card Saldo - Dourado */
+.saldo-card {
+  border-color: #ffd700;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 215, 0, 0.2);
+}
+
+.saldo-card:hover {
+  border-color: #ffed4a;
+  box-shadow: 0 8px 24px rgba(255, 215, 0, 0.3);
+  transform: translateY(-4px);
+}
+
+.saldo-card .card-icon {
+  color: #ffd700;
 }
 
 .summary-card .card-icon {
@@ -478,30 +495,46 @@
 }
 
 .transaction-item {
-  background: #1a1a1a;
-  border-radius: 8px;
-  padding: 1rem;
+  background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%);
+  border-radius: 12px;
+  padding: 1.5rem;
   display: grid;
-  grid-template-columns: auto 1fr auto auto auto;
+  grid-template-columns: auto auto 1fr auto auto;
   gap: 1rem;
   align-items: center;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
   position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  min-height: 80px;
 }
 
 .transaction-item:hover {
-  background: #2a2a2a;
-  transform: translateX(4px);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   border-color: rgba(255, 255, 255, 0.2);
 }
 
 .transaction-item.entrada {
-  border-left: 4px solid #00ff99;
+  border: 2px solid #00ff99;
+  background: linear-gradient(135deg, rgba(0, 255, 153, 0.15) 0%, rgba(0, 255, 153, 0.08) 50%, #1a1a1a 100%);
+  box-shadow: 0 4px 12px rgba(0, 255, 153, 0.2);
+}
+
+.transaction-item.entrada:hover {
+  box-shadow: 0 8px 24px rgba(0, 255, 153, 0.3);
+  border-color: #34ffaa;
 }
 
 .transaction-item.saída {
-  border-left: 4px solid #ff4d4d;
+  border: 2px solid #ff4d4d;
+  background: linear-gradient(135deg, rgba(255, 77, 77, 0.15) 0%, rgba(255, 77, 77, 0.08) 50%, #1a1a1a 100%);
+  box-shadow: 0 4px 12px rgba(255, 77, 77, 0.2);
+}
+
+.transaction-item.saída:hover {
+  box-shadow: 0 8px 24px rgba(255, 77, 77, 0.3);
+  border-color: #ff7777;
 }
 
 .transaction-icon {
@@ -511,53 +544,76 @@
 .transaction-details {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.5rem;
+  flex: 1;
 }
 
 .transaction-description {
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: var(--color-white);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.recurring-badge {
-  font-size: 0.9rem;
-  opacity: 0.8;
-  cursor: help;
+  letter-spacing: 0.3px;
+  margin: 0;
 }
 
 .transaction-project {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 500;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 107, 0, 0.3);
+  display: inline-block;
+  width: fit-content;
 }
 
 .transaction-value {
+  font-size: 1.25rem;
   font-weight: 700;
-  font-size: 1.1rem;
+  text-align: right;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
 }
 
 .transaction-item.entrada .transaction-value {
   color: #00ff99;
+  border: 1px solid rgba(0, 255, 153, 0.3);
 }
 
 .transaction-item.saída .transaction-value {
   color: #ff4d4d;
+  border: 1px solid rgba(255, 77, 77, 0.3);
 }
 
 .transaction-date {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
   font-weight: 500;
+  text-align: right;
+  padding: 0.25rem 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  width: fit-content;
+  margin-left: auto;
 }
 
 /* Botões de Ação das Transações */
 .transaction-actions {
   display: flex;
+  flex-direction: column;
   gap: 0.25rem;
   opacity: 0;
   transition: opacity 0.3s ease;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 0.5rem;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
 }
 
 .transaction-item:hover .transaction-actions {
@@ -567,28 +623,30 @@
 .transaction-action-btn {
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 1rem;
+  color: var(--color-orange);
+  font-size: 1.1rem;
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.25rem 0.5rem;
   border-radius: 4px;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  line-height: 1;
 }
 
 .transaction-action-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--color-orange);
+  background-color: rgba(255, 107, 0, 0.1);
   transform: scale(1.1);
 }
 
+.transaction-action-btn.edit-btn:hover {
+  color: var(--color-orange-hover);
+}
+
 .transaction-action-btn.delete-btn:hover {
-  color: #ff4d4d;
-  background-color: rgba(255, 77, 77, 0.1);
+  color: #FF1744;
+  background-color: rgba(255, 23, 68, 0.1);
 }
 
 /* Formulário Nova Transação */
@@ -1272,5 +1330,190 @@
   .cancel-button,
   .delete-confirm-button {
     width: 100%;
+  }
+}
+
+/* Charts Section */
+.charts-section {
+  margin: 2rem 0;
+}
+
+.charts-section h2 {
+  color: var(--color-white);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+.chart-card {
+  background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+}
+
+.chart-card h3 {
+  color: var(--color-white);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Pie Chart */
+.pie-chart-container {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 1rem;
+}
+
+.pie-slice {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(
+    #00ff99 0% var(--percentage, 50%),
+    #ff4d4d var(--percentage, 50%) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pie-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.pie-total {
+  color: var(--color-white);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.pie-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+.pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-white);
+  font-size: 0.9rem;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.entrada-color {
+  background-color: #00ff99;
+}
+
+.saida-color {
+  background-color: #ff4d4d;
+}
+
+/* Bar Chart */
+.bar-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: end;
+  height: 200px;
+  padding: 1rem 0;
+}
+
+.bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80px;
+  height: 100%;
+  position: relative;
+}
+
+.bar-fill {
+  width: 60px;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.3s ease;
+  min-height: 10px;
+}
+
+.entrada-fill {
+  background: linear-gradient(to top, #00cc7a, #00ff99);
+}
+
+.saida-fill {
+  background: linear-gradient(to top, #cc0000, #ff4d4d);
+}
+
+.bar-label {
+  color: var(--color-white);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.bar-value {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.7rem;
+  margin-top: 0.25rem;
+  text-align: center;
+}
+
+/* Responsive Charts */
+@media (max-width: 768px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .pie-chart-container {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .pie-center {
+    width: 90px;
+    height: 90px;
+  }
+  
+  .pie-total {
+    font-size: 0.8rem;
+  }
+  
+  .bar-container {
+    height: 150px;
   }
 }

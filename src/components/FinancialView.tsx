@@ -10,8 +10,6 @@ export interface Transaction {
   description: string;
   project: string;
   date: string;
-  isRecurring?: boolean;
-  recurringId?: string;
 }
 
 interface FinancialViewProps {
@@ -21,6 +19,7 @@ interface FinancialViewProps {
 
 const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [projects, setProjects] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -30,65 +29,22 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Função para gerar transações recorrentes
-  const generateRecurringTransactions = (transactions: Transaction[]) => {
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
-    const currentYear = currentDate.getFullYear();
-    
-    // Buscar transações recorrentes únicas (templates)
-    const recurringTemplates = transactions.filter(t => t.isRecurring && !t.recurringId);
-    const newTransactions: Transaction[] = [];
-    
-    recurringTemplates.forEach(template => {
-      const templateDate = new Date(template.date);
-      const templateMonth = templateDate.getMonth();
-      const templateYear = templateDate.getFullYear();
-      
-      // Só gerar se o template é de um mês anterior ao atual
-      const isFromPreviousMonth = (templateYear < currentYear) || 
-                                  (templateYear === currentYear && templateMonth < currentMonth);
-      
-      if (isFromPreviousMonth) {
-        // Verificar se já existe uma transação para este mês
-        const existsThisMonth = transactions.some(t => {
-          if (!t.recurringId || t.recurringId !== template.id.toString()) return false;
-          const tDate = new Date(t.date);
-          return tDate.getMonth() === currentMonth && tDate.getFullYear() === currentYear;
-        });
-        
-        if (!existsThisMonth) {
-          // Criar nova transação para este mês
-          const newTransaction: Transaction = {
-            id: Date.now() + Math.random(),
-            type: template.type,
-            value: template.value,
-            description: `${template.description} (Mensal)`,
-            project: template.project,
-            date: new Date(currentYear, currentMonth, 1).toISOString(),
-            isRecurring: false,
-            recurringId: template.id.toString()
-          };
-          newTransactions.push(newTransaction);
-        }
-      }
-    });
-    
-    return newTransactions;
-  };
-
-  // Carregar transações dos dados pré-carregados ou API
+  // Carregar transações e projetos dos dados pré-carregados ou API
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
         // Tentar usar dados pré-carregados primeiro
         const preloadedTransactions = localStorage.getItem('preloaded_transactions');
+        const preloadedConfig = localStorage.getItem('preloaded_config');
         let loadedTransactions: Transaction[] = [];
+        let loadedProjects: string[] = [];
         
-        if (preloadedTransactions) {
+        if (preloadedTransactions && preloadedConfig) {
           // Usar dados pré-carregados (carregamento instantâneo)
           loadedTransactions = JSON.parse(preloadedTransactions);
+          const config = JSON.parse(preloadedConfig);
+          loadedProjects = config.projects || [];
           
           // Limpar dados pré-carregados após uso
           localStorage.removeItem('preloaded_transactions');
@@ -96,27 +52,18 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
           // Fallback: carregar da API se não houver dados pré-carregados
           // Isso só acontece quando o usuário atualiza a página
           loadedTransactions = await jsonbinClient.getTransactions();
+          const config = await jsonbinClient.getConfig();
+          loadedProjects = config.projects;
         }
         
         if (!mounted) return;
-        
-        // Gerar transações recorrentes para o mês atual
-        const newRecurringTransactions = generateRecurringTransactions(loadedTransactions);
-        
-        if (newRecurringTransactions.length > 0) {
-          // Salvar as novas transações recorrentes na API
-          for (const transaction of newRecurringTransactions) {
-            await jsonbinClient.createTransaction(transaction);
-          }
-          const updatedTransactions = [...loadedTransactions, ...newRecurringTransactions];
-          setTransactions(updatedTransactions);
-        } else {
-          setTransactions(loadedTransactions);
-        }
+        setTransactions(loadedTransactions);
+        setProjects(loadedProjects);
       } catch (error) {
-        console.error('Erro ao carregar transações:', error);
+        console.error('Erro ao carregar dados:', error);
         if (mounted) {
           setTransactions([]);
+          setProjects([]);
         }
       } finally {
         if (mounted) {
@@ -148,7 +95,22 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
     .filter(t => t.type === 'Saída')
     .reduce((sum, t) => sum + t.value, 0);
 
-  const lucroPercentual = totalEntradas > 0 ? ((totalEntradas - totalSaidas) / totalEntradas * 100) : 0;
+  // Margem de Lucro = (Lucro / Receita) * 100
+  // Lucro = Entradas - Saídas
+  // Receita = Entradas (total recebido)
+  const lucroAbsoluto = totalEntradas - totalSaidas;
+  const lucroPercentual = totalEntradas > 0 ? (lucroAbsoluto / totalEntradas * 100) : 0;
+
+  // Função para formatar data atual para o título do modal
+  const getCurrentDateForTitle = () => {
+    const today = new Date();
+    return today.toLocaleDateString('pt-BR', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
   const handleCreateTransaction = async (newTransaction: Omit<Transaction, 'id'>) => {
     setIsCreating(true);
@@ -303,6 +265,14 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
               <div className="card-number">{lucroPercentual >= 0 ? '+' : ''}{lucroPercentual.toFixed(1)}%</div>
             </div>
           </div>
+          
+          <div className="summary-card saldo-card">
+            <div className="card-icon">💰</div>
+            <div className="card-content">
+              <h3>Saldo Atual</h3>
+              <div className="card-number">{formatCurrency(totalEntradas - totalSaidas)}</div>
+            </div>
+          </div>
         </div>
 
         {/* Botão Nova Movimentação */}
@@ -355,6 +325,8 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
                 <div 
                   key={transaction.id} 
                   className={`transaction-item ${transaction.type.toLowerCase()}`}
+                  onClick={() => handleEditTransaction(transaction)}
+                  style={{ cursor: 'pointer' }}
                 >
                   <div className="transaction-actions">
                     <button 
@@ -369,7 +341,7 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
                       className="transaction-action-btn delete-btn"
                       title="Excluir movimentação"
                     >
-                      🗑️
+                      ❌
                     </button>
                   </div>
                   
@@ -379,11 +351,6 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
                   <div className="transaction-details">
                     <div className="transaction-description">
                       {transaction.description}
-                      {transaction.isRecurring && (
-                        <span className="recurring-badge" title="Movimentação recorrente mensal">
-                          📅
-                        </span>
-                      )}
                     </div>
                     <div className="transaction-project">
                       {transaction.project}
@@ -400,6 +367,68 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
             </div>
           )}
         </div>
+
+        {/* Gráficos */}
+        <div className="charts-section">
+          <h2>📊 Visão Geral</h2>
+          <div className="charts-grid">
+            <div className="chart-card">
+              <h3>Distribuição de Movimentações</h3>
+              <div className="pie-chart">
+                <div className="pie-chart-container">
+                  <div 
+                    className="pie-slice entrada-slice"
+                    style={{
+                      '--percentage': `${totalEntradas + totalSaidas > 0 ? (totalEntradas / (totalEntradas + totalSaidas)) * 100 : 50}%`
+                    } as React.CSSProperties}
+                  ></div>
+                  <div className="pie-center">
+                    <span className="pie-total">{formatCurrency(totalEntradas + totalSaidas)}</span>
+                    <span className="pie-label">Total</span>
+                  </div>
+                </div>
+                <div className="pie-legend">
+                  <div className="legend-item">
+                    <div className="legend-color entrada-color"></div>
+                    <span>Entradas: {formatCurrency(totalEntradas)}</span>
+                  </div>
+                  <div className="legend-item">
+                    <div className="legend-color saida-color"></div>
+                    <span>Saídas: {formatCurrency(totalSaidas)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="chart-card">
+              <h3>Balanço Mensal</h3>
+              <div className="bar-chart">
+                <div className="bar-container">
+                  <div className="bar entrada-bar">
+                    <div 
+                      className="bar-fill entrada-fill"
+                      style={{
+                        height: `${totalEntradas > 0 ? Math.max((totalEntradas / Math.max(totalEntradas, totalSaidas)) * 100, 10) : 0}%`
+                      }}
+                    ></div>
+                    <span className="bar-label">Entradas</span>
+                    <span className="bar-value">{formatCurrency(totalEntradas)}</span>
+                  </div>
+                  <div className="bar saida-bar">
+                    <div 
+                      className="bar-fill saida-fill"
+                      style={{
+                        height: `${totalSaidas > 0 ? Math.max((totalSaidas / Math.max(totalEntradas, totalSaidas)) * 100, 10) : 0}%`
+                      }}
+                    ></div>
+                    <span className="bar-label">Saídas</span>
+                    <span className="bar-value">{formatCurrency(totalSaidas)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Modal Nova Movimentação */}
@@ -407,12 +436,13 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
         <Modal 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)}
-          title="Nova Movimentação"
+          title={`Nova Movimentação - ${getCurrentDateForTitle()}`}
         >
           <NewTransactionForm 
             onSubmit={handleCreateTransaction}
             onCancel={() => setIsModalOpen(false)}
             isLoading={isCreating}
+            projects={projects}
           />
         </Modal>
       )}
@@ -435,6 +465,7 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
               setEditingTransaction(null);
             }}
             isLoading={isEditing}
+            projects={projects}
           />
         </Modal>
       )}
@@ -501,6 +532,7 @@ interface NewTransactionFormProps {
   onSubmit: (transaction: Omit<Transaction, 'id'>) => void;
   onCancel: () => void;
   isLoading?: boolean;
+  projects: string[];
 }
 
 // Componente do formulário de edição de transação
@@ -509,14 +541,44 @@ interface EditTransactionFormProps {
   onSubmit: (transaction: Transaction) => void;
   onCancel: () => void;
   isLoading?: boolean;
+  projects: string[];
 }
 
-const NewTransactionForm = ({ onSubmit, onCancel, isLoading = false }: NewTransactionFormProps) => {
+const NewTransactionForm = ({ onSubmit, onCancel, isLoading = false, projects }: NewTransactionFormProps) => {
   const [type, setType] = useState<'Entrada' | 'Saída'>('Entrada');
   const [value, setValue] = useState('');
   const [description, setDescription] = useState('');
   const [project, setProject] = useState('');
-  const [isRecurring, setIsRecurring] = useState(false);
+
+  // Função para formatar valor como moeda
+  const formatCurrencyInput = (value: string) => {
+    // Remove tudo que não é dígito
+    const numbers = value.replace(/\D/g, '');
+    
+    // Se não há números, retorna vazio
+    if (!numbers) return '';
+    
+    // Converte para número e divide por 100 para ter centavos
+    const amount = parseInt(numbers) / 100;
+    
+    // Formata como moeda brasileira
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(amount);
+  };
+
+  // Função para converter valor formatado para número
+  const parseCurrencyInput = (formattedValue: string) => {
+    const numbers = formattedValue.replace(/\D/g, '');
+    return numbers ? parseInt(numbers) / 100 : 0;
+  };
+
+  const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    const formatted = formatCurrencyInput(inputValue);
+    setValue(formatted);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -526,7 +588,7 @@ const NewTransactionForm = ({ onSubmit, onCancel, isLoading = false }: NewTransa
       return;
     }
 
-    const numericValue = parseFloat(value.replace(',', '.'));
+    const numericValue = parseCurrencyInput(value);
     if (isNaN(numericValue) || numericValue <= 0) {
       alert('Por favor, insira um valor válido.');
       return;
@@ -537,9 +599,7 @@ const NewTransactionForm = ({ onSubmit, onCancel, isLoading = false }: NewTransa
       value: numericValue,
       description,
       project,
-      date: new Date().toISOString(),
-      isRecurring,
-      recurringId: undefined
+      date: new Date().toISOString()
     });
   };
 
@@ -568,13 +628,11 @@ const NewTransactionForm = ({ onSubmit, onCancel, isLoading = false }: NewTransa
       <div className="form-group">
         <label htmlFor="value">Valor *</label>
         <input
-          type="number"
+          type="text"
           id="value"
           value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder="0,00"
-          step="0.01"
-          min="0"
+          onChange={handleValueChange}
+          placeholder="R$ 0,00"
           required
         />
       </div>
@@ -593,34 +651,19 @@ const NewTransactionForm = ({ onSubmit, onCancel, isLoading = false }: NewTransa
 
       <div className="form-group">
         <label htmlFor="project">Projeto *</label>
-        <input
-          type="text"
+        <select
           id="project"
           value={project}
           onChange={(e) => setProject(e.target.value)}
-          placeholder="Nome do projeto"
           required
-        />
-      </div>
-
-      <div className="form-group recurring-group">
-        <label className="recurring-label">
-          <input
-            type="checkbox"
-            checked={isRecurring}
-            onChange={(e) => setIsRecurring(e.target.checked)}
-            className="recurring-checkbox"
-          />
-          <span className="recurring-text">
-            Mensal
-          </span>
-        </label>
-        <small className="recurring-help">
-          {isRecurring 
-            ? "Esta movimentação será repetida automaticamente todo mês" 
-            : "Marque para repetir esta movimentação mensalmente"
-          }
-        </small>
+        >
+          <option value="">Selecione um projeto</option>
+          {projects.map((proj) => (
+            <option key={proj} value={proj}>
+              {proj}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="form-actions">
@@ -657,12 +700,40 @@ const NewTransactionForm = ({ onSubmit, onCancel, isLoading = false }: NewTransa
   );
 };
 
-const EditTransactionForm = ({ transaction, onSubmit, onCancel, isLoading = false }: EditTransactionFormProps) => {
+const EditTransactionForm = ({ transaction, onSubmit, onCancel, isLoading = false, projects }: EditTransactionFormProps) => {
   const [type, setType] = useState<'Entrada' | 'Saída'>(transaction.type);
-  const [value, setValue] = useState(transaction.value.toString());
+  const [value, setValue] = useState(() => {
+    // Formatar valor inicial como moeda
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(transaction.value);
+  });
   const [description, setDescription] = useState(transaction.description);
   const [project, setProject] = useState(transaction.project);
-  const [isRecurring, setIsRecurring] = useState(transaction.isRecurring || false);
+
+  // Função para formatar valor como moeda
+  const formatCurrencyInput = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (!numbers) return '';
+    const amount = parseInt(numbers) / 100;
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(amount);
+  };
+
+  // Função para converter valor formatado para número
+  const parseCurrencyInput = (formattedValue: string) => {
+    const numbers = formattedValue.replace(/\D/g, '');
+    return numbers ? parseInt(numbers) / 100 : 0;
+  };
+
+  const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    const formatted = formatCurrencyInput(inputValue);
+    setValue(formatted);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -672,7 +743,7 @@ const EditTransactionForm = ({ transaction, onSubmit, onCancel, isLoading = fals
       return;
     }
 
-    const numericValue = parseFloat(value.replace(',', '.'));
+    const numericValue = parseCurrencyInput(value);
     if (isNaN(numericValue) || numericValue <= 0) {
       alert('Por favor, insira um valor válido.');
       return;
@@ -683,8 +754,7 @@ const EditTransactionForm = ({ transaction, onSubmit, onCancel, isLoading = fals
       type,
       value: numericValue,
       description,
-      project,
-      isRecurring
+      project
     });
   };
 
@@ -713,13 +783,11 @@ const EditTransactionForm = ({ transaction, onSubmit, onCancel, isLoading = fals
       <div className="form-group">
         <label htmlFor="edit-value">Valor *</label>
         <input
-          type="number"
+          type="text"
           id="edit-value"
           value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder="0,00"
-          step="0.01"
-          min="0"
+          onChange={handleValueChange}
+          placeholder="R$ 0,00"
           required
         />
       </div>
@@ -738,34 +806,19 @@ const EditTransactionForm = ({ transaction, onSubmit, onCancel, isLoading = fals
 
       <div className="form-group">
         <label htmlFor="edit-project">Projeto *</label>
-        <input
-          type="text"
+        <select
           id="edit-project"
           value={project}
           onChange={(e) => setProject(e.target.value)}
-          placeholder="Nome do projeto"
           required
-        />
-      </div>
-
-      <div className="form-group recurring-group">
-        <label className="recurring-label">
-          <input
-            type="checkbox"
-            checked={isRecurring}
-            onChange={(e) => setIsRecurring(e.target.checked)}
-            className="recurring-checkbox"
-          />
-          <span className="recurring-text">
-            Mensal
-          </span>
-        </label>
-        <small className="recurring-help">
-          {isRecurring 
-            ? "Esta movimentação será repetida automaticamente todo mês" 
-            : "Marque para repetir esta movimentação mensalmente"
-          }
-        </small>
+        >
+          <option value="">Selecione um projeto</option>
+          {projects.map((proj) => (
+            <option key={proj} value={proj}>
+              {proj}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="form-actions">
