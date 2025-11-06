@@ -22,11 +22,6 @@ interface FinancialViewProps {
 const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<string | number | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   // Função para gerar transações recorrentes
@@ -149,73 +144,30 @@ const FinancialView = ({ onBack, currentUser }: FinancialViewProps) => {
 
   const lucroPercentual = totalEntradas > 0 ? ((totalEntradas - totalSaidas) / totalEntradas * 100) : 0;
 
-  const showSuccessNotification = (message: string) => {
-    setSuccessMessage(message);
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
-  };
-
   const handleCreateTransaction = async (newTransaction: Omit<Transaction, 'id'>) => {
     try {
-      let transactionData = {
+      const transactionWithId = {
         ...newTransaction,
-        date: newTransaction.date || new Date().toISOString()
+        id: Date.now().toString()
       };
 
-      // Se é recorrente, criar apenas a transação do mês atual
-      // O template será a própria transação com isRecurring: true
-      if (newTransaction.isRecurring) {
-        // Não precisa criar template separado, a própria transação serve como template
-        transactionData = {
-          ...transactionData,
-          isRecurring: true,
-          recurringId: undefined // Esta é a transação original/template
-        };
+      // Gerar transações recorrentes se necessário
+      const allTransactions = [...transactions, transactionWithId];
+      const updatedTransactions = generateRecurringTransactions(allTransactions);
+      
+      // Salvar no JSONBin
+      for (const transaction of updatedTransactions) {
+        if (!transactions.find(t => t.id === transaction.id)) {
+          await jsonbinClient.createTransaction(transaction);
+        }
       }
       
-      const createdTransaction = await jsonbinClient.createTransaction(transactionData);
-      setTransactions(prev => [createdTransaction, ...prev]);
+      setTransactions(updatedTransactions);
       setIsModalOpen(false);
-      showSuccessNotification('Movimentação criada com sucesso!');
+      alert('Movimentação criada com sucesso!');
     } catch (error) {
-      console.error('Erro ao criar transação:', error);
-      showSuccessNotification('Erro ao criar movimentação. Tente novamente.');
-    }
-  };
-
-  const handleEditTransaction = (transaction: Transaction) => {
-    setEditingTransaction(transaction);
-    setIsEditModalOpen(true);
-  };
-
-  const handleUpdateTransaction = async (updatedTransaction: Transaction) => {
-    try {
-      const savedTransaction = await jsonbinClient.updateTransaction(updatedTransaction);
-      setTransactions(prev => prev.map(t => t.id === savedTransaction.id ? savedTransaction : t));
-      setIsEditModalOpen(false);
-      setEditingTransaction(null);
-      showSuccessNotification('Movimentação atualizada com sucesso!');
-    } catch (error) {
-      console.error('Erro ao atualizar transação:', error);
-      showSuccessNotification('Erro ao atualizar movimentação. Tente novamente.');
-    }
-  };
-
-  const handleDeleteTransaction = (id: string | number) => {
-    setConfirmDelete(id);
-  };
-
-  const confirmDeleteTransaction = async () => {
-    if (confirmDelete) {
-      try {
-        await jsonbinClient.deleteTransaction(confirmDelete);
-        setTransactions(prev => prev.filter(t => t.id !== confirmDelete));
-        setConfirmDelete(null);
-        showSuccessNotification('Movimentação excluída com sucesso!');
-      } catch (error) {
-        console.error('Erro ao excluir transação:', error);
-        showSuccessNotification('Erro ao excluir movimentação. Tente novamente.');
-      }
+      console.error('Erro ao criar movimentação:', error);
+      alert('Erro ao criar movimentação. Tente novamente.');
     }
   };
 
