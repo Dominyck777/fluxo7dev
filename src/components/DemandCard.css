@@ -171,17 +171,83 @@
   letter-spacing: 0.3px;
 }
 
+.description-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+}
+
 .project-description {
   color: rgba(255, 255, 255, 0.75);
   font-size: 0.95rem;
   line-height: 1.5;
   margin: 0;
+  overflow: hidden;
+  position: relative;
+  /* Transição suave com max-height */
+  transition: max-height 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+              opacity 0.3s ease-in-out,
+              -webkit-line-clamp 0.3s ease-in-out;
+  /* Estado contraído - altura será controlada via JavaScript */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
-  overflow: hidden;
   text-overflow: ellipsis;
+  opacity: 0.9;
+}
+
+.project-description.expanded {
+  /* Estado expandido - remove limitações de linha */
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  text-overflow: unset;
+  opacity: 1;
+}
+
+.expand-description-btn {
+  align-self: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 0.25rem;
+}
+
+.expand-description-btn:hover {
+  background: rgba(255, 107, 0, 0.1);
+  transform: scale(1.1);
+}
+
+.expand-description-btn:active {
+  transform: scale(0.95);
+}
+
+.expand-icon {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.6);
+  transform: rotate(90deg);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  line-height: 1;
+}
+
+.expand-description-btn.expanded .expand-icon {
+  transform: rotate(270deg);
+  color: var(--color-orange);
+}
+
+.expand-description-btn:hover .expand-icon {
+  color: var(--color-orange);
 }
 
 .card-badges {
@@ -284,5 +350,14 @@
   
   .project-description {
     font-size: 0.9rem;
+  }
+  
+  .expand-description-btn {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .expand-icon {
+    font-size: 1rem;
   }
 }

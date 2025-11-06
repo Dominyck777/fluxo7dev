@@ -14,6 +14,7 @@ interface EditDemandFormProps {
 const EditDemandForm = ({ demand, onSubmit, onCancel, devs, projects, priorities }: EditDemandFormProps) => {
   const [formData, setFormData] = useState<Demand>(demand);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -95,16 +96,26 @@ const EditDemandForm = ({ demand, onSubmit, onCancel, devs, projects, priorities
       </div>
 
       <div className="form-field">
-        <label htmlFor="descricao">
-          Descrição <span className="required">*</span>
-        </label>
+        <div className="description-header">
+          <label htmlFor="descricao">
+            Descrição <span className="required">*</span>
+          </label>
+          <button
+            type="button"
+            onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+            className="expand-btn"
+            title={isDescriptionExpanded ? 'Contrair descrição' : 'Expandir descrição'}
+          >
+            {isDescriptionExpanded ? '📖 Contrair' : '📋 Expandir'}
+          </button>
+        </div>
         <textarea
           id="descricao"
           placeholder="Descreva a demanda..."
           value={formData.descricao}
           onChange={(e) => handleChange('descricao', e.target.value)}
           className={errors.descricao ? 'error' : ''}
-          rows={5}
+          rows={isDescriptionExpanded ? 15 : 5}
         />
         {errors.descricao && (
           <span className="error-text">{errors.descricao}</span>

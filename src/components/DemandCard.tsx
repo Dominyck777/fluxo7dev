@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react';
 import './DemandCard.css';
 
 export interface Demand {
@@ -19,6 +20,34 @@ interface DemandCardProps {
 }
 
 const DemandCard = ({ demand, onEdit, onDelete, onComplete, isCompleting }: DemandCardProps) => {
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [descriptionHeight, setDescriptionHeight] = useState<number>(0);
+  const descriptionRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (descriptionRef.current) {
+      // Calcula a altura total do texto
+      const element = descriptionRef.current;
+      
+      // Temporariamente remove as limitações para medir altura real
+      const originalMaxHeight = element.style.maxHeight;
+      const originalDisplay = element.style.display;
+      const originalWebkitLineClamp = element.style.webkitLineClamp;
+      
+      element.style.maxHeight = 'none';
+      element.style.display = 'block';
+      element.style.webkitLineClamp = 'unset';
+      
+      const fullHeight = element.scrollHeight;
+      setDescriptionHeight(fullHeight);
+      
+      // Restaura os estilos originais
+      element.style.maxHeight = originalMaxHeight;
+      element.style.display = originalDisplay;
+      element.style.webkitLineClamp = originalWebkitLineClamp;
+    }
+  }, [demand.descricao]);
+
   const getStatusClass = (status: string) => {
     switch (status) {
       case 'Pendente':
@@ -106,7 +135,29 @@ const DemandCard = ({ demand, onEdit, onDelete, onComplete, isCompleting }: Dema
       <div className="card-body">
         <h3 className="project-title">{demand.projeto}</h3>
         
-        <p className="project-description">{demand.descricao}</p>
+        <div className="description-container">
+          <p 
+            ref={descriptionRef}
+            className={`project-description ${isDescriptionExpanded ? 'expanded' : ''}`}
+            style={{
+              maxHeight: isDescriptionExpanded ? `${descriptionHeight}px` : '3em'
+            }}
+          >
+            {demand.descricao}
+          </p>
+          {demand.descricao.length > 100 && (
+            <button
+              className={`expand-description-btn ${isDescriptionExpanded ? 'expanded' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsDescriptionExpanded(!isDescriptionExpanded);
+              }}
+              title={isDescriptionExpanded ? 'Contrair descrição' : 'Expandir descrição'}
+            >
+              <span className="expand-icon">›</span>
+            </button>
+          )}
+        </div>
         
         <div className="card-badges">
           <span className={`priority-badge ${getPriorityClass(demand.prioridade)}`}>
