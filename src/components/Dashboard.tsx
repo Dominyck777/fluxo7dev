@@ -283,7 +283,12 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
                 // Cards normais com dados
                 <>
                   <div className="summary-card card-completion">
-                    <div className="card-icon">📊</div>
+                    <div className="card-icon">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
+                        <path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
                     <div className="card-content">
                       <h3>Taxa de Conclusão</h3>
                       <div className="card-number">{completionRate}%</div>
@@ -291,7 +296,12 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
                   </div>
                   
                   <div className="summary-card card-pending">
-                    <div className="card-icon">⏳</div>
+                    <div className="card-icon">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
+                        <path d="M12 6v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
                     <div className="card-content">
                       <h3>Pendentes</h3>
                       <div className="card-number">{statusCounts.pendente}</div>
@@ -299,7 +309,12 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
                   </div>
                   
                   <div className="summary-card card-completed">
-                    <div className="card-icon">✅</div>
+                    <div className="card-icon">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
+                      </svg>
+                    </div>
                     <div className="card-content">
                       <h3>Concluídas</h3>
                       <div className="card-number">{statusCounts.concluido}</div>
