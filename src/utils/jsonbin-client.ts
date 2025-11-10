@@ -8,6 +8,7 @@ const BASE_URL = 'https://api.jsonbin.io/v3';
 export interface Developer {
   id: string;
   name: string;
+  
   password: string;
   role: 'admin' | 'developer';
   active: boolean;

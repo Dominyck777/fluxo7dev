@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { type Demand } from './DemandCard';
+import ExpandedDescriptionModal from './ExpandedDescriptionModal';
 import './NewDemandForm.css';
 
 interface EditDemandFormProps {
@@ -15,7 +16,7 @@ interface EditDemandFormProps {
 const EditDemandForm = ({ demand, onSubmit, onCancel, devs, projects, priorities, isLoading = false }: EditDemandFormProps) => {
   const [formData, setFormData] = useState<Demand>(demand);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -104,27 +105,27 @@ const EditDemandForm = ({ demand, onSubmit, onCancel, devs, projects, priorities
       </div>
 
       <div className="form-field">
-        <div className="description-header">
-          <label htmlFor="descricao">
-            Descrição <span className="required">*</span>
-          </label>
+        <label htmlFor="descricao">
+          Descrição <span className="required">*</span>
+        </label>
+        <div className="textarea-container">
+          <textarea
+            id="descricao"
+            placeholder="Descreva a demanda..."
+            value={formData.descricao}
+            onChange={(e) => handleChange('descricao', e.target.value)}
+            className={errors.descricao ? 'error' : ''}
+            rows={5}
+          />
           <button
             type="button"
-            onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-            className="expand-btn"
-            title={isDescriptionExpanded ? 'Contrair descrição' : 'Expandir descrição'}
+            onClick={() => setIsDescriptionModalOpen(true)}
+            className="fullscreen-btn"
+            title="Expandir para tela cheia"
           >
-            {isDescriptionExpanded ? '📖 Contrair' : '📋 Expandir'}
+            ◰
           </button>
         </div>
-        <textarea
-          id="descricao"
-          placeholder="Descreva a demanda..."
-          value={formData.descricao}
-          onChange={(e) => handleChange('descricao', e.target.value)}
-          className={errors.descricao ? 'error' : ''}
-          rows={isDescriptionExpanded ? 15 : 5}
-        />
         {errors.descricao && (
           <span className="error-text">{errors.descricao}</span>
         )}
@@ -196,6 +197,15 @@ const EditDemandForm = ({ demand, onSubmit, onCancel, devs, projects, priorities
           ⏳ Salvando alterações...
         </div>
       )}
+      
+      <ExpandedDescriptionModal
+        isOpen={isDescriptionModalOpen}
+        onClose={() => setIsDescriptionModalOpen(false)}
+        value={formData.descricao}
+        onChange={(value) => handleChange('descricao', value)}
+        title="Editar Descrição da Demanda"
+        placeholder="Descreva a demanda..."
+      />
     </div>
   );
 };

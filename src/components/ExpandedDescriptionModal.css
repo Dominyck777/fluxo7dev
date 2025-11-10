@@ -1,0 +1,233 @@
+/* Modal expandido - baseado no Modal.css mas com z-index maior */
+.expanded-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100; /* Maior que o modal normal (1000) */
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.expanded-modal-content {
+  background-color: var(--color-dark-gray);
+  border: 2px solid var(--color-orange);
+  border-radius: 12px;
+  width: 90dvw;
+  max-width: 1000px;
+  height: 80dvh;
+  max-height: 700px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.expanded-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 2px solid rgba(255, 107, 0, 0.2);
+  flex-shrink: 0;
+}
+
+.expanded-modal-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-orange);
+  margin: 0;
+}
+
+.expanded-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--color-orange);
+  font-size: 1.75rem;
+  cursor: pointer;
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.expanded-modal-close:hover {
+  background-color: rgba(255, 107, 0, 0.1);
+}
+
+.expanded-modal-body {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.expanded-textarea {
+  width: 100%;
+  height: 100%;
+  background: rgba(20, 20, 20, 0.8);
+  border: 2px solid rgba(255, 107, 0, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  color: var(--color-white);
+  font-size: 1rem;
+  font-family: inherit;
+  line-height: 1.5;
+  resize: none;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.expanded-textarea:focus {
+  border-color: var(--color-orange);
+  background: rgba(30, 30, 30, 0.9);
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.15);
+}
+
+.expanded-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
+}
+
+.expanded-modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(255, 107, 0, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+.expanded-stats {
+  display: flex;
+  gap: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}
+
+.expanded-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-save-expanded {
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  border: 2px solid #00ff99;
+  background: linear-gradient(135deg, #00ff99 0%, #00cc77 100%);
+  color: #000;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.btn-save-expanded:hover {
+  background: linear-gradient(135deg, #00cc77 0%, #00aa55 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 255, 153, 0.3);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .expanded-modal-content {
+    width: 95dvw;
+    height: 85dvh;
+    max-width: 100%;
+    border-radius: 10px;
+  }
+  
+  .expanded-modal-header {
+    padding: 1.25rem;
+  }
+  
+  .expanded-modal-title {
+    font-size: 1.25rem;
+  }
+  
+  .expanded-modal-body {
+    padding: 1.25rem;
+  }
+  
+  .expanded-modal-footer {
+    padding: 1rem 1.25rem;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  
+  .expanded-actions {
+    align-self: stretch;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .expanded-modal-overlay {
+    padding: 0.5rem;
+    align-items: flex-start;
+    padding-top: 2rem;
+  }
+  
+  .expanded-modal-content {
+    width: 100dvw;
+    height: calc(100dvh - 2.5rem);
+    max-height: calc(100dvh - 2.5rem);
+    border-radius: 8px;
+  }
+  
+  .expanded-modal-header {
+    padding: 1rem;
+  }
+  
+  .expanded-modal-title {
+    font-size: 1.1rem;
+  }
+  
+  .expanded-modal-body {
+    padding: 1rem;
+  }
+  
+  .expanded-modal-footer {
+    padding: 1rem;
+  }
+  
+  .btn-save-expanded {
+    padding: 0.7rem 1rem;
+    font-size: 0.85rem;
+  }
+}

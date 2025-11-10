@@ -1,5 +1,6 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { type Demand } from './DemandCard';
+import ExpandedDescriptionModal from './ExpandedDescriptionModal';
 import './NewDemandForm.css';
 
 interface NewDemandFormProps {
@@ -21,6 +22,7 @@ const NewDemandForm = ({ onSubmit, onCancel, devs, projects, priorities, default
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -90,7 +92,8 @@ const NewDemandForm = ({ onSubmit, onCancel, devs, projects, priorities, default
   }, [onCancel]);
 
   return (
-    <form onSubmit={handleSubmit} className="new-demand-form">
+    <>
+      <form onSubmit={handleSubmit} className="new-demand-form">
       <div className="form-field">
         <label htmlFor="desenvolvedor">
           Desenvolvedor <span className="required">*</span>
@@ -133,15 +136,25 @@ const NewDemandForm = ({ onSubmit, onCancel, devs, projects, priorities, default
         <label htmlFor="descricao">
           Descrição <span className="required">*</span>
         </label>
-        <textarea
-          id="descricao"
-          value={formData.descricao}
-          onChange={(e) => handleChange('descricao', e.target.value)}
-          placeholder="Descreva a demanda..."
-          className={errors.descricao ? 'error' : ''}
-          autoFocus
-          rows={5}
-        />
+        <div className="textarea-container">
+          <textarea
+            id="descricao"
+            value={formData.descricao}
+            onChange={(e) => handleChange('descricao', e.target.value)}
+            placeholder="Descreva a demanda..."
+            className={errors.descricao ? 'error' : ''}
+            autoFocus
+            rows={5}
+          />
+          <button
+            type="button"
+            onClick={() => setIsDescriptionModalOpen(true)}
+            className="fullscreen-btn"
+            title="Expandir para tela cheia"
+          >
+            ◰
+          </button>
+        </div>
         {errors.descricao && (
           <span className="error-text">{errors.descricao}</span>
         )}
@@ -194,6 +207,16 @@ const NewDemandForm = ({ onSubmit, onCancel, devs, projects, priorities, default
         </button>
       </div>
     </form>
+    
+    <ExpandedDescriptionModal
+      isOpen={isDescriptionModalOpen}
+      onClose={() => setIsDescriptionModalOpen(false)}
+      value={formData.descricao}
+      onChange={(value) => handleChange('descricao', value)}
+      title="Nova Descrição da Demanda"
+      placeholder="Descreva a demanda..."
+    />
+    </>
   );
 };
 
