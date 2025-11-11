@@ -18,6 +18,33 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
+/* Ativar scroll na descrição quando hover no card */
+.demand-card:hover .description-container {
+  max-height: 120px;
+  overflow-y: auto;
+  padding-right: 8px;
+  padding-bottom: 12px;
+}
+
+/* Estilizar scrollbar */
+.demand-card:hover .description-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.demand-card:hover .description-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.demand-card:hover .description-container::-webkit-scrollbar-thumb {
+  background: var(--color-orange);
+  border-radius: 2px;
+}
+
+.demand-card:hover .description-container::-webkit-scrollbar-thumb:hover {
+  background: var(--color-orange-hover);
+}
+
 /* Cores sólidas por PRIORIDADE - Muito mais visíveis */
 
 /* Baixa - Azul */
@@ -163,12 +190,21 @@
   flex: 1;
 }
 
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
 .project-title {
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--color-white);
   margin: 0;
   letter-spacing: 0.3px;
+  flex: 1;
 }
 
 .description-container {
@@ -176,6 +212,10 @@
   flex-direction: column;
   gap: 0.5rem;
   position: relative;
+  /* Altura fixa para permitir scroll controlado */
+  max-height: 60px;
+  overflow: hidden;
+  transition: all 0.3s ease;
 }
 
 .project-description {
@@ -185,10 +225,8 @@
   margin: 0;
   overflow: hidden;
   position: relative;
-  /* Transição suave com max-height */
-  transition: max-height 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-              opacity 0.3s ease-in-out,
-              -webkit-line-clamp 0.3s ease-in-out;
+  /* Transição suave */
+  transition: opacity 0.3s ease-in-out;
   /* Estado contraído - altura será controlada via JavaScript */
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -196,6 +234,16 @@
   -webkit-box-orient: vertical;
   text-overflow: ellipsis;
   opacity: 0.9;
+}
+
+/* Quando hover no card, a descrição fica scrollável */
+.demand-card:hover .description-container .project-description {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  text-overflow: unset;
+  opacity: 1;
+  overflow: visible;
 }
 
 .project-description.expanded {

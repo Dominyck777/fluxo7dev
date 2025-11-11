@@ -13,6 +13,7 @@ interface ChecklistDescriptionProps {
   onUpdate?: (updatedDescription: string) => void;
   isExpanded?: boolean;
   className?: string;
+  showProgressOnly?: boolean;
 }
 
 const ChecklistDescription = ({ 
@@ -20,7 +21,8 @@ const ChecklistDescription = ({
   demandId, 
   onUpdate, 
   isExpanded = false,
-  className = '' 
+  className = '',
+  showProgressOnly = false
 }: ChecklistDescriptionProps) => {
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
   const [textParts, setTextParts] = useState<string[]>([]);
@@ -165,22 +167,19 @@ const ChecklistDescription = ({
   const totalItems = checklistItems.length;
   const hasChecklist = totalItems > 0;
 
+  // Se showProgressOnly for true, renderiza apenas o progresso
+  if (showProgressOnly) {
+    return hasChecklist ? (
+      <div className="checklist-progress-only">
+        <span className="progress-text-compact">
+          📋 {completedItems}/{totalItems}
+        </span>
+      </div>
+    ) : null;
+  }
+
   return (
     <div className={`checklist-description ${className} ${isExpanded ? 'expanded' : ''}`}>
-      {hasChecklist && (
-        <div className="checklist-progress">
-          <span className="progress-text">
-            📋 {completedItems}/{totalItems} concluído{completedItems !== 1 ? 's' : ''}
-          </span>
-          <div className="progress-bar">
-            <div 
-              className="progress-fill"
-              style={{ width: totalItems > 0 ? `${(completedItems / totalItems) * 100}%` : '0%' }}
-            ></div>
-          </div>
-        </div>
-      )}
-      
       <div className="description-content">
         {renderContent()}
         {renderCheckboxes()}

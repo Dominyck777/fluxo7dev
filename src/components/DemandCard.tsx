@@ -109,7 +109,21 @@ const DemandCard = ({ demand, onEdit, onDelete, onComplete, onUpdate, isCompleti
       </div>
       
       <div className="card-body">
-        <h3 className="project-title">{demand.projeto}</h3>
+        <div className="project-header">
+          <h3 className="project-title">{demand.projeto}</h3>
+          <ChecklistDescription
+            description={demand.descricao}
+            demandId={demand.id}
+            onUpdate={(updatedDescription) => {
+              if (onUpdate) {
+                onUpdate({ ...demand, descricao: updatedDescription });
+              }
+            }}
+            isExpanded={isDescriptionExpanded}
+            className="progress-counter"
+            showProgressOnly={true}
+          />
+        </div>
         
         <div className="description-container">
           <ChecklistDescription
@@ -122,6 +136,7 @@ const DemandCard = ({ demand, onEdit, onDelete, onComplete, onUpdate, isCompleti
             }}
             isExpanded={isDescriptionExpanded}
             className="project-description"
+            showProgressOnly={false}
           />
           {demand.descricao.length > 100 && (
             <button
