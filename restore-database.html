@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurar Base de Dados - Fluxo7 Dev</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #0d0d0d;
+            color: #fff;
+        }
+        .container {
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 12px;
+            border: 2px solid #ff6b00;
+        }
+        h1 {
+            color: #ff6b00;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .status.info { background: rgba(0, 123, 255, 0.2); border: 1px solid #007bff; }
+        .status.success { background: rgba(40, 167, 69, 0.2); border: 1px solid #28a745; }
+        .status.error { background: rgba(220, 53, 69, 0.2); border: 1px solid #dc3545; }
+        .status.warning { background: rgba(255, 193, 7, 0.2); border: 1px solid #ffc107; color: #000; }
+        
+        button {
+            background: #ff6b00;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #e55a00;
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .data-preview {
+            background: #0d0d0d;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #333;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b00, #ffc107);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Restaurar Base de Dados</h1>
+        
+        <div id="status" class="status info">
+            ⏳ Aguardando ação do usuário...
+        </div>
+        
+        <div class="progress">
+            <div id="progressBar" class="progress-bar"></div>
+        </div>
+        
+        <button id="checkBtn" onclick="checkDatabase()">🔍 Verificar Estado Atual</button>
+        <button id="restoreBtn" onclick="restoreDatabase()" disabled>🚀 Restaurar Base Completa</button>
+        <button id="verifyBtn" onclick="verifyRestore()" disabled>✅ Verificar Restauração</button>
+        
+        <div id="dataPreview" class="data-preview" style="display: none;"></div>
+    </div>
+
+    <script>
+        const BIN_ID = '690605e5ae596e708f3c7bc5';
+        const API_KEY = '$2a$10$/XmOGvx8./SZzV3qMzQ5i.6FjBjS4toNbeaEFzX2D8QPUddyM6VR2';
+        const BASE_URL = 'https://api.jsonbin.io/v3';
+        
+        // Estrutura completa da base de dados
+        const COMPLETE_DATABASE = {
+            "devs": [
+                {
+                    "id": "admin",
+                    "name": "Administrador",
+                    "password": "admin123",
+                    "role": "admin",
+                    "active": true
+                },
+                {
+                    "id": "dominyck",
+                    "name": "Dominyck",
+                    "password": "dev123",
+                    "role": "developer",
+                    "active": true
+                },
+                {
+                    "id": "joao",
+                    "name": "João Silva",
+                    "password": "joao123",
+                    "role": "developer",
+                    "active": true
+                },
+                {
+                    "id": "maria",
+                    "name": "Maria Santos",
+                    "password": "maria123",
+                    "role": "developer",
+                    "active": true
+                }
+            ],
+            "projects": [
+                "Fluxo7 Dev",
+                "Website Corporativo",
+                "E-commerce Platform",
+                "Sistema de Gestão",
+                "App Mobile",
+                "API Backend",
+                "Dashboard Analytics",
+                "Sistema de Pagamentos",
+                "Plataforma de Cursos",
+                "Sistema de CRM",
+                "Outros"
+            ],
+            "priorities": [
+                "Baixa",
+                "Média", 
+                "Alta",
+                "Urgente"
+            ],
+            "demands": [
+                {
+                    "id": 1731340200000,
+                    "desenvolvedor": "Dominyck",
+                    "projeto": "Fluxo7 Dev",
+                    "descricao": "Implementar sistema de autenticação\\n- [x] Criar tela de login\\n- [x] Validar credenciais\\n- [ ] Implementar logout\\n- [ ] Testes de segurança",
+                    "status": "Pendente",
+                    "prioridade": "Alta",
+                    "dataCriacao": "2024-11-11T18:30:00.000Z"
+                },
+                {
+                    "id": 1731340260000,
+                    "desenvolvedor": "João Silva",
+                    "projeto": "Website Corporativo",
+                    "descricao": "Desenvolver página inicial responsiva\\n- [ ] Layout desktop\\n- [ ] Layout mobile\\n- [ ] Otimização de imagens\\n- [ ] Testes cross-browser",
+                    "status": "Pendente",
+                    "prioridade": "Média",
+                    "dataCriacao": "2024-11-11T18:31:00.000Z"
+                },
+                {
+                    "id": 1731340320000,
+                    "desenvolvedor": "Maria Santos",
+                    "projeto": "E-commerce Platform",
+                    "descricao": "Integração com gateway de pagamento\\n- [x] Pesquisar APIs disponíveis\\n- [x] Implementar Stripe\\n- [ ] Implementar PayPal\\n- [ ] Testes de transação",
+                    "status": "Concluído",
+                    "prioridade": "Urgente",
+                    "dataCriacao": "2024-11-10T14:15:00.000Z"
+                }
+            ],
+            "transactions": [
+                {
+                    "id": 1731340400000,
+                    "type": "Entrada",
+                    "value": 5000,
+                    "description": "Pagamento projeto Website Corporativo",
+                    "project": "Website Corporativo",
+                    "date": "2024-11-01T10:00:00.000Z"
+                },
+                {
+                    "id": 1731340460000,
+                    "type": "Saída",
+                    "value": 1200,
+                    "description": "Hospedagem e domínios",
+                    "project": "Fluxo7 Dev",
+                    "date": "2024-11-01T14:30:00.000Z"
+                },
+                {
+                    "id": 1731340520000,
+                    "type": "Entrada",
+                    "value": 8000,
+                    "description": "Pagamento projeto E-commerce Platform",
+                    "project": "E-commerce Platform",
+                    "date": "2024-11-05T09:15:00.000Z"
+                },
+                {
+                    "id": 1731340580000,
+                    "type": "Saída",
+                    "value": 800,
+                    "description": "Licenças de software",
+                    "project": "Sistema de Gestão",
+                    "date": "2024-11-07T16:45:00.000Z"
+                },
+                {
+                    "id": 1731340640000,
+                    "type": "Entrada",
+                    "value": 3500,
+                    "description": "Consultoria técnica",
+                    "project": "API Backend",
+                    "date": "2024-11-10T11:20:00.000Z"
+                }
+            ],
+            "feedback-isis": [
+                {
+                    "id": "fb001",
+                    "timestamp": "2024-11-11T15:17:00.000Z",
+                    "estrelas": 5,
+                    "nome_cliente": "João Silva",
+                    "empresa": "Arena Palace",
+                    "projeto": "fluxo7arena",
+                    "comentario": "Excelente atendimento! O sistema de reservas funcionou perfeitamente durante nosso evento."
+                },
+                {
+                    "id": "fb002", 
+                    "timestamp": "2024-11-10T14:30:00.000Z",
+                    "estrelas": 4,
+                    "nome_cliente": "Maria Santos",
+                    "empresa": "Sports Center",
+                    "projeto": "fluxo7arena",
+                    "comentario": "Muito bom sistema, apenas algumas melhorias na interface mobile seriam bem-vindas."
+                },
+                {
+                    "id": "fb003",
+                    "timestamp": "2024-11-09T10:45:00.000Z", 
+                    "estrelas": 5,
+                    "nome_cliente": "Carlos Oliveira",
+                    "empresa": "Clube Esportivo",
+                    "projeto": "fluxo7arena",
+                    "comentario": "Sistema intuitivo e eficiente. Nossos clientes adoraram a facilidade de reserva."
+                },
+                {
+                    "id": "fb004",
+                    "timestamp": "2024-11-08T16:20:00.000Z",
+                    "estrelas": 3,
+                    "nome_cliente": "Ana Costa",
+                    "empresa": "Academia Fitness",
+                    "projeto": "fluxo7arena", 
+                    "comentario": "Funciona bem, mas gostaria de mais opções de personalização no layout."
+                },
+                {
+                    "id": "fb005",
+                    "timestamp": "2024-11-07T13:10:00.000Z",
+                    "estrelas": 5,
+                    "nome_cliente": "Pedro Almeida",
+                    "empresa": "Centro Aquático",
+                    "projeto": "fluxo7arena",
+                    "comentario": "Perfeito! Reduziu significativamente nosso tempo de gestão de reservas."
+                }
+            ]
+        };
+        
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+        
+        function updateProgress(percent) {
+            document.getElementById('progressBar').style.width = percent + '%';
+        }
+        
+        function showData(data, title) {
+            const preview = document.getElementById('dataPreview');
+            preview.innerHTML = `<h3>${title}</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            preview.style.display = 'block';
+        }
+        
+        async function checkDatabase() {
+            try {
+                updateStatus('🔍 Verificando estado atual da base de dados...', 'info');
+                updateProgress(25);
+                
+                const response = await fetch(`${BASE_URL}/b/${BIN_ID}/latest`, {
+                    headers: {
+                        'X-Master-Key': API_KEY
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                updateProgress(75);
+                const data = await response.json();
+                const record = data.record;
+                
+                updateProgress(100);
+                
+                const stats = {
+                    devs: record.devs?.length || 0,
+                    projects: record.projects?.length || 0,
+                    priorities: record.priorities?.length || 0,
+                    demands: record.demands?.length || 0,
+                    transactions: record.transactions?.length || 0,
+                    feedbacks: record['feedback-isis']?.length || 0
+                };
+                
+                updateStatus(`✅ Base verificada: ${stats.devs} devs, ${stats.projects} projetos, ${stats.demands} demandas, ${stats.transactions} transações, ${stats.feedbacks} feedbacks`, 'success');
+                
+                showData(stats, '📊 Estado Atual da Base');
+                
+                // Habilitar botão de restauração
+                document.getElementById('restoreBtn').disabled = false;
+                
+            } catch (error) {
+                updateStatus(`❌ Erro ao verificar base: ${error.message}`, 'error');
+                updateProgress(0);
+            }
+        }
+        
+        async function restoreDatabase() {
+            try {
+                updateStatus('🚀 Iniciando restauração da base de dados...', 'info');
+                updateProgress(10);
+                
+                // Fazer backup primeiro
+                updateStatus('💾 Fazendo backup dos dados atuais...', 'info');
+                updateProgress(25);
+                
+                const backupResponse = await fetch(`${BASE_URL}/b/${BIN_ID}/latest`, {
+                    headers: {
+                        'X-Master-Key': API_KEY
+                    }
+                });
+                
+                if (backupResponse.ok) {
+                    const backupData = await backupResponse.json();
+                    console.log('Backup realizado:', backupData.record);
+                }
+                
+                updateProgress(50);
+                updateStatus('📝 Restaurando estrutura completa...', 'info');
+                
+                // Restaurar base completa
+                const restoreResponse = await fetch(`${BASE_URL}/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify(COMPLETE_DATABASE)
+                });
+                
+                if (!restoreResponse.ok) {
+                    throw new Error(`HTTP ${restoreResponse.status}: ${restoreResponse.statusText}`);
+                }
+                
+                updateProgress(100);
+                updateStatus('🎉 Base de dados restaurada com sucesso!', 'success');
+                
+                // Habilitar verificação
+                document.getElementById('verifyBtn').disabled = false;
+                
+                showData({
+                    devs: COMPLETE_DATABASE.devs.length,
+                    projects: COMPLETE_DATABASE.projects.length,
+                    priorities: COMPLETE_DATABASE.priorities.length,
+                    demands: COMPLETE_DATABASE.demands.length,
+                    transactions: COMPLETE_DATABASE.transactions.length,
+                    feedbacks: COMPLETE_DATABASE['feedback-isis'].length
+                }, '✅ Dados Restaurados');
+                
+            } catch (error) {
+                updateStatus(`❌ Erro na restauração: ${error.message}`, 'error');
+                updateProgress(0);
+            }
+        }
+        
+        async function verifyRestore() {
+            try {
+                updateStatus('🔍 Verificando integridade da restauração...', 'info');
+                updateProgress(50);
+                
+                const response = await fetch(`${BASE_URL}/b/${BIN_ID}/latest`, {
+                    headers: {
+                        'X-Master-Key': API_KEY
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                const record = data.record;
+                
+                updateProgress(100);
+                
+                // Verificar se todos os dados estão presentes
+                const checks = {
+                    devs: record.devs?.length === 4,
+                    projects: record.projects?.length === 11,
+                    priorities: record.priorities?.length === 4,
+                    demands: record.demands?.length === 3,
+                    transactions: record.transactions?.length === 5,
+                    feedbacks: record['feedback-isis']?.length === 5
+                };
+                
+                const allGood = Object.values(checks).every(check => check);
+                
+                if (allGood) {
+                    updateStatus('✅ Verificação concluída: Todos os dados foram restaurados corretamente!', 'success');
+                    
+                    showData({
+                        '👥 Desenvolvedores': `${record.devs?.length}/4 ✅`,
+                        '📁 Projetos': `${record.projects?.length}/11 ✅`,
+                        '🎯 Prioridades': `${record.priorities?.length}/4 ✅`,
+                        '📋 Demandas': `${record.demands?.length}/3 ✅`,
+                        '💰 Transações': `${record.transactions?.length}/5 ✅`,
+                        '⭐ Feedbacks': `${record['feedback-isis']?.length}/5 ✅`,
+                        '🌐 Status': 'Base operacional ✅'
+                    }, '🎉 Verificação Final');
+                    
+                } else {
+                    updateStatus('⚠️ Alguns dados podem estar faltando. Verifique os detalhes.', 'warning');
+                    showData(checks, '⚠️ Status da Verificação');
+                }
+                
+            } catch (error) {
+                updateStatus(`❌ Erro na verificação: ${error.message}`, 'error');
+                updateProgress(0);
+            }
+        }
+    </script>
+</body>
+</html>

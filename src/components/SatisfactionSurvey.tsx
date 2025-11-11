@@ -129,20 +129,35 @@ const SatisfactionSurvey = ({ onBack, onLogout }: SatisfactionSurveyProps) => {
       setIsDeleting(true);
       setError('');
       
-      // Limpar todos os feedbacks do JSONBin
-      const emptyData = { 'feedback-isis': [] };
+      // 1. Primeiro, ler a base completa
+      const readResponse = await fetch('https://api.jsonbin.io/v3/b/690605e5ae596e708f3c7bc5/latest', {
+        headers: {
+          'X-Master-Key': '$2a$10$/XmOGvx8./SZzV3qMzQ5i.6FjBjS4toNbeaEFzX2D8QPUddyM6VR2'
+        }
+      });
+
+      if (!readResponse.ok) {
+        throw new Error('Erro ao ler base de dados');
+      }
+
+      const currentData = await readResponse.json();
+      const fullDatabase = currentData.record;
       
-      const response = await fetch('https://api.jsonbin.io/v3/b/690605e5ae596e708f3c7bc5', {
+      // 2. Limpar apenas os feedbacks, mantendo todo o resto
+      fullDatabase['feedback-isis'] = [];
+      
+      // 3. Salvar a base completa de volta
+      const updateResponse = await fetch('https://api.jsonbin.io/v3/b/690605e5ae596e708f3c7bc5', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'X-Master-Key': '$2a$10$/XmOGvx8./SZzV3qMzQ5i.6FjBjS4toNbeaEFzX2D8QPUddyM6VR2'
         },
-        body: JSON.stringify(emptyData)
+        body: JSON.stringify(fullDatabase)
       });
 
-      if (!response.ok) {
-        throw new Error('Erro ao deletar feedbacks');
+      if (!updateResponse.ok) {
+        throw new Error('Erro ao atualizar base de dados');
       }
 
       setFeedbacks([]);
@@ -160,21 +175,36 @@ const SatisfactionSurvey = ({ onBack, onLogout }: SatisfactionSurveyProps) => {
       setDeletingFeedbackId(feedbackId);
       setError('');
       
-      // Remover o feedback específico da lista
-      const updatedFeedbacks = feedbacks.filter(f => f.id !== feedbackId);
-      const updatedData = { 'feedback-isis': updatedFeedbacks };
+      // 1. Primeiro, ler a base completa
+      const readResponse = await fetch('https://api.jsonbin.io/v3/b/690605e5ae596e708f3c7bc5/latest', {
+        headers: {
+          'X-Master-Key': '$2a$10$/XmOGvx8./SZzV3qMzQ5i.6FjBjS4toNbeaEFzX2D8QPUddyM6VR2'
+        }
+      });
+
+      if (!readResponse.ok) {
+        throw new Error('Erro ao ler base de dados');
+      }
+
+      const currentData = await readResponse.json();
+      const fullDatabase = currentData.record;
       
-      const response = await fetch('https://api.jsonbin.io/v3/b/690605e5ae596e708f3c7bc5', {
+      // 2. Remover o feedback específico da lista, mantendo todo o resto
+      const updatedFeedbacks = feedbacks.filter(f => f.id !== feedbackId);
+      fullDatabase['feedback-isis'] = updatedFeedbacks;
+      
+      // 3. Salvar a base completa de volta
+      const updateResponse = await fetch('https://api.jsonbin.io/v3/b/690605e5ae596e708f3c7bc5', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'X-Master-Key': '$2a$10$/XmOGvx8./SZzV3qMzQ5i.6FjBjS4toNbeaEFzX2D8QPUddyM6VR2'
         },
-        body: JSON.stringify(updatedData)
+        body: JSON.stringify(fullDatabase)
       });
 
-      if (!response.ok) {
-        throw new Error('Erro ao deletar feedback');
+      if (!updateResponse.ok) {
+        throw new Error('Erro ao atualizar base de dados');
       }
 
       setFeedbacks(updatedFeedbacks);

@@ -1,0 +1,45 @@
+{
+    "devs": [
+        {
+      "id": "admin",
+      "name": "Administrador",
+      "password": "admin123",
+      "role": "admin",
+      "active": true
+    },
+    {
+      "id": "dominyck",
+      "name": "Dominyck",
+      "password": "dev123",
+      "role": "admin",
+      "active": true
+    },
+    {
+      "id": "talis",
+      "name": "Talison",
+      "password": "t",
+      "role": "admin",
+      "active": true
+    },
+    {
+      "id": "Kallew",
+      "name": "Kallew",
+      "password": "Kallew100!",
+      "role": "admin",
+      "active": true
+    }
+  ],
+  "projects": [
+    "Fluxo7 Dev",
+    "Fluxo7 Arena"
+  ],
+  "priorities": [
+    "Baixa",
+    "Média",
+    "Alta",
+    "Urgente"
+  ],
+  "demands": [],
+  "transactions": [],
+  "feedback-isis": []
+}
