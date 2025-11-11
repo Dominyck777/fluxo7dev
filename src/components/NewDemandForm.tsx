@@ -141,7 +141,18 @@ const NewDemandForm = ({ onSubmit, onCancel, devs, projects, priorities, default
             id="descricao"
             value={formData.descricao}
             onChange={(e) => handleChange('descricao', e.target.value)}
-            placeholder="Descreva a demanda..."
+            placeholder="Descreva a demanda...
+
+💡 Dica: Use checklists interativos!
+- [ ] Item não concluído
+- [x] Item concluído
+
+Exemplo:
+Implementar sistema de login
+- [ ] Criar tela de login
+- [ ] Validar credenciais
+- [ ] Implementar autenticação
+- [ ] Testes unitários"
             className={errors.descricao ? 'error' : ''}
             autoFocus
             rows={5}

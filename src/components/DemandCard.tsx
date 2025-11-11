@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import './DemandCard.css';
+import ChecklistDescription from './ChecklistDescription';
 
 export interface Demand {
   id: string | number;
@@ -16,37 +17,12 @@ interface DemandCardProps {
   onEdit?: (demand: Demand) => void;
   onDelete?: (id: string | number) => void;
   onComplete?: (demand: Demand) => void;
+  onUpdate?: (demand: Demand) => void;
   isCompleting?: boolean;
 }
 
-const DemandCard = ({ demand, onEdit, onDelete, onComplete, isCompleting }: DemandCardProps) => {
+const DemandCard = ({ demand, onEdit, onDelete, onComplete, onUpdate, isCompleting }: DemandCardProps) => {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const [descriptionHeight, setDescriptionHeight] = useState<number>(0);
-  const descriptionRef = useRef<HTMLParagraphElement>(null);
-
-  useEffect(() => {
-    if (descriptionRef.current) {
-      // Calcula a altura total do texto
-      const element = descriptionRef.current;
-      
-      // Temporariamente remove as limitações para medir altura real
-      const originalMaxHeight = element.style.maxHeight;
-      const originalDisplay = element.style.display;
-      const originalWebkitLineClamp = element.style.webkitLineClamp;
-      
-      element.style.maxHeight = 'none';
-      element.style.display = 'block';
-      element.style.webkitLineClamp = 'unset';
-      
-      const fullHeight = element.scrollHeight;
-      setDescriptionHeight(fullHeight);
-      
-      // Restaura os estilos originais
-      element.style.maxHeight = originalMaxHeight;
-      element.style.display = originalDisplay;
-      element.style.webkitLineClamp = originalWebkitLineClamp;
-    }
-  }, [demand.descricao]);
 
   const getStatusClass = (status: string) => {
     switch (status) {
@@ -136,15 +112,17 @@ const DemandCard = ({ demand, onEdit, onDelete, onComplete, isCompleting }: Dema
         <h3 className="project-title">{demand.projeto}</h3>
         
         <div className="description-container">
-          <p 
-            ref={descriptionRef}
-            className={`project-description ${isDescriptionExpanded ? 'expanded' : ''}`}
-            style={{
-              maxHeight: isDescriptionExpanded ? `${descriptionHeight}px` : '3em'
+          <ChecklistDescription
+            description={demand.descricao}
+            demandId={demand.id}
+            onUpdate={(updatedDescription) => {
+              if (onUpdate) {
+                onUpdate({ ...demand, descricao: updatedDescription });
+              }
             }}
-          >
-            {demand.descricao}
-          </p>
+            isExpanded={isDescriptionExpanded}
+            className="project-description"
+          />
           {demand.descricao.length > 100 && (
             <button
               className={`expand-description-btn ${isDescriptionExpanded ? 'expanded' : ''}`}

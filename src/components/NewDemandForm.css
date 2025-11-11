@@ -75,7 +75,7 @@
 }
 
 .form-field textarea {
-  resize: vertical;
+  resize: none;
   min-height: 120px;
   font-family: inherit;
   line-height: 1.5;

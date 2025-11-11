@@ -1,0 +1,230 @@
+/* Checklist Description Component */
+.checklist-description {
+  width: 100%;
+}
+
+.checklist-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: rgba(255, 107, 0, 0.1);
+  border: 1px solid rgba(255, 107, 0, 0.3);
+  border-radius: 6px;
+}
+
+.progress-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-orange);
+  white-space: nowrap;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-orange) 0%, #ffb347 100%);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.description-content {
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.description-text {
+  margin: 0 0 0.5rem 0;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+}
+
+.description-text:last-child {
+  margin-bottom: 0;
+}
+
+/* Container dos checkboxes */
+.checklist-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Checklist Items */
+.checklist-item {
+  margin: 0;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 6px;
+  border-left: 3px solid rgba(255, 107, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.checklist-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-left-color: var(--color-orange);
+}
+
+.checklist-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Custom Checkbox */
+.checklist-checkbox {
+  display: none;
+}
+
+.checklist-checkmark {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #666;
+  border-radius: 4px;
+  background: transparent;
+  position: relative;
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition: all 0.2s ease;
+}
+
+.checklist-checkbox:checked + .checklist-checkmark {
+  background: var(--color-orange);
+  border-color: var(--color-orange);
+}
+
+.checklist-checkbox:checked + .checklist-checkmark::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.checklist-checkmark:hover {
+  border-color: var(--color-orange);
+  background: rgba(255, 107, 0, 0.1);
+}
+
+.checklist-text {
+  flex: 1;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  transition: all 0.2s ease;
+}
+
+.checklist-text.checked {
+  color: #999;
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .checklist-progress {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .progress-text {
+    text-align: center;
+    white-space: normal;
+  }
+  
+  .checklist-item {
+    padding: 0.4rem;
+  }
+  
+  .checklist-label {
+    gap: 0.5rem;
+  }
+  
+  .checklist-checkmark {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .checklist-text {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .checklist-progress {
+    padding: 0.4rem;
+  }
+  
+  .progress-text {
+    font-size: 0.8rem;
+  }
+  
+  .checklist-item {
+    margin: 0.4rem 0;
+    padding: 0.3rem;
+  }
+  
+  .checklist-text {
+    font-size: 0.85rem;
+  }
+}
+
+/* Animações */
+@keyframes checkboxCheck {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.checklist-checkbox:checked + .checklist-checkmark::after {
+  animation: checkboxCheck 0.2s ease;
+}
+
+/* Estados expandido/contraído */
+.checklist-description:not(.expanded) .description-content {
+  max-height: 6em;
+  overflow: hidden;
+  position: relative;
+}
+
+.checklist-description:not(.expanded) .description-content::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2em;
+  background: linear-gradient(transparent, #1a1a1a);
+  pointer-events: none;
+}
+
+.checklist-description.expanded .description-content {
+  max-height: none;
+}
+
+/* Transições suaves */
+.description-content {
+  transition: max-height 0.3s ease;
+}

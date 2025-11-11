@@ -12,10 +12,11 @@ import './Dashboard.css';
 interface DashboardProps {
   onLogout: () => void;
   currentUser: Developer;
+  onOpenSidebar?: () => void;
 }
 
 
-const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
+const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => {
   const [currentView, setCurrentView] = useState<'dashboard' | 'financial'>('dashboard');
   const [selectedDev, setSelectedDev] = useState<string>(currentUser.name);
   const [selectedProject, setSelectedProject] = useState<string>('Todos');
@@ -192,6 +193,16 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
     }
   };
 
+  // Função específica para atualizar descrição (checkboxes) sem loading states
+  const handleUpdateDescription = async (updatedDemand: Demand) => {
+    try {
+      const saved = await jsonbinClient.updateDemand(updatedDemand);
+      setDemands(prev => prev.map(d => d.id === saved.id ? saved : d));
+    } catch (error) {
+      console.error('Erro ao atualizar descrição:', error);
+    }
+  };
+
   const handleCompleteDemand = async (updatedDemand: Demand) => {
     setCompletingId(updatedDemand.id);
     try {
@@ -236,7 +247,12 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
     <div className="dashboard">
       <header className="dashboard-header" role="banner">
         <div className="header-content">
-          <span className="header-icon" aria-hidden="true">
+          <span 
+            className={`header-icon ${onOpenSidebar ? 'clickable' : ''}`} 
+            onClick={onOpenSidebar}
+            title={onOpenSidebar ? 'Abrir menu' : ''}
+            style={{ cursor: onOpenSidebar ? 'pointer' : 'default' }}
+          >
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="3" y="3" width="18" height="18" rx="2" stroke="#f05902" strokeWidth="2"/>
               <path d="M8 8L10 10L8 12" stroke="#ffaa33" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -510,6 +526,7 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
                       onEdit={handleEditDemand}
                       onDelete={handleDeleteDemand}
                       onComplete={handleCompleteDemand}
+                      onUpdate={handleUpdateDescription}
                       isCompleting={completingId === demand.id}
                     />
                   ))
@@ -548,6 +565,7 @@ const Dashboard = ({ onLogout, currentUser }: DashboardProps) => {
                     onEdit={handleEditDemand}
                     onDelete={handleDeleteDemand}
                     onComplete={handleCompleteDemand}
+                    onUpdate={handleUpdateDescription}
                     isCompleting={completingId === demand.id}
                   />
                 ))}

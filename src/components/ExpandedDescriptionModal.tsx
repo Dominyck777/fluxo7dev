@@ -19,6 +19,8 @@ const ExpandedDescriptionModal = ({
   title = "Descrição da Demanda"
 }: ExpandedDescriptionModalProps) => {
   const [localValue, setLocalValue] = useState(value);
+  const [isAddingItem, setIsAddingItem] = useState(false);
+  const [newItemText, setNewItemText] = useState('');
 
   useEffect(() => {
     setLocalValue(value);
@@ -48,6 +50,21 @@ const ExpandedDescriptionModal = ({
   const handleSave = () => {
     onChange(localValue);
     onClose();
+  };
+
+  const handleAddItem = () => {
+    if (newItemText.trim()) {
+      const newItem = `- [ ] ${newItemText.trim()}`;
+      const updatedValue = localValue ? `${localValue}\n${newItem}` : newItem;
+      setLocalValue(updatedValue);
+      setNewItemText('');
+      setIsAddingItem(false);
+    }
+  };
+
+  const handleCancelAddItem = () => {
+    setNewItemText('');
+    setIsAddingItem(false);
   };
 
   if (!isOpen) return null;
@@ -81,6 +98,58 @@ const ExpandedDescriptionModal = ({
               }
             }}
           />
+          
+          {/* Seção para adicionar novos itens de checklist */}
+          <div className="add-item-section">
+            {!isAddingItem ? (
+              <button
+                type="button"
+                onClick={() => setIsAddingItem(true)}
+                className="btn-add-item"
+                title="Adicionar novo item de checklist"
+              >
+                ➕ Adicionar item
+              </button>
+            ) : (
+              <div className="add-item-form">
+                <input
+                  type="text"
+                  value={newItemText}
+                  onChange={(e) => setNewItemText(e.target.value)}
+                  placeholder="Digite o nome do item..."
+                  className="add-item-input"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddItem();
+                    } else if (e.key === 'Escape') {
+                      e.preventDefault();
+                      handleCancelAddItem();
+                    }
+                  }}
+                />
+                <div className="add-item-actions">
+                  <button
+                    type="button"
+                    onClick={handleAddItem}
+                    className="btn-confirm-item"
+                    title="Adicionar item (Enter)"
+                  >
+                    ✓
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancelAddItem}
+                    className="btn-cancel-item"
+                    title="Cancelar (Esc)"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         
         <div className="expanded-modal-footer">
