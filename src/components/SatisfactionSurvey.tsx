@@ -85,7 +85,11 @@ const SatisfactionSurvey = ({ onBack, onLogout }: SatisfactionSurveyProps) => {
   const getAverageRating = () => {
     if (filteredFeedbacks.length === 0) return 0;
     const sum = filteredFeedbacks.reduce((acc, feedback) => acc + feedback.estrelas, 0);
-    return (sum / filteredFeedbacks.length).toFixed(1);
+    return sum / filteredFeedbacks.length;
+  };
+
+  const getAverageRatingFormatted = () => {
+    return getAverageRating().toFixed(1);
   };
 
   const getRatingDistribution = () => {
@@ -98,13 +102,16 @@ const SatisfactionSurvey = ({ onBack, onLogout }: SatisfactionSurveyProps) => {
     return distribution;
   };
 
-  const renderStars = (rating: number, size: 'small' | 'medium' | 'large' = 'medium') => {
+  const renderStars = (rating: number) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
       stars.push(
         <span
           key={i}
-          className={`star ${size} ${i <= rating ? 'filled' : 'empty'}`}
+          style={{
+            color: i <= rating ? '#ffd700' : 'rgba(255, 255, 255, 0.3)',
+            fontSize: '1rem'
+          }}
         >
           ⭐
         </span>
@@ -236,9 +243,9 @@ const SatisfactionSurvey = ({ onBack, onLogout }: SatisfactionSurveyProps) => {
           <div className="stat-content">
             <h3>Média Geral</h3>
             <div className="average-rating">
-              <span className="stat-number">{getAverageRating()}</span>
+              <span className="stat-number">{getAverageRatingFormatted()}</span>
               <div className="average-stars">
-                {renderStars(Math.round(parseFloat(getAverageRating())), 'small')}
+                {renderStars(Math.round(getAverageRating()))}
               </div>
             </div>
           </div>
@@ -250,7 +257,7 @@ const SatisfactionSurvey = ({ onBack, onLogout }: SatisfactionSurveyProps) => {
             <h3>Distribuição</h3>
             <div className="distribution-bars">
               {Object.entries(distribution).reverse().map(([stars, count]) => (
-                <div key={stars} className="distribution-row">
+                <div key={String(stars)} className="distribution-row">
                   <span className="stars-label">{stars}⭐</span>
                   <div className="distribution-bar">
                     <div 
@@ -295,7 +302,7 @@ const SatisfactionSurvey = ({ onBack, onLogout }: SatisfactionSurveyProps) => {
           <label>Estrelas:</label>
           <select
             value={filter.estrelas}
-            onChange={(e) => setFilter(prev => ({ ...prev, estrelas: parseInt(e.target.value) }))}
+            onChange={(e) => setFilter(prev => ({ ...prev, estrelas: parseInt(e.target.value) || 0 }))}
           >
             <option value={0}>Todas</option>
             <option value={5}>5 ⭐</option>
