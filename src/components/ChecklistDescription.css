@@ -221,29 +221,9 @@
   animation: checkboxCheck 0.2s ease;
 }
 
-/* Estados expandido/contraído */
-.checklist-description:not(.expanded) .description-content {
-  max-height: 6em;
-  overflow: hidden;
-  position: relative;
-}
-
-.checklist-description:not(.expanded) .description-content::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2em;
-  background: linear-gradient(transparent, #1a1a1a);
-  pointer-events: none;
-}
-
-.checklist-description.expanded .description-content {
-  max-height: none;
-}
+/* Estados expandido/contraído - Removido para mostrar texto completo */
 
 /* Transições suaves */
 .description-content {
-  transition: max-height 0.3s ease;
+  transition: all 0.3s ease;
 }
