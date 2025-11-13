@@ -1,8 +1,17 @@
 {
+  "functions": {
+    "api/demands.ts": {
+      "runtime": "@vercel/node"
+    },
+    "api/config.ts": {
+      "runtime": "@vercel/node"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/:path*",
       "destination": "/api/:path*"
     }
-  ]
+  ],
+  "buildCommand": "npm run build"
 }

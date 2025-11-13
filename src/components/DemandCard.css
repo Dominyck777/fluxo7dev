@@ -26,23 +26,23 @@
   padding-bottom: 12px;
 }
 
-/* Estilizar scrollbar */
-.demand-card:hover .description-container::-webkit-scrollbar {
+/* Estilizar scrollbar - Compatível com build */
+.description-container::-webkit-scrollbar {
   width: 4px;
 }
 
-.demand-card:hover .description-container::-webkit-scrollbar-track {
+.description-container::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
 }
 
-.demand-card:hover .description-container::-webkit-scrollbar-thumb {
-  background: var(--color-orange);
+.description-container::-webkit-scrollbar-thumb {
+  background: #ff6b00;
   border-radius: 2px;
 }
 
-.demand-card:hover .description-container::-webkit-scrollbar-thumb:hover {
-  background: var(--color-orange-hover);
+.description-container::-webkit-scrollbar-thumb:hover {
+  background: #ff8533;
 }
 
 /* Cores sólidas por PRIORIDADE - Muito mais visíveis */

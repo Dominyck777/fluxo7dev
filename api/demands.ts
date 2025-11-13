@@ -1,16 +1,21 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import fs from 'fs';
-import path from 'path';
 
-const dbPath = path.join(process.cwd(), 'api', 'db.json');
+// Mock data para desenvolvimento - em produção usar banco de dados real
+const mockDB = {
+  devs: ["Dominyck", "Kallew", "Talison"],
+  projects: ["F7 Arena", "F7 Barber"],
+  priorities: ["Baixa", "Média", "Alta", "Urgente"],
+  demands: []
+};
 
 function readDB() {
-  const data = fs.readFileSync(dbPath, 'utf-8');
-  return JSON.parse(data);
+  // Em produção, conectar com banco de dados real (MongoDB, PostgreSQL, etc.)
+  return mockDB;
 }
 
 function writeDB(data: any) {
-  fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
+  // Em produção, salvar no banco de dados real
+  Object.assign(mockDB, data);
 }
 
 export default function handler(req: VercelRequest, res: VercelResponse) {

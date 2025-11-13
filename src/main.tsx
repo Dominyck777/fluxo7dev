@@ -3,8 +3,8 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 
-// Registra Service Worker para Web Push Notifications
-if ('serviceWorker' in navigator) {
+// Registra Service Worker para Web Push Notifications (apenas em produção)
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
