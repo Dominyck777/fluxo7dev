@@ -7,8 +7,10 @@ interface SidebarProps {
   onClose: () => void;
   user: Developer;
   onLogout: () => void;
-  onNavigate: (path: string) => void;
+  onNavigate: (tab: ActiveTab) => void;
 }
+
+type ActiveTab = 'dashboard' | 'financial' | 'satisfaction';
 
 const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) => {
   useEffect(() => {
@@ -29,8 +31,8 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
     };
   }, [isOpen, onClose]);
 
-  const handleTabClick = (path: string) => {
-    onNavigate(path);
+  const handleTabClick = (tab: ActiveTab) => {
+    onNavigate(tab);
     onClose(); // Fecha a sidebar após navegar
   };
 
@@ -56,7 +58,7 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
         <nav className="sidebar-nav">
           <button
             className="sidebar-tab"
-            onClick={() => handleTabClick('/demandas')}
+            onClick={() => handleTabClick('dashboard')}
           >
             <span className="tab-icon">📊</span>
             <span className="tab-label">Dashboard</span>
@@ -64,7 +66,7 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
           
           <button
             className="sidebar-tab"
-            onClick={() => handleTabClick('/financeiro')}
+            onClick={() => handleTabClick('financial')}
           >
             <span className="tab-icon">💰</span>
             <span className="tab-label">Financeiro</span>
@@ -72,7 +74,7 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
           
           <button
             className="sidebar-tab"
-            onClick={() => handleTabClick('/satisfacao')}
+            onClick={() => handleTabClick('satisfaction')}
           >
             <span className="tab-icon">⭐</span>
             <span className="tab-label">Pesquisa de Satisfação</span>
