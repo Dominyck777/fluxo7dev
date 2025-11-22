@@ -11,6 +11,7 @@ export interface Transaction {
   project: string;
   date: string;
   isMonthly?: boolean;
+  isPaid?: boolean;
 }
 
 interface FinancialViewProps {
