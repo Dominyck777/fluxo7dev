@@ -214,14 +214,29 @@
   top: 0;
   z-index: 100;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dev-menu-button {
+  background: transparent;
+  border: none;
+  padding: 0.25rem;
+  border-radius: 999px;
+  cursor: pointer;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+  justify-content: center;
+  color: var(--color-orange);
+  transition: all 0.3s ease;
+}
+
+.dev-menu-button:hover {
+  background: rgba(255, 107, 0, 0.12);
+  box-shadow: 0 0 0 1px rgba(255, 107, 0, 0.5);
+  transform: scale(1.05);
+}
+
+.dev-menu-button svg {
+  display: block;
 }
 
 .back-button {
@@ -281,9 +296,10 @@
 /* Summary Cards */
 .financial-summary {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 1.5rem;
   margin-bottom: 2rem;
+  align-items: stretch;
 }
 
 .summary-card {
@@ -296,6 +312,8 @@
   gap: 1rem;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  min-height: 120px;
+  height: 100%;
 }
 
 .summary-card:hover {
@@ -316,8 +334,11 @@
   transform: translateY(-4px);
 }
 
-.entradas-card .card-icon {
+.entradas-card .card-icon,
+.entrada-icon {
   color: #00ff99;
+  font-size: 2rem;
+  text-shadow: 0 0 10px rgba(0, 255, 153, 0.5);
 }
 
 /* Card Saídas - Vermelho */
@@ -333,8 +354,11 @@
   transform: translateY(-4px);
 }
 
-.saidas-card .card-icon {
+.saidas-card .card-icon,
+.saida-icon {
   color: #ff4d4d;
+  font-size: 2rem;
+  text-shadow: 0 0 10px rgba(255, 77, 77, 0.5);
 }
 
 /* Card Lucro - Azul */
@@ -479,6 +503,12 @@
 .section-title {
   border-bottom: 2px solid var(--color-orange);
   padding-bottom: 0.5rem;
+}
+
+.section-subtitle {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .empty-state {
@@ -855,11 +885,30 @@
 /* Responsive Design */
 @media (max-width: 1024px) {
   .financial-summary {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
   }
   
+  /* Manter entrada e saída na primeira linha */
+  .entradas-card {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  
+  .saidas-card {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  
+  /* Lucro e saldo na segunda linha */
   .lucro-card {
-    grid-column: 1 / -1;
+    grid-column: 1;
+    grid-row: 2;
+  }
+  
+  .saldo-card {
+    grid-column: 2;
+    grid-row: 2;
   }
 }
 
@@ -1374,6 +1423,13 @@
   width: 200px;
   height: 200px;
   margin: 0 auto 1rem;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+  transition: transform 0.3s ease;
+}
+
+.pie-chart-container:hover {
+  transform: translateY(-4px);
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.5));
 }
 
 .pie-slice {
@@ -1381,12 +1437,29 @@
   height: 100%;
   border-radius: 50%;
   background: conic-gradient(
-    #00ff99 0% var(--percentage, 50%),
-    #ff4d4d var(--percentage, 50%) 100%
+    #10B981 0% var(--percentage, 50%),
+    #EF4444 var(--percentage, 50%) 100%
   );
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    inset 0 4px 8px rgba(255, 255, 255, 0.1),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.pie-slice::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 50%, rgba(0, 0, 0, 0.2) 100%);
+  pointer-events: none;
 }
 
 .pie-center {
@@ -1394,7 +1467,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.8);
+  background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(10, 10, 10, 0.95) 100%);
   border-radius: 50%;
   width: 120px;
   height: 120px;
@@ -1402,7 +1475,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 3px solid rgba(255, 107, 0, 0.4);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.1);
 }
 
 .pie-total {
@@ -1432,63 +1508,114 @@
 }
 
 .legend-color {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
 }
 
 .entrada-color {
-  background-color: #00ff99;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
 }
 
 .saida-color {
-  background-color: #ff4d4d;
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
 }
 
 /* Bar Chart */
 .bar-container {
   display: flex;
-  justify-content: space-around;
-  align-items: end;
-  height: 200px;
-  padding: 1rem 0;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 3rem;
+  height: 280px;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  position: relative;
+}
+
+.bar-container::before {
+  content: '';
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  right: 1.5rem;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .bar {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 80px;
-  height: 100%;
+  justify-content: flex-end;
+  width: 100px;
+  flex: 0 0 auto;
   position: relative;
+  height: 100%;
 }
 
 .bar-fill {
-  width: 60px;
-  border-radius: 4px 4px 0 0;
-  transition: height 0.3s ease;
-  min-height: 10px;
+  width: 80px;
+  border-radius: 8px 8px 0 0;
+  transition: all 0.3s ease;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 8px 8px 0 0;
 }
 
 .entrada-fill {
-  background: linear-gradient(to top, #00cc7a, #00ff99);
+  background: linear-gradient(180deg, #10B981 0%, #059669 100%) !important;
+  border: 2px solid rgba(16, 185, 129, 0.8);
+  border-bottom: none;
+}
+
+.entrada-bar:hover .entrada-fill {
+  background: linear-gradient(180deg, #34D399 0%, #10B981 100%) !important;
+  box-shadow: 0 -6px 20px rgba(16, 185, 129, 0.6);
+  border-color: rgba(16, 185, 129, 1);
 }
 
 .saida-fill {
-  background: linear-gradient(to top, #cc0000, #ff4d4d);
+  background: linear-gradient(180deg, #EF4444 0%, #DC2626 100%) !important;
+  border: 2px solid rgba(239, 68, 68, 0.8);
+  border-bottom: none;
+}
+
+.saida-bar:hover .saida-fill {
+  background: linear-gradient(180deg, #F87171 0%, #EF4444 100%) !important;
+  box-shadow: 0 -6px 20px rgba(239, 68, 68, 0.6);
+  border-color: rgba(239, 68, 68, 1);
 }
 
 .bar-label {
   color: var(--color-white);
-  font-size: 0.8rem;
-  font-weight: 600;
-  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-top: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .bar-value {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.7rem;
-  margin-top: 0.25rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 0.35rem;
   text-align: center;
 }
 

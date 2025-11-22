@@ -125,7 +125,7 @@ const DemandCard = ({ demand, onEdit, onDelete, onComplete, onUpdate, isCompleti
           />
         </div>
         
-        <div className="description-container">
+        <div className={`description-container ${isDescriptionExpanded ? 'expanded' : ''}`}>
           <ChecklistDescription
             description={demand.descricao}
             demandId={demand.id}

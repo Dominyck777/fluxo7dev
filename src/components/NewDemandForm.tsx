@@ -23,6 +23,8 @@ const NewDemandForm = ({ onSubmit, onCancel, devs, projects, priorities, default
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
+  const [isAddingItem, setIsAddingItem] = useState(false);
+  const [newItemText, setNewItemText] = useState('');
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -67,6 +69,23 @@ const NewDemandForm = ({ onSubmit, onCancel, devs, projects, priorities, default
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
+  };
+
+  const handleAddChecklistItem = () => {
+    if (!newItemText.trim()) return;
+
+    const newItem = `- [ ] ${newItemText.trim()}`;
+    const base = formData.descricao?.trimEnd();
+    const updatedDescription = base ? `${base}\n${newItem}` : newItem;
+
+    setFormData(prev => ({ ...prev, descricao: updatedDescription }));
+    setNewItemText('');
+    setIsAddingItem(false);
+  };
+
+  const handleCancelAddItem = () => {
+    setNewItemText('');
+    setIsAddingItem(false);
   };
 
   // Keyboard shortcuts
@@ -166,6 +185,57 @@ Implementar sistema de login
             ◰
           </button>
         </div>
+        <div className="add-item-section">
+          {!isAddingItem ? (
+            <button
+              type="button"
+              onClick={() => setIsAddingItem(true)}
+              className="btn-add-item"
+              title="Adicionar novo item de checklist"
+            >
+              ➕ Adicionar item
+            </button>
+          ) : (
+            <div className="add-item-form">
+              <input
+                type="text"
+                value={newItemText}
+                onChange={(e) => setNewItemText(e.target.value)}
+                placeholder="Digite o nome do item..."
+                className="add-item-input"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddChecklistItem();
+                  } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    handleCancelAddItem();
+                  }
+                }}
+              />
+              <div className="add-item-actions">
+                <button
+                  type="button"
+                  onClick={handleAddChecklistItem}
+                  className="btn-confirm-item"
+                  title="Adicionar item (Enter)"
+                >
+                  ✓
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancelAddItem}
+                  className="btn-cancel-item"
+                  title="Cancelar (Esc)"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
         {errors.descricao && (
           <span className="error-text">{errors.descricao}</span>
         )}

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './SatisfactionSurvey.css';
 
 interface SatisfactionSurveyProps {
-  onBack: () => void;
+  onOpenSidebar?: () => void;
   onLogout: () => void;
 }
 
@@ -20,7 +20,7 @@ interface FeedbackResponse {
   'feedback-isis': FeedbackData[];
 }
 
-const SatisfactionSurvey = ({ onBack, onLogout }: SatisfactionSurveyProps) => {
+const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps) => {
   const [feedbacks, setFeedbacks] = useState<FeedbackData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -101,6 +101,21 @@ const SatisfactionSurvey = ({ onBack, onLogout }: SatisfactionSurveyProps) => {
     });
     return distribution;
   };
+
+  const getRecentFeedbacks = () => {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    
+    return filteredFeedbacks.filter(feedback => {
+      const feedbackDate = new Date(feedback.timestamp);
+      return feedbackDate >= oneWeekAgo;
+    });
+  };
+
+  const recentFeedbacks = getRecentFeedbacks();
+  const recentPercentage = filteredFeedbacks.length > 0 
+    ? ((recentFeedbacks.length / filteredFeedbacks.length) * 100).toFixed(0)
+    : 0;
 
   const renderStars = (rating: number) => {
     const stars = [];
@@ -216,15 +231,6 @@ const SatisfactionSurvey = ({ onBack, onLogout }: SatisfactionSurveyProps) => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="satisfaction-loading">
-        <div className="loading-spinner">⏳</div>
-        <p>Carregando pesquisas de satisfação...</p>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="satisfaction-error">
@@ -236,200 +242,265 @@ const SatisfactionSurvey = ({ onBack, onLogout }: SatisfactionSurveyProps) => {
       </div>
     );
   }
-
   const distribution = getRatingDistribution();
 
   return (
     <div className="satisfaction-survey">
       <header className="satisfaction-header">
-        <button 
-          className="back-button"
-          onClick={onBack}
-          title="Voltar ao Dashboard"
-        >
-          ← Voltar
-        </button>
-        <h1 className="satisfaction-title">⭐ Pesquisa de Satisfação</h1>
-        <button 
-          className="logout-button"
-          onClick={onLogout}
-          title="Sair do sistema"
-        >
-          🚪 Sair
-        </button>
+        <div className="header-content">
+          <span 
+            className={`header-icon ${onOpenSidebar ? 'clickable' : ''}`}
+            onClick={onOpenSidebar}
+            title={onOpenSidebar ? 'Abrir menu' : ''}
+            style={{ cursor: onOpenSidebar ? 'pointer' : 'default' }}
+          >
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="3" width="18" height="18" rx="2" stroke="#f05902" strokeWidth="2" />
+              <path d="M8 8L10 10L8 12" stroke="#ffaa33" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M12 12H16" stroke="#91b0b0" strokeWidth="2" strokeLinecap="round" />
+              <circle cx="18" cy="18" r="4" fill="#1a1a1a" stroke="#f05902" strokeWidth="1.5" />
+              <path d="M18 16V20M16 18H20" stroke="#ffaa33" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </span>
+          <h1 className="satisfaction-title">⭐ Feedbacks</h1>
+          <div className="header-user-section">
+            <button 
+              className="logout-button"
+              onClick={onLogout}
+              title="Sair do sistema"
+            >
+              🚪 Sair
+            </button>
+          </div>
+        </div>
       </header>
 
-      <div className="survey-stats">
-        <div className="stat-card">
-          <div className="stat-icon">📈</div>
-          <div className="stat-content">
-            <h3>Total</h3>
-            <span className="stat-number">{filteredFeedbacks.length}</span>
-          </div>
-        </div>
+      <main className="satisfaction-main">
+        <div className="satisfaction-content">
+          {/* Visão geral */}
+          <h2 className="feedbacks-section-title">Visão geral</h2>
+          <div className="survey-stats">
+            {isLoading ? (
+              <>
+                <div className="stat-card">
+                  <div className="stat-icon">⏳</div>
+                  <div className="stat-content">
+                    <h3>Carregando total</h3>
+                    <span className="stat-number">...</span>
+                  </div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-icon">⭐</div>
+                  <div className="stat-content">
+                    <h3>Carregando média</h3>
+                    <span className="stat-number">...</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="stat-card stat-card-total">
+                  <div className="stat-icon">📈</div>
+                  <div className="stat-content">
+                    <h3>Total de Feedbacks</h3>
+                    <span className="stat-number">{filteredFeedbacks.length}</span>
+                    <div className="stat-details">
+                      <div className="stat-detail-item">
+                        <span className="stat-detail-label">Recentes (7 dias)</span>
+                        <span className="stat-detail-value">{recentFeedbacks.length}</span>
+                      </div>
+                      <div className="stat-detail-item">
+                        <span className="stat-detail-label">% Recentes</span>
+                        <span className="stat-detail-value">{recentPercentage}%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-        <div className="stat-card">
-          <div className="stat-icon">⭐</div>
-          <div className="stat-content">
-            <h3>Média Geral</h3>
-            <div className="average-rating">
-              <span className="stat-number">{getAverageRatingFormatted()}</span>
-              <div className="average-stars">
-                {renderStars(Math.round(getAverageRating()))}
+                <div className="stat-card">
+                  <div className="stat-icon">⭐</div>
+                  <div className="stat-content">
+                    <h3>Média Geral</h3>
+                    <div className="average-rating">
+                      <span className="stat-number">{getAverageRatingFormatted()}</span>
+                      <div className="average-stars">
+                        {renderStars(Math.round(getAverageRating()))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="stat-card rating-distribution">
+                  <div className="stat-icon">📊</div>
+                  <div className="stat-content">
+                    <h3>Distribuição</h3>
+                    <div className="distribution-bars">
+                      {Object.entries(distribution).reverse().map(([stars, count]) => (
+                        <div key={String(stars)} className="distribution-row">
+                          <span className="stars-label">{stars}⭐</span>
+                          <div className="distribution-bar">
+                            <div
+                              className="bar-fill"
+                              style={{
+                                width:
+                                  filteredFeedbacks.length > 0
+                                    ? `${(count / filteredFeedbacks.length) * 100}%`
+                                    : '0%',
+                              }}
+                            />
+                          </div>
+                          <span className="count-label">{count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Filtros */}
+          <h2 className="feedbacks-section-title">Filtros</h2>
+          <div className="satisfaction-filters">
+            <div className="filter-group">
+              <label>Empresa:</label>
+              <input
+                type="text"
+                value={filter.empresa}
+                onChange={(e) => setFilter((prev) => ({ ...prev, empresa: e.target.value }))}
+                placeholder="Filtrar por empresa..."
+              />
+            </div>
+
+            <div className="filter-group">
+              <label>Projeto:</label>
+              <input
+                type="text"
+                value={filter.projeto}
+                onChange={(e) => setFilter((prev) => ({ ...prev, projeto: e.target.value }))}
+                placeholder="Filtrar por projeto..."
+              />
+            </div>
+
+            <div className="filter-group">
+              <label>Estrelas:</label>
+              <select
+                value={filter.estrelas}
+                onChange={(e) =>
+                  setFilter((prev) => ({
+                    ...prev,
+                    estrelas: parseInt(e.target.value) || 0,
+                  }))
+                }
+              >
+                <option value={0}>Todas</option>
+                <option value={5}>5 ⭐</option>
+                <option value={4}>4 ⭐</option>
+                <option value={3}>3 ⭐</option>
+                <option value={2}>2 ⭐</option>
+                <option value={1}>1 ⭐</option>
+              </select>
+            </div>
+
+            <button onClick={loadFeedbacks} className="refresh-btn">
+              🔄 Atualizar
+            </button>
+
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="delete-all-btn"
+              disabled={filteredFeedbacks.length === 0}
+              title="Apagar todas as pesquisas"
+            >
+              🗑️ Apagar Todas
+            </button>
+          </div>
+
+          {/* Lista de feedbacks */}
+          <h2 className="feedbacks-section-title">Feedbacks</h2>
+          <div className="feedbacks-list">
+            {isLoading ? (
+              <div className="no-feedbacks">
+                <div className="no-data-icon">⏳</div>
+                <p>Carregando pesquisas de satisfação...</p>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="stat-card rating-distribution">
-          <div className="stat-icon">📊</div>
-          <div className="stat-content">
-            <h3>Distribuição</h3>
-            <div className="distribution-bars">
-              {Object.entries(distribution).reverse().map(([stars, count]) => (
-                <div key={String(stars)} className="distribution-row">
-                  <span className="stars-label">{stars}⭐</span>
-                  <div className="distribution-bar">
-                    <div 
-                      className="bar-fill" 
-                      style={{ 
-                        width: filteredFeedbacks.length > 0 
-                          ? `${(count / filteredFeedbacks.length) * 100}%` 
-                          : '0%' 
-                      }}
-                    />
+            ) : filteredFeedbacks.length === 0 ? (
+              <div className="no-feedbacks">
+                <div className="no-data-icon">📝</div>
+                <p>Nenhuma pesquisa de satisfação encontrada</p>
+              </div>
+            ) : (
+              filteredFeedbacks.map((feedback) => (
+                <div key={feedback.id} className="feedback-card">
+                  <div className="feedback-header">
+                    <div className="feedback-info">
+                      <h3>{feedback.nome_cliente}</h3>
+                      <div className="feedback-meta">
+                        <span className="empresa">{feedback.empresa}</span>
+                        <span className="projeto">{feedback.projeto}</span>
+                        <span className="date">{formatDate(feedback.timestamp)}</span>
+                      </div>
+                    </div>
+                    <div className="feedback-actions">
+                      <div className="feedback-rating">
+                        {renderStars(feedback.estrelas)}
+                      </div>
+                      <button
+                        onClick={() => handleDeleteSingleFeedback(feedback.id)}
+                        className="delete-feedback-btn"
+                        disabled={deletingFeedbackId === feedback.id}
+                        title="Apagar esta pesquisa"
+                      >
+                        {deletingFeedbackId === feedback.id ? '⏳' : '🗑️'}
+                      </button>
+                    </div>
                   </div>
-                  <span className="count-label">{count}</span>
+
+                  {feedback.comentario && (
+                    <div className="feedback-comment">
+                      <p>"{feedback.comentario}"</p>
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
+              ))
+            )}
           </div>
-        </div>
-      </div>
 
-      <div className="satisfaction-filters">
-        <div className="filter-group">
-          <label>Empresa:</label>
-          <input
-            type="text"
-            value={filter.empresa}
-            onChange={(e) => setFilter(prev => ({ ...prev, empresa: e.target.value }))}
-            placeholder="Filtrar por empresa..."
-          />
-        </div>
-
-        <div className="filter-group">
-          <label>Projeto:</label>
-          <input
-            type="text"
-            value={filter.projeto}
-            onChange={(e) => setFilter(prev => ({ ...prev, projeto: e.target.value }))}
-            placeholder="Filtrar por projeto..."
-          />
-        </div>
-
-        <div className="filter-group">
-          <label>Estrelas:</label>
-          <select
-            value={filter.estrelas}
-            onChange={(e) => setFilter(prev => ({ ...prev, estrelas: parseInt(e.target.value) || 0 }))}
-          >
-            <option value={0}>Todas</option>
-            <option value={5}>5 ⭐</option>
-            <option value={4}>4 ⭐</option>
-            <option value={3}>3 ⭐</option>
-            <option value={2}>2 ⭐</option>
-            <option value={1}>1 ⭐</option>
-          </select>
-        </div>
-
-        <button onClick={loadFeedbacks} className="refresh-btn">
-          🔄 Atualizar
-        </button>
-        
-        <button 
-          onClick={() => setShowDeleteConfirm(true)} 
-          className="delete-all-btn"
-          disabled={filteredFeedbacks.length === 0}
-          title="Apagar todas as pesquisas"
-        >
-          🗑️ Apagar Todas
-        </button>
-      </div>
-
-      <div className="feedbacks-list">
-        {filteredFeedbacks.length === 0 ? (
-          <div className="no-feedbacks">
-            <div className="no-data-icon">📝</div>
-            <p>Nenhuma pesquisa de satisfação encontrada</p>
-          </div>
-        ) : (
-          filteredFeedbacks.map((feedback) => (
-            <div key={feedback.id} className="feedback-card">
-              <div className="feedback-header">
-                <div className="feedback-info">
-                  <h3>{feedback.nome_cliente}</h3>
-                  <div className="feedback-meta">
-                    <span className="empresa">{feedback.empresa}</span>
-                    <span className="projeto">{feedback.projeto}</span>
-                    <span className="date">{formatDate(feedback.timestamp)}</span>
-                  </div>
+          {/* Modal de confirmação para deletar */}
+          {showDeleteConfirm && (
+            <div className="delete-confirm-overlay">
+              <div className="delete-confirm-modal">
+                <div className="delete-confirm-header">
+                  <h3>⚠️ Confirmar Exclusão</h3>
                 </div>
-                <div className="feedback-actions">
-                  <div className="feedback-rating">
-                    {renderStars(feedback.estrelas)}
-                  </div>
+                <div className="delete-confirm-content">
+                  <p>
+                    Tem certeza que deseja apagar <strong>todas as {feedbacks.length} pesquisas</strong> de
+                    satisfação?
+                  </p>
+                  <p className="warning-text">Esta ação não pode ser desfeita!</p>
+                </div>
+                <div className="delete-confirm-actions">
                   <button
-                    onClick={() => handleDeleteSingleFeedback(feedback.id)}
-                    className="delete-feedback-btn"
-                    disabled={deletingFeedbackId === feedback.id}
-                    title="Apagar esta pesquisa"
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="cancel-delete-btn"
+                    disabled={isDeleting}
                   >
-                    {deletingFeedbackId === feedback.id ? '⏳' : '🗑️'}
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleDeleteAllFeedbacks}
+                    className="confirm-delete-btn"
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? '⏳ Apagando...' : '🗑️ Apagar Todas'}
                   </button>
                 </div>
               </div>
-              
-              {feedback.comentario && (
-                <div className="feedback-comment">
-                  <p>"{feedback.comentario}"</p>
-                </div>
-              )}
             </div>
-          ))
-        )}
-      </div>
-
-      {/* Modal de confirmação para deletar */}
-      {showDeleteConfirm && (
-        <div className="delete-confirm-overlay">
-          <div className="delete-confirm-modal">
-            <div className="delete-confirm-header">
-              <h3>⚠️ Confirmar Exclusão</h3>
-            </div>
-            <div className="delete-confirm-content">
-              <p>Tem certeza que deseja apagar <strong>todas as {feedbacks.length} pesquisas</strong> de satisfação?</p>
-              <p className="warning-text">Esta ação não pode ser desfeita!</p>
-            </div>
-            <div className="delete-confirm-actions">
-              <button 
-                onClick={() => setShowDeleteConfirm(false)}
-                className="cancel-delete-btn"
-                disabled={isDeleting}
-              >
-                Cancelar
-              </button>
-              <button 
-                onClick={handleDeleteAllFeedbacks}
-                className="confirm-delete-btn"
-                disabled={isDeleting}
-              >
-                {isDeleting ? '⏳ Apagando...' : '🗑️ Apagar Todas'}
-              </button>
-            </div>
-          </div>
+          )}
         </div>
-      )}
+      </main>
     </div>
   );
 };

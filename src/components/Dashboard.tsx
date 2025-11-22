@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DemandCard, { type Demand } from './DemandCard';
 import Modal from './Modal';
 import NewDemandForm from './NewDemandForm';
 import EditDemandForm from './EditDemandForm';
 import ConfirmDialog from './ConfirmDialog';
 import Loading from './Loading';
-import FinancialView from './FinancialView';
 import { jsonbinClient, type Developer } from '../utils/jsonbin-client';
 import './Dashboard.css';
 
@@ -14,10 +14,8 @@ interface DashboardProps {
   currentUser: Developer;
   onOpenSidebar?: () => void;
 }
-
-
 const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => {
-  const [currentView, setCurrentView] = useState<'dashboard' | 'financial'>('dashboard');
+  const navigate = useNavigate();
   const [selectedDev, setSelectedDev] = useState<string>(currentUser.name);
   const [selectedProject, setSelectedProject] = useState<string>('Todos');
   const [selectedStatus, setSelectedStatus] = useState<string>('Todos');
@@ -58,6 +56,7 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
           setProjects(config.projects || []);
           setPriorities(config.priorities || []);
           setDemands(demands);
+          setSelectedDev(currentUser.name);
           setIsLoading(false);
           
           // Limpar dados pré-carregados após uso
@@ -144,6 +143,15 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
     ? Math.round((statusCounts.concluido / demandsForStats.length) * 100) 
     : 0;
 
+  const isConfigLoading = !devs.length || !projects.length || !priorities.length;
+
+  // Marca todos os itens de checklist da descrição como concluídos (- [x])
+  const markAllChecklistDone = (description: string): string => {
+    if (!description) return '';
+    // Substitui qualquer "- [ ]" ou "- [x]" (maiúsculo/minúsculo) por "- [x]"
+    return description.replace(/-\s*\[(?:x|X|\s)\]/g, '- [x]');
+  };
+
   const showSuccessNotification = (message: string) => {
     setSuccessMessage(message);
     setShowSuccess(true);
@@ -206,7 +214,9 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
   const handleCompleteDemand = async (updatedDemand: Demand) => {
     setCompletingId(updatedDemand.id);
     try {
-      const saved = await jsonbinClient.updateDemand(updatedDemand);
+      const descricaoMarcada = markAllChecklistDone(updatedDemand.descricao);
+      const payload: Demand = { ...updatedDemand, descricao: descricaoMarcada };
+      const saved = await jsonbinClient.updateDemand(payload);
       setDemands(prev => prev.map(d => d.id === saved.id ? saved : d));
       showSuccessNotification('Demanda concluída com sucesso!');
     } finally {
@@ -231,18 +241,6 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
       }
     }
   };
-
-
-  // Renderização condicional baseada na view atual
-  if (currentView === 'financial') {
-    return (
-      <FinancialView 
-        onBack={() => setCurrentView('dashboard')}
-        onLogout={onLogout}
-      />
-    );
-  }
-
   return (
     <div className="dashboard">
       <header className="dashboard-header" role="banner">
@@ -270,14 +268,6 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
             <div className="user-info">
               <span className="user-name">Olá, {currentUser.name}</span>
             </div>
-            <button 
-              onClick={() => setCurrentView('financial')}
-              className="financial-button"
-              aria-label="Visualização financeira"
-              title="Financeiro"
-            >
-              💰
-            </button>
             <button 
               onClick={onLogout} 
               className="logout-button"
@@ -372,13 +362,20 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
                     value={selectedDev}
                     onChange={(e) => setSelectedDev(e.target.value)}
                     className="dev-filter"
+                    disabled={isConfigLoading}
                   >
-                    <option value="Todos">Todos</option>
-                    {devs.map((dev) => (
-                      <option key={dev} value={dev}>
-                        {dev}
-                      </option>
-                    ))}
+                    {isConfigLoading ? (
+                      <option value={selectedDev}>Carregando...</option>
+                    ) : (
+                      <>
+                        <option value="Todos">Todos</option>
+                        {devs.map((dev) => (
+                          <option key={dev} value={dev}>
+                            {dev}
+                          </option>
+                        ))}
+                      </>
+                    )}
                   </select>
                 </div>
 
@@ -389,11 +386,18 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
                     value={selectedProject}
                     onChange={(e) => setSelectedProject(e.target.value)}
                     className="project-filter"
+                    disabled={isConfigLoading}
                   >
-                    <option value="Todos">Todos</option>
-                    {projects.map((project) => (
-                      <option key={project} value={project}>{project}</option>
-                    ))}
+                    {isConfigLoading ? (
+                      <option value={selectedProject}>Carregando...</option>
+                    ) : (
+                      <>
+                        <option value="Todos">Todos</option>
+                        {projects.map((project) => (
+                          <option key={project} value={project}>{project}</option>
+                        ))}
+                      </>
+                    )}
                   </select>
                 </div>
                 
@@ -418,11 +422,18 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
                     value={selectedPriority}
                     onChange={(e) => setSelectedPriority(e.target.value)}
                     className="priority-filter"
+                    disabled={isConfigLoading}
                   >
-                    <option value="Todas">Todas</option>
-                    {priorities && priorities.map((p) => (
-                      <option key={p} value={p}>{p}</option>
-                    ))}
+                    {isConfigLoading ? (
+                      <option value={selectedPriority}>Carregando...</option>
+                    ) : (
+                      <>
+                        <option value="Todas">Todas</option>
+                        {priorities && priorities.map((p) => (
+                          <option key={p} value={p}>{p}</option>
+                        ))}
+                      </>
+                    )}
                   </select>
                 </div>
               </div>

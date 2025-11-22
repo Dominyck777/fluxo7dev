@@ -1,6 +1,7 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { type Demand } from './DemandCard';
 import ExpandedDescriptionModal from './ExpandedDescriptionModal';
+import ChecklistDescription from './ChecklistDescription';
 import './NewDemandForm.css';
 
 interface EditDemandFormProps {
@@ -17,6 +18,9 @@ const EditDemandForm = ({ demand, onSubmit, onCancel, devs, projects, priorities
   const [formData, setFormData] = useState<Demand>(demand);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [isAddingItem, setIsAddingItem] = useState(false);
+  const [newItemText, setNewItemText] = useState('');
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -53,6 +57,44 @@ const EditDemandForm = ({ demand, onSubmit, onCancel, devs, projects, priorities
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
+  };
+
+  // Atalhos de teclado: ESC para cancelar, Ctrl+Enter para salvar
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onCancel();
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        const form = document.querySelector('.new-demand-form') as HTMLFormElement | null;
+        if (form) {
+          form.requestSubmit();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onCancel]);
+
+  const handleAddChecklistItem = () => {
+    if (!newItemText.trim()) return;
+
+    const newItem = `- [ ] ${newItemText.trim()}`;
+    const base = formData.descricao?.trimEnd();
+    const updatedDescription = base ? `${base}\n${newItem}` : newItem;
+
+    handleChange('descricao', updatedDescription);
+    setNewItemText('');
+    setIsAddingItem(false);
+  };
+
+  const handleCancelAddItem = () => {
+    setNewItemText('');
+    setIsAddingItem(false);
   };
 
   return (
@@ -108,24 +150,92 @@ const EditDemandForm = ({ demand, onSubmit, onCancel, devs, projects, priorities
         <label htmlFor="descricao">
           Descrição <span className="required">*</span>
         </label>
-        <div className="textarea-container">
-          <textarea
-            id="descricao"
-            placeholder="Descreva a demanda..."
-            value={formData.descricao}
-            onChange={(e) => handleChange('descricao', e.target.value)}
-            className={errors.descricao ? 'error' : ''}
-            rows={5}
-          />
-          <button
-            type="button"
-            onClick={() => setIsDescriptionModalOpen(true)}
-            className="fullscreen-btn"
-            title="Expandir para tela cheia"
+
+        {isEditingDescription ? (
+          <div className="textarea-container">
+            <textarea
+              id="descricao"
+              placeholder="Descreva a demanda..."
+              value={formData.descricao}
+              onChange={(e) => handleChange('descricao', e.target.value)}
+              className={errors.descricao ? 'error' : ''}
+              rows={5}
+            />
+            <button
+              type="button"
+              onClick={() => setIsDescriptionModalOpen(true)}
+              className="fullscreen-btn"
+              title="Expandir para tela cheia"
+            >
+              ◰
+            </button>
+          </div>
+        ) : (
+          <div
+            className="description-viewer"
+            onClick={() => setIsEditingDescription(true)}
           >
-            ◰
-          </button>
+            <ChecklistDescription
+              description={formData.descricao}
+              demandId={formData.id}
+              onUpdate={(updated) => handleChange('descricao', updated)}
+              isExpanded={true}
+              showProgressOnly={false}
+            />
+          </div>
+        )}
+
+        <div className="add-item-section">
+          {!isAddingItem ? (
+            <button
+              type="button"
+              onClick={() => setIsAddingItem(true)}
+              className="btn-add-item"
+              title="Adicionar novo item de checklist"
+            >
+              ➕ Adicionar item
+            </button>
+          ) : (
+            <div className="add-item-form">
+              <input
+                type="text"
+                value={newItemText}
+                onChange={(e) => setNewItemText(e.target.value)}
+                placeholder="Digite o nome do item..."
+                className="add-item-input"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddChecklistItem();
+                  } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    handleCancelAddItem();
+                  }
+                }}
+              />
+              <div className="add-item-actions">
+                <button
+                  type="button"
+                  onClick={handleAddChecklistItem}
+                  className="btn-confirm-item"
+                  title="Adicionar item (Enter)"
+                >
+                  ✓
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancelAddItem}
+                  className="btn-cancel-item"
+                  title="Cancelar (Esc)"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          )}
         </div>
+
         {errors.descricao && (
           <span className="error-text">{errors.descricao}</span>
         )}
@@ -167,12 +277,14 @@ const EditDemandForm = ({ demand, onSubmit, onCancel, devs, projects, priorities
           className="btn-cancel"
         >
           Cancelar
+          <span className="keyboard-badge">ESC</span>
         </button>
         <button
           type="submit"
           className="btn-submit"
         >
           Salvar Alterações
+          <span className="keyboard-badge">Ctrl+Enter</span>
         </button>
       </div>
         </form>

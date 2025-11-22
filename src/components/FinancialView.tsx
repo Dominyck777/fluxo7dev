@@ -10,14 +10,15 @@ export interface Transaction {
   description: string;
   project: string;
   date: string;
+  isMonthly?: boolean;
 }
 
 interface FinancialViewProps {
-  onBack: () => void;
+  onOpenSidebar?: () => void;
   onLogout: () => void;
 }
 
-const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
+const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [projects, setProjects] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -78,20 +79,27 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
   }, []);
 
 
-  // Calcular totais do mês atual
-  const currentMonth = new Date().getMonth();
-  const currentYear = new Date().getFullYear();
-  
-  const currentMonthTransactions = transactions.filter(t => {
+  // Calcular totais considerando as movimentações recentes (últimos ~30 dias)
+  const now = new Date();
+  const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
+  const recentTransactions = transactions.filter(t => {
     const transactionDate = new Date(t.date);
-    return transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear;
+    const diff = now.getTime() - transactionDate.getTime();
+    return diff >= 0 && diff <= THIRTY_DAYS_MS;
   });
 
-  const totalEntradas = currentMonthTransactions
+  const historicalTransactions = transactions.filter(t => {
+    const transactionDate = new Date(t.date);
+    const diff = now.getTime() - transactionDate.getTime();
+    return diff > THIRTY_DAYS_MS;
+  });
+
+  const totalEntradas = recentTransactions
     .filter(t => t.type === 'Entrada')
     .reduce((sum, t) => sum + t.value, 0);
 
-  const totalSaidas = currentMonthTransactions
+  const totalSaidas = recentTransactions
     .filter(t => t.type === 'Saída')
     .reduce((sum, t) => sum + t.value, 0);
 
@@ -207,6 +215,21 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
     }
   };
 
+  const handleTogglePaid = async (transaction: Transaction) => {
+    const updated: Transaction = { ...transaction, isPaid: !transaction.isPaid };
+
+    // Atualiza otimistamente no estado local
+    setTransactions(prev => prev.map(t => t.id === updated.id ? updated : t));
+
+    try {
+      await jsonbinClient.updateTransaction(updated);
+    } catch (error) {
+      console.error('Erro ao atualizar status de pagamento:', error);
+      alert('Erro ao atualizar status de pagamento. Tente novamente.');
+      // Opcional: poderia reverter o estado aqui se necessário
+    }
+  };
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -218,32 +241,42 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
   };
-
-
+  
   return (
     <div className="financial-view">
       <header className="financial-header">
-        <button 
-          onClick={onBack}
-          className="back-button"
-          aria-label="Voltar ao dashboard"
-        >
-          ← Voltar
-        </button>
-        <h1 className="financial-title">💰 Financeiro</h1>
-        <button 
-          onClick={onLogout}
-          className="logout-button"
-          aria-label="Sair do sistema"
-        >
-          🚪 Sair
-        </button>
+        <div className="header-content">
+          <span
+            className={`header-icon ${onOpenSidebar ? 'clickable' : ''}`}
+            onClick={onOpenSidebar}
+            title={onOpenSidebar ? 'Abrir menu' : ''}
+            style={{ cursor: onOpenSidebar ? 'pointer' : 'default' }}
+          >
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="3" width="18" height="18" rx="2" stroke="#f05902" strokeWidth="2"/>
+              <path d="M8 8L10 10L8 12" stroke="#ffaa33" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 12H16" stroke="#91b0b0" strokeWidth="2" strokeLinecap="round"/>
+              <circle cx="18" cy="18" r="4" fill="#1a1a1a" stroke="#f05902" strokeWidth="1.5"/>
+              <path d="M18 16V20M16 18H20" stroke="#ffaa33" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </span>
+          <h1 className="financial-title">Financeiro</h1>
+          <div className="header-user-section">
+            <button 
+              onClick={onLogout}
+              className="logout-button"
+              aria-label="Sair do sistema"
+            >
+              🚪 Sair
+            </button>
+          </div>
+        </div>
       </header>
 
       <div className="financial-content">
         <div className="financial-summary">
           <div className="summary-card entradas-card">
-            <div className="card-icon">💵</div>
+            <div className="card-icon entrada-icon">📈</div>
             <div className="card-content">
               <h3>Total de Entradas</h3>
               <div className="card-number">{formatCurrency(totalEntradas)}</div>
@@ -251,7 +284,7 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
           </div>
           
           <div className="summary-card saidas-card">
-            <div className="card-icon">💸</div>
+            <div className="card-icon saida-icon">📉</div>
             <div className="card-content">
               <h3>Total de Saídas</h3>
               <div className="card-number">{formatCurrency(totalSaidas)}</div>
@@ -281,14 +314,17 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
             onClick={() => setIsModalOpen(true)}
             className="new-transaction-button"
           >
-            ➕💰 Nova Movimentação
+            + Nova Movimentação
           </button>
         </div>
 
-        {/* Lista de Movimentações */}
+        {/* Lista de Movimentações (últimos 30 dias) */}
         <div className="transactions-section">
           <div className="section-header">
-            <h2 className="section-title">Movimentações do Mês</h2>
+            <div>
+              <h2 className="section-title">Movimentações Recentes (últimos 30 dias)</h2>
+              <p className="section-subtitle">Considera apenas movimentações dos últimos 30 dias. Entradas, saídas, lucro e gráficos usam este período.</p>
+            </div>
             <button 
               onClick={refreshTransactions}
               className="refresh-transactions-button"
@@ -315,13 +351,13 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
                 </div>
               ))}
             </div>
-          ) : currentMonthTransactions.length === 0 ? (
+          ) : recentTransactions.length === 0 ? (
             <div className="empty-state">
-              <p>Nenhuma movimentação encontrada para este mês.</p>
+              <p>Nenhuma movimentação encontrada nos últimos 30 dias.</p>
             </div>
           ) : (
             <div className="transactions-list">
-              {currentMonthTransactions.map(transaction => (
+              {recentTransactions.map(transaction => (
                 <div 
                   key={transaction.id} 
                   className={`transaction-item ${transaction.type.toLowerCase()}`}
@@ -330,14 +366,21 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
                 >
                   <div className="transaction-actions">
                     <button 
-                      onClick={() => handleEditTransaction(transaction)}
+                      onClick={(e) => { e.stopPropagation(); handleTogglePaid(transaction); }}
+                      className="transaction-action-btn edit-btn"
+                      title={transaction.isPaid ? 'Marcar como em aberto' : 'Marcar como paga'}
+                    >
+                      {transaction.isPaid ? '💸' : '✅'}
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleEditTransaction(transaction); }}
                       className="transaction-action-btn edit-btn"
                       title="Editar movimentação"
                     >
                       ✏️
                     </button>
                     <button 
-                      onClick={() => handleDeleteTransaction(transaction.id)}
+                      onClick={(e) => { e.stopPropagation(); handleDeleteTransaction(transaction.id); }}
                       className="transaction-action-btn delete-btn"
                       title="Excluir movimentação"
                     >
@@ -360,7 +403,7 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
                     {formatCurrency(transaction.value)}
                   </div>
                   <div className="transaction-date">
-                    {formatDate(transaction.date)}
+                    {formatDate(transaction.date)}{transaction.isPaid ? ' - Pago' : ''}
                   </div>
                 </div>
               ))}
@@ -408,7 +451,9 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
                     <div 
                       className="bar-fill entrada-fill"
                       style={{
-                        height: `${totalEntradas > 0 ? Math.max((totalEntradas / Math.max(totalEntradas, totalSaidas)) * 100, 10) : 0}%`
+                        height: totalEntradas === 0 ? '0%' : 
+                                totalSaidas === 0 ? '85%' :
+                                `${Math.max((totalEntradas / Math.max(totalEntradas, totalSaidas)) * 85, 20)}%`
                       }}
                     ></div>
                     <span className="bar-label">Entradas</span>
@@ -418,7 +463,9 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
                     <div 
                       className="bar-fill saida-fill"
                       style={{
-                        height: `${totalSaidas > 0 ? Math.max((totalSaidas / Math.max(totalEntradas, totalSaidas)) * 100, 10) : 0}%`
+                        height: totalSaidas === 0 ? '0%' : 
+                                totalEntradas === 0 ? '85%' :
+                                `${Math.max((totalSaidas / Math.max(totalEntradas, totalSaidas)) * 85, 20)}%`
                       }}
                     ></div>
                     <span className="bar-label">Saídas</span>
@@ -429,6 +476,69 @@ const FinancialView = ({ onBack, onLogout }: FinancialViewProps) => {
             </div>
           </div>
         </div>
+
+        {/* Histórico de Movimentações (anteriores a 30 dias) */}
+        {historicalTransactions.length > 0 && (
+          <div className="transactions-section history-section">
+            <div className="section-header">
+              <div>
+                <h2 className="section-title">Histórico de Movimentações</h2>
+                <p className="section-subtitle">Movimentações com mais de 30 dias. Não entram nos totais nem nos gráficos atuais.</p>
+              </div>
+            </div>
+            <div className="transactions-list">
+              {historicalTransactions.map(transaction => (
+                <div 
+                  key={transaction.id} 
+                  className={`transaction-item ${transaction.type.toLowerCase()}`}
+                  onClick={() => handleEditTransaction(transaction)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="transaction-actions">
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleTogglePaid(transaction); }}
+                      className="transaction-action-btn edit-btn"
+                      title={transaction.isPaid ? 'Marcar como em aberto' : 'Marcar como paga'}
+                    >
+                      {transaction.isPaid ? '💸' : '✅'}
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleEditTransaction(transaction); }}
+                      className="transaction-action-btn edit-btn"
+                      title="Editar movimentação"
+                    >
+                      ✏️
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleDeleteTransaction(transaction.id); }}
+                      className="transaction-action-btn delete-btn"
+                      title="Excluir movimentação"
+                    >
+                      ❌
+                    </button>
+                  </div>
+                  <div className="transaction-icon">
+                    {transaction.type === 'Entrada' ? '💵' : '💸'}
+                  </div>
+                  <div className="transaction-details">
+                    <div className="transaction-description">
+                      {transaction.description}
+                    </div>
+                    <div className="transaction-project">
+                      {transaction.project}
+                    </div>
+                  </div>
+                  <div className="transaction-value">
+                    {formatCurrency(transaction.value)}
+                  </div>
+                  <div className="transaction-date">
+                    {formatDate(transaction.date)}{transaction.isPaid ? ' - Pago' : ''}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modal Nova Movimentação */}
@@ -549,6 +659,7 @@ const NewTransactionForm = ({ onSubmit, onCancel, isLoading = false, projects }:
   const [value, setValue] = useState('');
   const [description, setDescription] = useState('');
   const [project, setProject] = useState('');
+  const [isMonthly, setIsMonthly] = useState(false);
 
   // Função para formatar valor como moeda
   const formatCurrencyInput = (value: string) => {
@@ -599,7 +710,8 @@ const NewTransactionForm = ({ onSubmit, onCancel, isLoading = false, projects }:
       value: numericValue,
       description,
       project,
-      date: new Date().toISOString()
+      date: new Date().toISOString(),
+      isMonthly
     });
   };
 
@@ -666,6 +778,18 @@ const NewTransactionForm = ({ onSubmit, onCancel, isLoading = false, projects }:
         </select>
       </div>
 
+      <div className="recurring-group">
+        <label className="recurring-label">
+          <input
+            type="checkbox"
+            className="recurring-checkbox"
+            checked={isMonthly}
+            onChange={(e) => setIsMonthly(e.target.checked)}
+          />
+          <span className="recurring-text">📅 Movimentação mensal (paga uma vez por mês)</span>
+        </label>
+      </div>
+
       <div className="form-actions">
         <button type="button" onClick={onCancel} className="cancel-button">
           Cancelar
@@ -711,6 +835,7 @@ const EditTransactionForm = ({ transaction, onSubmit, onCancel, isLoading = fals
   });
   const [description, setDescription] = useState(transaction.description);
   const [project, setProject] = useState(transaction.project);
+  const [isMonthly, setIsMonthly] = useState(!!transaction.isMonthly);
 
   // Função para formatar valor como moeda
   const formatCurrencyInput = (value: string) => {
@@ -754,7 +879,8 @@ const EditTransactionForm = ({ transaction, onSubmit, onCancel, isLoading = fals
       type,
       value: numericValue,
       description,
-      project
+      project,
+      isMonthly
     });
   };
 
@@ -819,6 +945,18 @@ const EditTransactionForm = ({ transaction, onSubmit, onCancel, isLoading = fals
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="recurring-group">
+        <label className="recurring-label">
+          <input
+            type="checkbox"
+            className="recurring-checkbox"
+            checked={isMonthly}
+            onChange={(e) => setIsMonthly(e.target.checked)}
+          />
+          <span className="recurring-text">📅 Movimentação mensal (paga uma vez por mês)</span>
+        </label>
       </div>
 
       <div className="form-actions">

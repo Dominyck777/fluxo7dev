@@ -10,7 +10,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   display: flex;
   flex-direction: column;
-  min-height: 200px;
+  min-height: 230px;
 }
 
 .demand-card:hover {
@@ -18,9 +18,8 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
-/* Ativar scroll na descrição quando hover no card */
+/* Ativar scroll na descrição quando hover no card (sem mudar a altura) */
 .demand-card:hover .description-container {
-  max-height: 120px;
   overflow-y: auto;
   padding-right: 8px;
   padding-bottom: 12px;
@@ -212,8 +211,23 @@
   flex-direction: column;
   gap: 0.5rem;
   position: relative;
-  /* Altura automática para mostrar texto completo */
+  /* Altura limitada por padrão (fechada) */
+  max-height: 160px;
+  overflow: hidden;
   transition: all 0.3s ease;
+}
+
+.description-container.expanded {
+  max-height: none;
+  overflow: visible;
+  padding-right: 0;
+  padding-bottom: 0;
+}
+
+.demand-card:hover .description-container.expanded {
+  overflow: visible;
+  padding-right: 0;
+  padding-bottom: 0;
 }
 
 .project-description {

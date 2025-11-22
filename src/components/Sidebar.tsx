@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { type Developer } from '../utils/jsonbin-client';
 import './Sidebar.css';
 
@@ -13,6 +14,17 @@ interface SidebarProps {
 type ActiveTab = 'dashboard' | 'financial' | 'satisfaction';
 
 const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) => {
+  const location = useLocation();
+
+  let currentTab: ActiveTab = 'dashboard';
+  if (location.pathname.startsWith('/financeiro')) {
+    currentTab = 'financial';
+  } else if (location.pathname.startsWith('/feedbacks')) {
+    currentTab = 'satisfaction';
+  } else {
+    currentTab = 'dashboard';
+  }
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -57,7 +69,7 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
 
         <nav className="sidebar-nav">
           <button
-            className="sidebar-tab"
+            className={`sidebar-tab ${currentTab === 'dashboard' ? 'active' : ''}`}
             onClick={() => handleTabClick('dashboard')}
           >
             <span className="tab-icon">📊</span>
@@ -65,7 +77,7 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
           </button>
           
           <button
-            className="sidebar-tab"
+            className={`sidebar-tab ${currentTab === 'financial' ? 'active' : ''}`}
             onClick={() => handleTabClick('financial')}
           >
             <span className="tab-icon">💰</span>
@@ -73,11 +85,11 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
           </button>
           
           <button
-            className="sidebar-tab"
+            className={`sidebar-tab ${currentTab === 'satisfaction' ? 'active' : ''}`}
             onClick={() => handleTabClick('satisfaction')}
           >
             <span className="tab-icon">⭐</span>
-            <span className="tab-label">Pesquisa de Satisfação</span>
+            <span className="tab-label">Feedbacks</span>
           </button>
         </nav>
 

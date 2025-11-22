@@ -81,6 +81,22 @@
   line-height: 1.5;
 }
 
+.description-viewer {
+  width: 100%;
+  min-height: 120px;
+  padding: 0.85rem;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 107, 0, 0.3);
+  background-color: rgba(20, 20, 20, 0.8);
+  cursor: text;
+  transition: all 0.3s ease;
+}
+
+.description-viewer:hover {
+  border-color: rgba(255, 107, 0, 0.5);
+  background-color: rgba(30, 30, 30, 0.9);
+}
+
 /* Container para textarea com botão de tela cheia */
 .textarea-container {
   position: relative;

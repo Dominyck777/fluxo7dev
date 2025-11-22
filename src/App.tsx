@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import FinancialView from './components/FinancialView';
@@ -9,13 +10,11 @@ import { type Developer } from './utils/jsonbin-client';
 const AUTH_KEY = 'fluxo7dev_auth';
 const USER_KEY = 'fluxo7dev_user';
 
-type ActiveView = 'dashboard' | 'financial' | 'satisfaction';
-
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState<Developer | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeView, setActiveView] = useState<ActiveView>('dashboard');
+  const navigate = useNavigate();
 
   // Carrega estado de autenticação do localStorage ao montar
   // Mantém o usuário logado mesmo após fechar o navegador
@@ -42,6 +41,7 @@ function App() {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
     setCurrentUser(user);
     setIsAuthenticated(true);
+    navigate('/demandas');
   };
 
   const handleLogout = () => {
@@ -49,47 +49,23 @@ function App() {
     localStorage.removeItem(USER_KEY);
     setCurrentUser(null);
     setIsAuthenticated(false);
-    setActiveView('dashboard'); // Reset para dashboard ao fazer logout
+    navigate('/');
   };
 
-  const handleNavigate = (view: ActiveView) => {
-    setActiveView(view);
-  };
-
-  const renderCurrentView = () => {
-    if (!currentUser) return null;
-    
-    switch (activeView) {
+  const handleNavigate = (tab: 'dashboard' | 'financial' | 'satisfaction') => {
+    switch (tab) {
       case 'dashboard':
-        return (
-          <Dashboard 
-            onLogout={handleLogout} 
-            currentUser={currentUser} 
-            onOpenSidebar={() => setIsSidebarOpen(true)}
-          />
-        );
+        navigate('/demandas');
+        break;
       case 'financial':
-        return (
-          <FinancialView 
-            onBack={() => setActiveView('dashboard')} 
-            onLogout={handleLogout} 
-          />
-        );
+        navigate('/financeiro');
+        break;
       case 'satisfaction':
-        return (
-          <SatisfactionSurvey 
-            onBack={() => setActiveView('dashboard')} 
-            onLogout={handleLogout} 
-          />
-        );
+        navigate('/feedbacks');
+        break;
       default:
-        return (
-          <Dashboard 
-            onLogout={handleLogout} 
-            currentUser={currentUser} 
-            onOpenSidebar={() => setIsSidebarOpen(true)}
-          />
-        );
+        navigate('/demandas');
+        break;
     }
   };
 
@@ -130,7 +106,38 @@ function App() {
     <>
       {isAuthenticated && currentUser ? (
         <>
-          {renderCurrentView()}
+          <Routes>
+            <Route
+              path="/demandas"
+              element={
+                <Dashboard 
+                  onLogout={handleLogout} 
+                  currentUser={currentUser} 
+                  onOpenSidebar={() => setIsSidebarOpen(true)}
+                />
+              }
+            />
+            <Route
+              path="/financeiro"
+              element={
+                <FinancialView 
+                  onOpenSidebar={() => setIsSidebarOpen(true)} 
+                  onLogout={handleLogout} 
+                />
+              }
+            />
+            <Route
+              path="/feedbacks"
+              element={
+                <SatisfactionSurvey 
+                  onOpenSidebar={() => setIsSidebarOpen(true)} 
+                  onLogout={handleLogout} 
+                />
+              }
+            />
+            <Route path="/" element={<Navigate to="/demandas" replace />} />
+            <Route path="*" element={<Navigate to="/demandas" replace />} />
+          </Routes>
           <Sidebar 
             isOpen={isSidebarOpen} 
             onClose={() => setIsSidebarOpen(false)} 
