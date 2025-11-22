@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import DemandCard, { type Demand } from './DemandCard';
 import Modal from './Modal';
 import NewDemandForm from './NewDemandForm';
@@ -15,7 +14,6 @@ interface DashboardProps {
   onOpenSidebar?: () => void;
 }
 const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => {
-  const navigate = useNavigate();
   const [selectedDev, setSelectedDev] = useState<string>(currentUser.name);
   const [selectedProject, setSelectedProject] = useState<string>('Todos');
   const [selectedStatus, setSelectedStatus] = useState<string>('Todos');
