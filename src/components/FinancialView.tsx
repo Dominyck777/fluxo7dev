@@ -80,20 +80,30 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
   }, []);
 
 
-  // Calcular totais considerando as movimentações recentes (últimos ~30 dias)
+  // Calcular totais considerando as movimentações até o "mesversário"
+  // Exemplo: movimentação em 10/03 fica como recente até 10/04 (inclusive)
   const now = new Date();
-  const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
-  const recentTransactions = transactions.filter(t => {
-    const transactionDate = new Date(t.date);
-    const diff = now.getTime() - transactionDate.getTime();
-    return diff >= 0 && diff <= THIRTY_DAYS_MS;
-  });
+  const isWithinAnniversaryWindow = (transaction: Transaction) => {
+    const transactionDate = new Date(transaction.date);
+    if (isNaN(transactionDate.getTime())) return false;
+
+    const anniversary = new Date(transactionDate);
+    anniversary.setMonth(anniversary.getMonth() + 1);
+
+    return now >= transactionDate && now < anniversary;
+  };
+
+  const recentTransactions = transactions.filter(isWithinAnniversaryWindow);
 
   const historicalTransactions = transactions.filter(t => {
     const transactionDate = new Date(t.date);
-    const diff = now.getTime() - transactionDate.getTime();
-    return diff > THIRTY_DAYS_MS;
+    if (isNaN(transactionDate.getTime())) return false;
+
+    const anniversary = new Date(transactionDate);
+    anniversary.setMonth(anniversary.getMonth() + 1);
+
+    return now >= anniversary;
   });
 
   const totalEntradas = recentTransactions
@@ -319,12 +329,12 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
           </button>
         </div>
 
-        {/* Lista de Movimentações (últimos 30 dias) */}
+        {/* Lista de Movimentações (até o mesversário) */}
         <div className="transactions-section">
           <div className="section-header">
             <div>
-              <h2 className="section-title">Movimentações Recentes (últimos 30 dias)</h2>
-              <p className="section-subtitle">Considera apenas movimentações dos últimos 30 dias. Entradas, saídas, lucro e gráficos usam este período.</p>
+              <h2 className="section-title">Movimentações Recentes (até 1 mês)</h2>
+              <p className="section-subtitle">Considera movimentações desde a data de lançamento até o mesmo dia do mês seguinte. Entradas, saídas, lucro e gráficos usam este período.</p>
             </div>
             <button 
               onClick={refreshTransactions}

@@ -69,11 +69,27 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
     }
   };
 
+  const empresas: string[] = Array.from(
+    new Set(
+      feedbacks
+        .map((f) => f.empresa)
+        .filter((empresa) => empresa && empresa.trim().length > 0)
+    )
+  ).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+  const projetos: string[] = Array.from(
+    new Set(
+      feedbacks
+        .map((f) => f.projeto)
+        .filter((projeto) => projeto && projeto.trim().length > 0)
+    )
+  ).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
   const filteredFeedbacks = feedbacks.filter(feedback => {
-    if (filter.empresa && !feedback.empresa.toLowerCase().includes(filter.empresa.toLowerCase())) {
+    if (filter.empresa && feedback.empresa !== filter.empresa) {
       return false;
     }
-    if (filter.projeto && !feedback.projeto.toLowerCase().includes(filter.projeto.toLowerCase())) {
+    if (filter.projeto && feedback.projeto !== filter.projeto) {
       return false;
     }
     if (filter.estrelas > 0 && feedback.estrelas !== filter.estrelas) {
@@ -364,22 +380,42 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
           <div className="satisfaction-filters">
             <div className="filter-group">
               <label>Empresa:</label>
-              <input
-                type="text"
+              <select
                 value={filter.empresa}
-                onChange={(e) => setFilter((prev) => ({ ...prev, empresa: e.target.value }))}
-                placeholder="Filtrar por empresa..."
-              />
+                onChange={(e) =>
+                  setFilter((prev) => ({
+                    ...prev,
+                    empresa: e.target.value,
+                  }))
+                }
+              >
+                <option value="">Todas</option>
+                {empresas.map((empresa) => (
+                  <option key={empresa} value={empresa}>
+                    {empresa}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="filter-group">
               <label>Projeto:</label>
-              <input
-                type="text"
+              <select
                 value={filter.projeto}
-                onChange={(e) => setFilter((prev) => ({ ...prev, projeto: e.target.value }))}
-                placeholder="Filtrar por projeto..."
-              />
+                onChange={(e) =>
+                  setFilter((prev) => ({
+                    ...prev,
+                    projeto: e.target.value,
+                  }))
+                }
+              >
+                <option value="">Todos</option>
+                {projetos.map((projeto) => (
+                  <option key={projeto} value={projeto}>
+                    {projeto}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="filter-group">
