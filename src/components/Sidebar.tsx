@@ -56,7 +56,15 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
       <div className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-logo">
-            <span className="logo-icon">👨‍💻</span>
+            {user.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.name}
+                className="sidebar-avatar"
+              />
+            ) : (
+              <span className="logo-icon">👨‍💻</span>
+            )}
           </div>
           <button
             className="sidebar-close"
@@ -95,7 +103,15 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
 
         <div className="sidebar-footer">
           <div className="user-info">
-            <span className="user-icon">👤</span>
+            {user.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.name}
+                className="user-avatar"
+              />
+            ) : (
+              <span className="user-icon">👤</span>
+            )}
             <div className="user-details">
               <span className="user-name">{user.name}</span>
               <span className="user-role">{user.role}</span>
