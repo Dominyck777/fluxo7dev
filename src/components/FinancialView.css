@@ -1383,18 +1383,73 @@
   gap: 1rem;
   align-items: center;
   position: relative;
-  padding: 1rem;
+  padding: 1.25rem 1rem 3.5rem 1rem;
   padding-right: 4rem;
   background: rgba(20, 20, 20, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   margin-bottom: 0.75rem;
   transition: all 0.3s ease;
+  min-height: 110px;
 }
 
 .transaction-item:hover {
   border-color: rgba(255, 255, 255, 0.2);
   background: rgba(30, 30, 30, 0.9);
+}
+
+.transaction-pay-button {
+  position: absolute;
+  left: 50%;
+  bottom: 0.9rem;
+  transform: translateX(-50%);
+  padding: 0.55rem 1.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  color: var(--color-white);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 130px;          /* largura fixa para nao "andar" */
+  min-width: 130px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.transaction-item.entrada .transaction-pay-button {
+  border-color: rgba(0, 255, 153, 0.4);
+  color: #00ff99;
+}
+
+.transaction-item.saída .transaction-pay-button {
+  border-color: rgba(255, 77, 77, 0.4);
+  color: #ff4d4d;
+}
+
+.transaction-pay-button:hover {
+  transform: translate(-50%, -1px) scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.transaction-pay-button.paid {
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+  border-color: rgba(34, 197, 94, 0.8);
+  color: #ffffff;
+}
+
+/* Quando for Saída e estiver paga, o texto deve ser branco (sobrepõe o vermelho padrão) */
+.transaction-item.saída .transaction-pay-button.paid {
+  color: #ffffff;
+}
+
+.transaction-pay-button.paid:hover {
+  transform: translate(-50%, -1px) scale(1.03);
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.45);
 }
 
 @media (max-width: 768px) {

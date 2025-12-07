@@ -373,13 +373,6 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
                 >
                   <div className="transaction-actions">
                     <button 
-                      onClick={(e) => { e.stopPropagation(); handleTogglePaid(transaction); }}
-                      className="transaction-action-btn edit-btn"
-                      title={transaction.isPaid ? 'Marcar como em aberto' : 'Marcar como paga'}
-                    >
-                      {transaction.isPaid ? '💸' : '✅'}
-                    </button>
-                    <button 
                       onClick={(e) => { e.stopPropagation(); handleEditTransaction(transaction); }}
                       className="transaction-action-btn edit-btn"
                       title="Editar movimentação"
@@ -410,8 +403,17 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
                     {formatCurrency(transaction.value)}
                   </div>
                   <div className="transaction-date">
-                    {formatDate(transaction.date)}{transaction.isPaid ? ' - Pago' : ''}
+                    {formatDate(transaction.date)}
                   </div>
+                  {transaction.type === 'Saída' && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleTogglePaid(transaction); }}
+                      className={`transaction-pay-button ${transaction.isPaid ? 'paid' : ''}`}
+                      title={transaction.isPaid ? 'Marcar como em aberto' : 'Marcar como paga'}
+                    >
+                      {transaction.isPaid ? 'Pago' : 'Pagar'}
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -503,13 +505,6 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
                 >
                   <div className="transaction-actions">
                     <button 
-                      onClick={(e) => { e.stopPropagation(); handleTogglePaid(transaction); }}
-                      className="transaction-action-btn edit-btn"
-                      title={transaction.isPaid ? 'Marcar como em aberto' : 'Marcar como paga'}
-                    >
-                      {transaction.isPaid ? '💸' : '✅'}
-                    </button>
-                    <button 
                       onClick={(e) => { e.stopPropagation(); handleEditTransaction(transaction); }}
                       className="transaction-action-btn edit-btn"
                       title="Editar movimentação"
@@ -539,8 +534,17 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
                     {formatCurrency(transaction.value)}
                   </div>
                   <div className="transaction-date">
-                    {formatDate(transaction.date)}{transaction.isPaid ? ' - Pago' : ''}
+                    {formatDate(transaction.date)}
                   </div>
+                  {transaction.type === 'Saída' && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleTogglePaid(transaction); }}
+                      className={`transaction-pay-button ${transaction.isPaid ? 'paid' : ''}`}
+                      title={transaction.isPaid ? 'Marcar como em aberto' : 'Marcar como paga'}
+                    >
+                      {transaction.isPaid ? 'Pago' : 'Pagar'}
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
