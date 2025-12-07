@@ -34,6 +34,7 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [completingId, setCompletingId] = useState<string | number | null>(null);
+  const [showUpdateNote, setShowUpdateNote] = useState(true);
 
   // Load devs, projects, demands from preloaded data or API
   useEffect(() => {
@@ -85,6 +86,18 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
       mounted = false;
     };
   }, [currentUser]);
+
+  // Verifica no localStorage se o usuário já fechou a nota de atualização
+  useEffect(() => {
+    try {
+      const dismissed = localStorage.getItem('fluxo7_update_note_dismissed');
+      if (dismissed === 'true') {
+        setShowUpdateNote(false);
+      }
+    } catch (error) {
+      console.error('Erro ao ler estado da nota de atualização:', error);
+    }
+  }, []);
 
   // (Removido) Persistência via localStorage substituída pela API
 
@@ -154,6 +167,15 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
     setSuccessMessage(message);
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 3000);
+  };
+
+  const handleCloseUpdateNote = () => {
+    setShowUpdateNote(false);
+    try {
+      localStorage.setItem('fluxo7_update_note_dismissed', 'true');
+    } catch (error) {
+      console.error('Erro ao salvar estado da nota de atualização:', error);
+    }
   };
 
   const refreshDemands = async () => {
@@ -276,6 +298,22 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
           </div>
         </div>
       </header>
+
+      {showUpdateNote && (
+        <div className="update-note-banner">
+          <span>
+            Atualização: por favor, deslogue e faça login novamente para garantir que todas as alterações sejam aplicadas corretamente.
+          </span>
+          <button
+            type="button"
+            className="update-note-close"
+            onClick={handleCloseUpdateNote}
+            aria-label="Fechar aviso de atualização"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       <main className="dashboard-main" role="main">
         <div className="dashboard-content">

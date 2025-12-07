@@ -32,14 +32,8 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
       }
     };
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
-    }
-
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
 
@@ -65,6 +59,10 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
             ) : (
               <span className="logo-icon">👨‍💻</span>
             )}
+            <div className="sidebar-user-text">
+              <span className="sidebar-user-name">{user.name}</span>
+              <span className="sidebar-user-role">{user.role}</span>
+            </div>
           </div>
           <button
             className="sidebar-close"
@@ -102,21 +100,6 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
         </nav>
 
         <div className="sidebar-footer">
-          <div className="user-info">
-            {user.avatar ? (
-              <img
-                src={user.avatar}
-                alt={user.name}
-                className="user-avatar"
-              />
-            ) : (
-              <span className="user-icon">👤</span>
-            )}
-            <div className="user-details">
-              <span className="user-name">{user.name}</span>
-              <span className="user-role">{user.role}</span>
-            </div>
-          </div>
           <button
             className="logout-btn"
             onClick={onLogout}
