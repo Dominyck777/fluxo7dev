@@ -307,13 +307,15 @@
   background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
   border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  padding: 1.4rem;
+  padding: 1.1rem;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  justify-content: center;
+  gap: 0.5rem;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  min-height: 120px;
+  min-height: 100px;
   height: 100%;
 }
 
@@ -324,12 +326,12 @@
   }
 
   .summary-card {
-    padding: 1.25rem;
-    min-height: 110px;
+    padding: 1.1rem;
+    min-height: 95px;
   }
 
   .summary-card .card-number {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
 }
 
@@ -340,12 +342,12 @@
   }
 
   .summary-card {
-    padding: 1.1rem;
-    min-height: 95px;
+    padding: 1rem;
+    min-height: 85px;
   }
 
   .summary-card .card-number {
-    font-size: 1.75rem;
+    font-size: 1.6rem;
   }
 
   .summary-card .card-content h3 {
@@ -374,7 +376,7 @@
 .entradas-card .card-icon,
 .entrada-icon {
   color: #00ff99;
-  font-size: 2rem;
+  font-size: 1.4rem;
   text-shadow: 0 0 10px rgba(0, 255, 153, 0.5);
 }
 
@@ -394,7 +396,7 @@
 .saidas-card .card-icon,
 .saida-icon {
   color: #ff4d4d;
-  font-size: 2rem;
+  font-size: 1.4rem;
   text-shadow: 0 0 10px rgba(255, 77, 77, 0.5);
 }
 
@@ -433,14 +435,15 @@
 }
 
 .summary-card .card-icon {
-  font-size: 2rem;
+  font-size: 1.6rem;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .summary-card .card-content {
-  flex: 1;
+  flex: 0 1 auto;
+  text-align: center;
 }
 
 .summary-card .card-content h3 {
@@ -970,7 +973,7 @@
   }
   
   .financial-summary {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 1rem;
   }
   

@@ -287,15 +287,13 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
       <div className="financial-content">
         <div className="financial-summary">
           <div className="summary-card entradas-card">
-            <div className="card-icon entrada-icon">📈</div>
             <div className="card-content">
-              <h3>Total de Entradas</h3>
+              <h3> Total Entrada</h3>
               <div className="card-number">{formatCurrency(totalEntradas)}</div>
             </div>
           </div>
           
           <div className="summary-card saidas-card">
-            <div className="card-icon saida-icon">📉</div>
             <div className="card-content">
               <h3>Total de Saídas</h3>
               <div className="card-number">{formatCurrency(totalSaidas)}</div>
@@ -303,7 +301,6 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
           </div>
           
           <div className="summary-card lucro-card">
-            <div className="card-icon">📊</div>
             <div className="card-content">
               <h3>Lucro %</h3>
               <div className="card-number">{lucroPercentual >= 0 ? '+' : ''}{lucroPercentual.toFixed(1)}%</div>
@@ -311,7 +308,6 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
           </div>
           
           <div className="summary-card saldo-card">
-            <div className="card-icon">💰</div>
             <div className="card-content">
               <h3>Saldo Atual</h3>
               <div className="card-number">{formatCurrency(totalEntradas - totalSaidas)}</div>
