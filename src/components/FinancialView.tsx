@@ -268,7 +268,7 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
               className="logout-button"
               aria-label="Sair do sistema"
             >
-              🚪 Sair
+              <span className="emoji-only">🚪</span> Sair
             </button>
           </div>
         </div>
@@ -414,7 +414,7 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
 
         {/* Gráficos */}
         <div className="charts-section">
-          <h2>📊 Visão Geral</h2>
+          <h2 className="charts-title"><span className="emoji-only">📊</span> Visão Geral</h2>
           <div className="charts-grid">
             <div className="chart-card">
               <h3>Distribuição de Movimentações</h3>
