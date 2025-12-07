@@ -11,7 +11,7 @@ interface SidebarProps {
   onNavigate: (tab: ActiveTab) => void;
 }
 
-type ActiveTab = 'dashboard' | 'financial' | 'satisfaction';
+type ActiveTab = 'dashboard' | 'financial' | 'clients' | 'satisfaction';
 
 const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) => {
   const location = useLocation();
@@ -19,6 +19,8 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
   let currentTab: ActiveTab = 'dashboard';
   if (location.pathname.startsWith('/financeiro')) {
     currentTab = 'financial';
+  } else if (location.pathname.startsWith('/clientes')) {
+    currentTab = 'clients';
   } else if (location.pathname.startsWith('/feedbacks')) {
     currentTab = 'satisfaction';
   } else {
@@ -88,6 +90,14 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
           >
             <span className="tab-icon">💰</span>
             <span className="tab-label">Financeiro</span>
+          </button>
+
+          <button
+            className={`sidebar-tab ${currentTab === 'clients' ? 'active' : ''}`}
+            onClick={() => handleTabClick('clients')}
+          >
+            <span className="tab-icon">👥</span>
+            <span className="tab-label">Clientes</span>
           </button>
           
           <button

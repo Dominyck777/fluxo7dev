@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import FinancialView from './components/FinancialView';
+import ClientsView from './components/ClientsView';
 import SatisfactionSurvey from './components/SatisfactionSurvey';
 import Sidebar from './components/Sidebar';
 import { type Developer } from './utils/jsonbin-client';
@@ -52,13 +53,16 @@ function App() {
     navigate('/');
   };
 
-  const handleNavigate = (tab: 'dashboard' | 'financial' | 'satisfaction') => {
+  const handleNavigate = (tab: 'dashboard' | 'financial' | 'clients' | 'satisfaction') => {
     switch (tab) {
       case 'dashboard':
         navigate('/demandas');
         break;
       case 'financial':
         navigate('/financeiro');
+        break;
+      case 'clients':
+        navigate('/clientes');
         break;
       case 'satisfaction':
         navigate('/feedbacks');
@@ -123,6 +127,15 @@ function App() {
                 <FinancialView 
                   onOpenSidebar={() => setIsSidebarOpen(true)} 
                   onLogout={handleLogout} 
+                />
+              }
+            />
+            <Route
+              path="/clientes"
+              element={
+                <ClientsView
+                  onOpenSidebar={() => setIsSidebarOpen(true)}
+                  onLogout={handleLogout}
                 />
               }
             />
