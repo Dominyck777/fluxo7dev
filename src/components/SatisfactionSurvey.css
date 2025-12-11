@@ -623,6 +623,97 @@
   font-size: 0.95rem;
 }
 
+.feedback-conversation {
+  padding: 0.75rem 1.75rem 1.25rem;
+  border-top: 1px solid rgba(255, 107, 0, 0.15);
+  background: radial-gradient(circle at top left, rgba(255, 107, 0, 0.12), transparent 55%);
+}
+
+.conversation-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 107, 0, 0.4);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--color-orange);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.conversation-toggle-btn:hover {
+  background: rgba(255, 107, 0, 0.12);
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.25);
+  transform: translateY(-1px);
+}
+
+.conversation-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-in-out;
+}
+
+.feedback-conversation.expanded .conversation-body {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.conversation-message {
+  padding: 0.45rem 0.75rem;
+  margin-bottom: 0.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.conversation-message.from-user {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.18) 0%, rgba(37, 99, 235, 0.08) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+}
+
+.conversation-message.from-assistant {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.08) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.conversation-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.15rem;
+}
+
+.conversation-from {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.conversation-time {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.conversation-text {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.conversation-empty {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
   .satisfaction-main {

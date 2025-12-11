@@ -20,6 +20,18 @@ interface Client {
 
 const CLIENTS_STORAGE_KEY = 'fluxo7_clients';
 
+const isPastDate = (isoDate: string) => {
+  if (!isoDate) return false;
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) return false;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  date.setHours(0, 0, 0, 0);
+
+  return date < today;
+};
+
 const ClientsView = ({ onOpenSidebar, onLogout }: ClientsViewProps) => {
   const [projects, setProjects] = useState<string[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
@@ -64,15 +76,22 @@ const ClientsView = ({ onOpenSidebar, onLogout }: ClientsViewProps) => {
         const remoteClients = await jsonbinClient.getClients();
         if (!mounted) return;
 
-        const normalizedFromBin: Client[] = remoteClients.map((client) => ({
-          id: String(client.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`),
-          code: client.code || '',
-          name: client.name || '',
-          project: client.project || '',
-          status: client.status ?? 'ativo',
-          activationDate: client.activationDate || '',
-          endDate: client.endDate || '',
-        }));
+        const normalizedFromBin: Client[] = remoteClients.map((client) => {
+          const activationDate = client.activationDate || '';
+          const endDate = client.endDate || '';
+          const baseStatus = client.status ?? 'ativo';
+          const status: 'ativo' | 'pendente' = isPastDate(endDate) ? 'pendente' : baseStatus;
+
+          return {
+            id: String(client.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`),
+            code: client.code || '',
+            name: client.name || '',
+            project: client.project || '',
+            status,
+            activationDate,
+            endDate,
+          };
+        });
 
         setClients(normalizedFromBin);
 
@@ -96,15 +115,22 @@ const ClientsView = ({ onOpenSidebar, onLogout }: ClientsViewProps) => {
         const stored = localStorage.getItem(CLIENTS_STORAGE_KEY);
         if (stored) {
           const parsed = JSON.parse(stored) as Partial<Client>[];
-          const normalized = parsed.map((client) => ({
-            id: client.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-            code: client.code || '',
-            name: client.name || '',
-            project: client.project || '',
-            status: client.status ?? 'ativo',
-            activationDate: client.activationDate || '',
-            endDate: client.endDate || '',
-          }));
+          const normalized = parsed.map((client) => {
+            const activationDate = client.activationDate || '';
+            const endDate = client.endDate || '';
+            const baseStatus = client.status ?? 'ativo';
+            const status: 'ativo' | 'pendente' = isPastDate(endDate) ? 'pendente' : baseStatus;
+
+            return {
+              id: client.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+              code: client.code || '',
+              name: client.name || '',
+              project: client.project || '',
+              status,
+              activationDate,
+              endDate,
+            };
+          });
           if (mounted) {
             setClients(normalized);
             setIsLoading(false);
@@ -157,14 +183,19 @@ const ClientsView = ({ onOpenSidebar, onLogout }: ClientsViewProps) => {
     activationDate: string;
     endDate: string;
   }) => {
+    const activationDate = data.activationDate;
+    const endDate = data.endDate;
+    const baseStatus: 'ativo' | 'pendente' = data.status;
+    const finalStatus: 'ativo' | 'pendente' = isPastDate(endDate) ? 'pendente' : baseStatus;
+
     const newClient: Client = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       code: data.code.trim(),
       name: data.name.trim(),
       project: data.project,
-      status: data.status,
-      activationDate: data.activationDate,
-      endDate: data.endDate,
+      status: finalStatus,
+      activationDate,
+      endDate,
     };
 
     const updated = [newClient, ...clients];
@@ -261,6 +292,15 @@ const ClientsView = ({ onOpenSidebar, onLogout }: ClientsViewProps) => {
                 >
                   <div className="card-header">
                     <span className="developer-badge">{client.name}</span>
+                    <span
+                      className={`status-badge ${
+                        client.status === 'ativo' ? 'status-concluido' : 'status-pendente'
+                      }`}
+                      onClick={() => handleToggleClientStatus(client.id)}
+                      title="Clique para alternar o status deste cliente"
+                    >
+                      {client.status === 'ativo' ? 'Ativo' : 'Pendente'}
+                    </span>
                   </div>
 
                   <div className="card-body">
@@ -284,18 +324,6 @@ const ClientsView = ({ onOpenSidebar, onLogout }: ClientsViewProps) => {
                           Encerramento: {formatDate(client.endDate)}
                         </p>
                       )}
-                    </div>
-
-                    <div className="card-badges">
-                      <span
-                        className={`status-badge ${
-                          client.status === 'ativo' ? 'status-concluido' : 'status-pendente'
-                        }`}
-                        onClick={() => handleToggleClientStatus(client.id)}
-                        title="Clique para alternar o status deste cliente"
-                      >
-                        {client.status === 'ativo' ? 'Ativo' : 'Pendente'}
-                      </span>
                     </div>
                   </div>
                 </div>

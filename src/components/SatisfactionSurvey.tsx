@@ -6,6 +6,12 @@ interface SatisfactionSurveyProps {
   onLogout: () => void;
 }
 
+interface ConversationMessage {
+  ts: string;
+  from: string;
+  text: string;
+}
+
 interface FeedbackData {
   id: string;
   timestamp: string;
@@ -14,10 +20,36 @@ interface FeedbackData {
   empresa: string;
   projeto: string;
   comentario?: string;
+  cod_cliente?: string;
+  conversa?: ConversationMessage[];
 }
 
-interface FeedbackResponse {
-  'feedback-isis': FeedbackData[];
+interface ConversationSession {
+  session_id: string;
+  started_at: string;
+  updated_at: string;
+  empresa: string;
+  software: string;
+  nome_cliente: string;
+  estrelas: number | null;
+  comentario: string | null;
+  conversa: ConversationMessage[];
+}
+
+interface ClientConversations {
+  cod_cliente: string;
+  nome_cliente: string;
+  empresa: string;
+  software: string;
+  conversas: ConversationSession[];
+}
+
+interface FeedbackDBRecord {
+  [codCliente: string]: ClientConversations;
+}
+
+interface ClientsRoot {
+  clientes: FeedbackDBRecord;
 }
 
 const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps) => {
@@ -32,6 +64,7 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingFeedbackId, setDeletingFeedbackId] = useState<string | null>(null);
+  const [expandedConversations, setExpandedConversations] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     loadFeedbacks();
@@ -42,8 +75,8 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
       setIsLoading(true);
       setError('');
       
-      // Buscar dados do feedback-isis no JSONBin
-      const response = await fetch('https://api.jsonbin.io/v3/b/690605e5ae596e708f3c7bc5', {
+      // Buscar dados de conversas/feedbacks no novo JSONBin
+      const response = await fetch('https://api.jsonbin.io/v3/b/693ab980d0ea881f4021e619/latest', {
         headers: {
           'X-Master-Key': '$2a$10$/XmOGvx8./SZzV3qMzQ5i.6FjBjS4toNbeaEFzX2D8QPUddyM6VR2'
         }
@@ -54,13 +87,35 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
       }
 
       const data = await response.json();
-      const feedbackData: FeedbackResponse = data.record;
-      
-      if (feedbackData['feedback-isis']) {
-        setFeedbacks(feedbackData['feedback-isis']);
-      } else {
-        setFeedbacks([]);
-      }
+      const root: ClientsRoot = (data.record as ClientsRoot) || { clientes: {} as FeedbackDBRecord };
+      const db: FeedbackDBRecord = root.clientes || {};
+
+      const sessions: FeedbackData[] = [];
+
+      Object.values(db).forEach((client) => {
+        if (!client || !Array.isArray(client.conversas)) return;
+
+        client.conversas.forEach((session) => {
+          if (session.estrelas == null) {
+            return;
+          }
+
+          sessions.push({
+            id: session.session_id,
+            timestamp: session.updated_at || session.started_at,
+            estrelas: session.estrelas ?? 0,
+            nome_cliente: session.nome_cliente || client.nome_cliente,
+            empresa: session.empresa || client.empresa,
+            projeto: session.software || client.software,
+            comentario: session.comentario || undefined,
+            cod_cliente: client.cod_cliente,
+            conversa: session.conversa || [],
+          });
+        });
+      });
+
+      sessions.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      setFeedbacks(sessions);
     } catch (err) {
       console.error('Erro ao carregar feedbacks:', err);
       setError('Erro ao carregar pesquisas de satisfação');
@@ -155,13 +210,29 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
     return new Date(timestamp).toLocaleString('pt-BR');
   };
 
+  const toggleConversation = (id: string) => {
+    setExpandedConversations((prev) => {
+      const isCurrentlyExpanded = prev[id];
+
+      // Se já está aberto, fecha todos
+      if (isCurrentlyExpanded) {
+        return {};
+      }
+
+      // Abre somente o card clicado e garante que os demais fiquem fechados
+      return {
+        [id]: true,
+      };
+    });
+  };
+
   const handleDeleteAllFeedbacks = async () => {
     try {
       setIsDeleting(true);
       setError('');
       
       // 1. Primeiro, ler a base completa
-      const readResponse = await fetch('https://api.jsonbin.io/v3/b/690605e5ae596e708f3c7bc5/latest', {
+      const readResponse = await fetch('https://api.jsonbin.io/v3/b/693ab980d0ea881f4021e619/latest', {
         headers: {
           'X-Master-Key': '$2a$10$/XmOGvx8./SZzV3qMzQ5i.6FjBjS4toNbeaEFzX2D8QPUddyM6VR2'
         }
@@ -172,13 +243,19 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
       }
 
       const currentData = await readResponse.json();
-      const fullDatabase = currentData.record;
+      const fullDatabase: ClientsRoot = (currentData.record as ClientsRoot) || { clientes: {} as FeedbackDBRecord };
       
       // 2. Limpar apenas os feedbacks, mantendo todo o resto
-      fullDatabase['feedback-isis'] = [];
+      Object.values(fullDatabase.clientes || {}).forEach((client) => {
+        if (!client || !Array.isArray(client.conversas)) return;
+        client.conversas.forEach((session) => {
+          session.estrelas = null;
+          session.comentario = null;
+        });
+      });
       
       // 3. Salvar a base completa de volta
-      const updateResponse = await fetch('https://api.jsonbin.io/v3/b/690605e5ae596e708f3c7bc5', {
+      const updateResponse = await fetch('https://api.jsonbin.io/v3/b/693ab980d0ea881f4021e619', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -207,7 +284,7 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
       setError('');
       
       // 1. Primeiro, ler a base completa
-      const readResponse = await fetch('https://api.jsonbin.io/v3/b/690605e5ae596e708f3c7bc5/latest', {
+      const readResponse = await fetch('https://api.jsonbin.io/v3/b/693ab980d0ea881f4021e619/latest', {
         headers: {
           'X-Master-Key': '$2a$10$/XmOGvx8./SZzV3qMzQ5i.6FjBjS4toNbeaEFzX2D8QPUddyM6VR2'
         }
@@ -218,14 +295,21 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
       }
 
       const currentData = await readResponse.json();
-      const fullDatabase = currentData.record;
+      const fullDatabase: ClientsRoot = (currentData.record as ClientsRoot) || { clientes: {} as FeedbackDBRecord };
       
       // 2. Remover o feedback específico da lista, mantendo todo o resto
-      const updatedFeedbacks = feedbacks.filter(f => f.id !== feedbackId);
-      fullDatabase['feedback-isis'] = updatedFeedbacks;
+      Object.values(fullDatabase.clientes || {}).forEach((client) => {
+        if (!client || !Array.isArray(client.conversas)) return;
+        client.conversas.forEach((session) => {
+          if (session.session_id === feedbackId) {
+            session.estrelas = null;
+            session.comentario = null;
+          }
+        });
+      });
       
       // 3. Salvar a base completa de volta
-      const updateResponse = await fetch('https://api.jsonbin.io/v3/b/690605e5ae596e708f3c7bc5', {
+      const updateResponse = await fetch('https://api.jsonbin.io/v3/b/693ab980d0ea881f4021e619', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -238,6 +322,7 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
         throw new Error('Erro ao atualizar base de dados');
       }
 
+      const updatedFeedbacks = feedbacks.filter(f => f.id !== feedbackId);
       setFeedbacks(updatedFeedbacks);
     } catch (err) {
       console.error('Erro ao deletar feedback:', err);
@@ -497,6 +582,51 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
                       <p>"{feedback.comentario}"</p>
                     </div>
                   )}
+
+                  <div
+                    className={`feedback-conversation ${
+                      expandedConversations[feedback.id] ? 'expanded' : ''
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      className="conversation-toggle-btn"
+                      onClick={() => toggleConversation(feedback.id)}
+                    >
+                      {expandedConversations[feedback.id]
+                        ? '📖 Esconder conversa completa'
+                        : '📋 Abrir conversa completa'}
+                    </button>
+                    <div className="conversation-body">
+                      {feedback.conversa && feedback.conversa.length > 0 ? (
+                        feedback.conversa.map((message) => (
+                          <div
+                            key={message.ts}
+                            className={`conversation-message ${
+                              message.from === 'user' ? 'from-user' : 'from-assistant'
+                            }`}
+                          >
+                            <div className="conversation-meta">
+                              <span className="conversation-from">
+                                {message.from === 'user' ? 'Cliente' : 'Assistente'}
+                              </span>
+                              <span className="conversation-time">
+                                {new Date(message.ts).toLocaleTimeString('pt-BR', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </span>
+                            </div>
+                            <p className="conversation-text">{message.text}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="conversation-empty">
+                          Nenhum histórico de conversa salvo para este feedback.
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               ))
             )}
