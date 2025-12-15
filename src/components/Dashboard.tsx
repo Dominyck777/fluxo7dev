@@ -6,6 +6,7 @@ import EditDemandForm from './EditDemandForm';
 import ConfirmDialog from './ConfirmDialog';
 import Loading from './Loading';
 import { jsonbinClient, type Developer } from '../utils/jsonbin-client';
+import { supabaseDemands } from '../utils/supabase-demands';
 import './Dashboard.css';
 
 interface DashboardProps {
@@ -66,7 +67,7 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
           // Isso só acontece quando o usuário atualiza a página
           const [config, demands] = await Promise.all([
             jsonbinClient.getConfig(),
-            jsonbinClient.getDemands(),
+            supabaseDemands.getDemands(),
           ]);
           if (!mounted) return;
           setDevs(config.devs || []);
@@ -181,7 +182,7 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
   const refreshDemands = async () => {
     setIsLoading(true);
     try {
-      const demandsData = await jsonbinClient.getDemands();
+      const demandsData = await supabaseDemands.getDemands();
       setDemands(demandsData);
     } catch (error) {
       console.error('Erro ao atualizar demandas:', error);
@@ -194,7 +195,7 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
     setIsCreating(true);
     try {
       const payload = { ...newDemand, dataCriacao: new Date().toISOString() };
-      const created = await jsonbinClient.createDemand(payload);
+      const created = await supabaseDemands.createDemand(payload);
       setDemands(prev => [created, ...prev]);
       setIsModalOpen(false);
       showSuccessNotification('Demanda criada com sucesso!');
@@ -211,7 +212,7 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
   const handleUpdateDemand = async (updatedDemand: Demand) => {
     setIsEditing(true);
     try {
-      const saved = await jsonbinClient.updateDemand(updatedDemand);
+      const saved = await supabaseDemands.updateDemand(updatedDemand);
       setDemands(prev => prev.map(d => d.id === saved.id ? saved : d));
       setIsEditModalOpen(false);
       setEditingDemand(null);
@@ -224,7 +225,7 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
   // Função específica para atualizar descrição (checkboxes) sem loading states
   const handleUpdateDescription = async (updatedDemand: Demand) => {
     try {
-      const saved = await jsonbinClient.updateDemand(updatedDemand);
+      const saved = await supabaseDemands.updateDemand(updatedDemand);
       setDemands(prev => prev.map(d => d.id === saved.id ? saved : d));
     } catch (error) {
       console.error('Erro ao atualizar descrição:', error);
@@ -236,7 +237,7 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
     try {
       const descricaoMarcada = markAllChecklistDone(updatedDemand.descricao);
       const payload: Demand = { ...updatedDemand, descricao: descricaoMarcada };
-      const saved = await jsonbinClient.updateDemand(payload);
+      const saved = await supabaseDemands.updateDemand(payload);
       setDemands(prev => prev.map(d => d.id === saved.id ? saved : d));
       showSuccessNotification('Demanda concluída com sucesso!');
     } finally {
@@ -252,7 +253,7 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
     if (confirmDelete) {
       setIsDeleting(true);
       try {
-        await jsonbinClient.deleteDemand(confirmDelete);
+        await supabaseDemands.deleteDemand(confirmDelete);
         setDemands(prev => prev.filter(d => d.id !== confirmDelete));
         setConfirmDelete(null);
         showSuccessNotification('Demanda excluída com sucesso!');

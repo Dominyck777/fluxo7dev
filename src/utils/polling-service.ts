@@ -1,4 +1,4 @@
-import { jsonbinClient } from './jsonbin-client';
+import { supabaseDemands } from './supabase-demands';
 import { notificationService } from './notification-service';
 import { type Demand } from '../components/DemandCard';
 
@@ -72,7 +72,7 @@ class PollingService {
     }
 
     try {
-      const demands = await jsonbinClient.getDemands();
+      const demands = await supabaseDemands.getDemands();
       const lastCheck = new Date(this.config.lastCheck);
       
       // Filtra demandas novas atribuídas ao usuário atual
