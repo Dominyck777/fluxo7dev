@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { jsonbinClient, type Developer } from '../utils/jsonbin-client';
+import { authenticateUserSupabase } from '../utils/auth';
 import './Login.css';
 
 interface LoginProps {
@@ -24,9 +25,9 @@ const Login = ({ onLogin }: LoginProps) => {
     setError('');
     
     try {
-      // 1. Autenticar usuário
-      const user = await jsonbinClient.authenticateUser(userId.toLowerCase(), password);
-      
+      // 1. Autenticar usuário direto no Supabase
+      const user = await authenticateUserSupabase(userId.toLowerCase(), password);
+
       if (user) {
         // 2. Pré-carregar dados em paralelo durante o splash
         const [config, demands, transactions] = await Promise.all([
