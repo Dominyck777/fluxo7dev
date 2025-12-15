@@ -2,7 +2,6 @@ import { supabase } from './supabase-client';
 import type { Demand } from '../components/DemandCard';
 
 interface DemandRow {
-  idx: number | null;
   id: number;
   desenvolvedor: string;
   projeto: string;
@@ -28,7 +27,7 @@ export const supabaseDemands = {
   async getDemands(): Promise<Demand[]> {
     const { data, error } = await supabase
       .from('demandas')
-      .select('idx, id, desenvolvedor, projeto, descricao, status, prioridade, data_criacao')
+      .select('id, desenvolvedor, projeto, descricao, status, prioridade, data_criacao')
       .order('data_criacao', { ascending: false });
 
     if (error) {
@@ -56,7 +55,7 @@ export const supabaseDemands = {
     const { data: inserted, error } = await supabase
       .from('demandas')
       .insert(row)
-      .select('idx, id, desenvolvedor, projeto, descricao, status, prioridade, data_criacao')
+      .select('id, desenvolvedor, projeto, descricao, status, prioridade, data_criacao')
       .single();
 
     if (error) {
@@ -81,7 +80,7 @@ export const supabaseDemands = {
       .from('demandas')
       .update(row)
       .eq('id', demand.id)
-      .select('idx, id, desenvolvedor, projeto, descricao, status, prioridade, data_criacao')
+      .select('id, desenvolvedor, projeto, descricao, status, prioridade, data_criacao')
       .single();
 
     if (error) {
