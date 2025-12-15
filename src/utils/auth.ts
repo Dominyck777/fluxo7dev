@@ -4,7 +4,6 @@ import { supabase } from './supabase-client';
 interface UsuarioRow {
   id: string;
   name: string;
-  password: string;
   avatar: string | null;
   role: string;
   active: boolean;
@@ -15,11 +14,10 @@ export async function authenticateUserSupabase(
   password: string
 ): Promise<Developer | null> {
   const { data, error } = await supabase
-    .from('usuarios')
-    .select('id, name, password, avatar, role, active')
-    .eq('id', userId)
-    .eq('password', password)
-    .eq('active', true)
+    .rpc('authenticate_usuario', {
+      p_id: userId,
+      p_password: password,
+    })
     .maybeSingle<UsuarioRow>();
 
   if (error) {
@@ -33,7 +31,8 @@ export async function authenticateUserSupabase(
     id: data.id,
     name: data.name,
     avatar: data.avatar ?? undefined,
-    password: data.password,
+    // senha não é mais retornada nem usada no front
+    password: '',
     role: (data.role as Developer['role']) ?? 'developer',
     active: data.active,
   };

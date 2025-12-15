@@ -29,19 +29,7 @@ const Login = ({ onLogin }: LoginProps) => {
       const user = await authenticateUserSupabase(userId.toLowerCase(), password);
 
       if (user) {
-        // 2. Pré-carregar dados em paralelo durante o splash
-        const [config, demands, transactions] = await Promise.all([
-          jsonbinClient.getConfig(),
-          jsonbinClient.getDemands(),
-          jsonbinClient.getTransactions()
-        ]);
-        
-        // 3. Armazenar dados no localStorage para acesso rápido
-        localStorage.setItem('preloaded_config', JSON.stringify(config));
-        localStorage.setItem('preloaded_demands', JSON.stringify(demands));
-        localStorage.setItem('preloaded_transactions', JSON.stringify(transactions));
-        
-        // 4. Fazer login após carregar tudo
+        // 2. Fazer login imediatamente (telas vão carregar os dados quando abrirem)
         onLogin(user);
       } else {
         setError('Usuário ou senha incorretos. Tente novamente.');
