@@ -25,34 +25,6 @@ export interface FeedbackData {
   conversa?: ConversationMessage[];
 }
 
-interface ConversationSession {
-  session_id: string;
-  started_at: string;
-  updated_at: string;
-  empresa: string;
-  software: string;
-  nome_cliente: string;
-  estrelas: number | null;
-  comentario: string | null;
-  conversa: ConversationMessage[];
-}
-
-interface ClientConversations {
-  cod_cliente: string;
-  nome_cliente: string;
-  empresa: string;
-  software: string;
-  conversas: ConversationSession[];
-}
-
-interface FeedbackDBRecord {
-  [codCliente: string]: ClientConversations;
-}
-
-interface ClientsRoot {
-  clientes: FeedbackDBRecord;
-}
-
 const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps) => {
   const [feedbacks, setFeedbacks] = useState<FeedbackData[]>([]);
   const [isLoading, setIsLoading] = useState(true);

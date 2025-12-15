@@ -14,6 +14,30 @@ interface IsisRow {
   timestamp: string;
 }
 
+function normalizeConversation(raw: unknown): FeedbackData['conversa'] {
+  if (!raw) {
+    return [];
+  }
+
+  // Se já veio como array, apenas confiamos no tipo em runtime
+  if (Array.isArray(raw)) {
+    return raw as FeedbackData['conversa'];
+  }
+
+  // Se veio como string JSON, tenta fazer o parse
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? (parsed as FeedbackData['conversa']) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  // Qualquer outro formato: ignora e retorna array vazio
+  return [];
+}
+
 function mapRowToFeedback(row: IsisRow): FeedbackData {
   return {
     id: String(row.id),
@@ -24,8 +48,7 @@ function mapRowToFeedback(row: IsisRow): FeedbackData {
     projeto: row.projeto ?? '',
     comentario: row.comentario ?? undefined,
     cod_cliente: row.cod_cliente ?? undefined,
-    // conversa vem como JSON bruto do Supabase (array de mensagens) se existir
-    conversa: (row.conversa as FeedbackData['conversa']) ?? [],
+    conversa: normalizeConversation(row.conversa),
   };
 }
 
