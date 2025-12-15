@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { jsonbinClient, type Developer } from '../utils/jsonbin-client';
+import type { Developer } from '../utils/jsonbin-client';
 import { authenticateUserSupabase } from '../utils/auth';
 import './Login.css';
 
