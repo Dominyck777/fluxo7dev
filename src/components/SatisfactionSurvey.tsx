@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import './SatisfactionSurvey.css';
+import { supabaseFeedbacks } from '../utils/supabase-feedbacks';
 
 interface SatisfactionSurveyProps {
   onOpenSidebar?: () => void;
@@ -12,7 +13,7 @@ interface ConversationMessage {
   text: string;
 }
 
-interface FeedbackData {
+export interface FeedbackData {
   id: string;
   timestamp: string;
   estrelas: number;
@@ -74,47 +75,7 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
     try {
       setIsLoading(true);
       setError('');
-      
-      // Buscar dados de conversas/feedbacks no novo JSONBin
-      const response = await fetch('https://api.jsonbin.io/v3/b/693ab980d0ea881f4021e619/latest', {
-        headers: {
-          'X-Master-Key': '$2a$10$/XmOGvx8./SZzV3qMzQ5i.6FjBjS4toNbeaEFzX2D8QPUddyM6VR2'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao carregar feedbacks');
-      }
-
-      const data = await response.json();
-      const root: ClientsRoot = (data.record as ClientsRoot) || { clientes: {} as FeedbackDBRecord };
-      const db: FeedbackDBRecord = root.clientes || {};
-
-      const sessions: FeedbackData[] = [];
-
-      Object.values(db).forEach((client) => {
-        if (!client || !Array.isArray(client.conversas)) return;
-
-        client.conversas.forEach((session) => {
-          if (session.estrelas == null) {
-            return;
-          }
-
-          sessions.push({
-            id: session.session_id,
-            timestamp: session.updated_at || session.started_at,
-            estrelas: session.estrelas ?? 0,
-            nome_cliente: session.nome_cliente || client.nome_cliente,
-            empresa: session.empresa || client.empresa,
-            projeto: session.software || client.software,
-            comentario: session.comentario || undefined,
-            cod_cliente: client.cod_cliente,
-            conversa: session.conversa || [],
-          });
-        });
-      });
-
-      sessions.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      const sessions = await supabaseFeedbacks.getFeedbacks();
       setFeedbacks(sessions);
     } catch (err) {
       console.error('Erro ao carregar feedbacks:', err);
@@ -230,44 +191,7 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
     try {
       setIsDeleting(true);
       setError('');
-      
-      // 1. Primeiro, ler a base completa
-      const readResponse = await fetch('https://api.jsonbin.io/v3/b/693ab980d0ea881f4021e619/latest', {
-        headers: {
-          'X-Master-Key': '$2a$10$/XmOGvx8./SZzV3qMzQ5i.6FjBjS4toNbeaEFzX2D8QPUddyM6VR2'
-        }
-      });
-
-      if (!readResponse.ok) {
-        throw new Error('Erro ao ler base de dados');
-      }
-
-      const currentData = await readResponse.json();
-      const fullDatabase: ClientsRoot = (currentData.record as ClientsRoot) || { clientes: {} as FeedbackDBRecord };
-      
-      // 2. Limpar apenas os feedbacks, mantendo todo o resto
-      Object.values(fullDatabase.clientes || {}).forEach((client) => {
-        if (!client || !Array.isArray(client.conversas)) return;
-        client.conversas.forEach((session) => {
-          session.estrelas = null;
-          session.comentario = null;
-        });
-      });
-      
-      // 3. Salvar a base completa de volta
-      const updateResponse = await fetch('https://api.jsonbin.io/v3/b/693ab980d0ea881f4021e619', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Master-Key': '$2a$10$/XmOGvx8./SZzV3qMzQ5i.6FjBjS4toNbeaEFzX2D8QPUddyM6VR2'
-        },
-        body: JSON.stringify(fullDatabase)
-      });
-
-      if (!updateResponse.ok) {
-        throw new Error('Erro ao atualizar base de dados');
-      }
-
+      await supabaseFeedbacks.clearAllFeedbacks();
       setFeedbacks([]);
       setShowDeleteConfirm(false);
     } catch (err) {
@@ -282,46 +206,7 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
     try {
       setDeletingFeedbackId(feedbackId);
       setError('');
-      
-      // 1. Primeiro, ler a base completa
-      const readResponse = await fetch('https://api.jsonbin.io/v3/b/693ab980d0ea881f4021e619/latest', {
-        headers: {
-          'X-Master-Key': '$2a$10$/XmOGvx8./SZzV3qMzQ5i.6FjBjS4toNbeaEFzX2D8QPUddyM6VR2'
-        }
-      });
-
-      if (!readResponse.ok) {
-        throw new Error('Erro ao ler base de dados');
-      }
-
-      const currentData = await readResponse.json();
-      const fullDatabase: ClientsRoot = (currentData.record as ClientsRoot) || { clientes: {} as FeedbackDBRecord };
-      
-      // 2. Remover o feedback específico da lista, mantendo todo o resto
-      Object.values(fullDatabase.clientes || {}).forEach((client) => {
-        if (!client || !Array.isArray(client.conversas)) return;
-        client.conversas.forEach((session) => {
-          if (session.session_id === feedbackId) {
-            session.estrelas = null;
-            session.comentario = null;
-          }
-        });
-      });
-      
-      // 3. Salvar a base completa de volta
-      const updateResponse = await fetch('https://api.jsonbin.io/v3/b/693ab980d0ea881f4021e619', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Master-Key': '$2a$10$/XmOGvx8./SZzV3qMzQ5i.6FjBjS4toNbeaEFzX2D8QPUddyM6VR2'
-        },
-        body: JSON.stringify(fullDatabase)
-      });
-
-      if (!updateResponse.ok) {
-        throw new Error('Erro ao atualizar base de dados');
-      }
-
+      await supabaseFeedbacks.clearSingleFeedback(feedbackId);
       const updatedFeedbacks = feedbacks.filter(f => f.id !== feedbackId);
       setFeedbacks(updatedFeedbacks);
     } catch (err) {
