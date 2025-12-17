@@ -36,6 +36,14 @@
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.7);
 }
 
+/* Garante que a foto preencha totalmente o círculo do avatar no perfil */
+.profile-avatar-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .profile-avatar-placeholder {
   width: 100%;
   height: 100%;
