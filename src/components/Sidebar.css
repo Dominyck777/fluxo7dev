@@ -45,6 +45,25 @@
   gap: 0.75rem;
 }
 
+.sidebar-logo-button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  color: inherit;
+  width: auto;
+  text-align: left;
+}
+
+.sidebar-logo-button:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 2px;
+}
+
 .sidebar-user-text {
   display: flex;
   flex-direction: column;

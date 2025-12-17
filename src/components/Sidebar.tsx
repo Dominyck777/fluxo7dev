@@ -11,7 +11,7 @@ interface SidebarProps {
   onNavigate: (tab: ActiveTab) => void;
 }
 
-type ActiveTab = 'dashboard' | 'financial' | 'clients' | 'satisfaction';
+type ActiveTab = 'dashboard' | 'financial' | 'clients' | 'satisfaction' | 'profile';
 
 const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) => {
   const location = useLocation();
@@ -51,7 +51,15 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
       <div className="sidebar-overlay" onClick={onClose} />
       <div className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-header">
-          <div className="sidebar-logo">
+          <button
+            type="button"
+            className="sidebar-logo sidebar-logo-button"
+            onClick={() => {
+              onNavigate('profile');
+              onClose();
+            }}
+            title="Abrir perfil"
+          >
             {user.avatar ? (
               <img
                 src={user.avatar}
@@ -65,7 +73,7 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
               <span className="sidebar-user-name">{user.name}</span>
               <span className="sidebar-user-role">{user.role}</span>
             </div>
-          </div>
+          </button>
           <button
             className="sidebar-close"
             onClick={onClose}

@@ -6,6 +6,7 @@ import FinancialView from './components/FinancialView';
 import ClientsView from './components/ClientsView';
 import SatisfactionSurvey from './components/SatisfactionSurvey';
 import Sidebar from './components/Sidebar';
+import ProfileView from './components/ProfileView';
 import { type Developer } from './utils/jsonbin-client';
 
 const AUTH_KEY = 'fluxo7dev_auth';
@@ -53,7 +54,16 @@ function App() {
     navigate('/');
   };
 
-  const handleNavigate = (tab: 'dashboard' | 'financial' | 'clients' | 'satisfaction') => {
+  const handleUpdateUser = (updatedUser: Developer) => {
+    setCurrentUser(updatedUser);
+    try {
+      localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
+    } catch (error) {
+      console.error('Erro ao atualizar usuário no localStorage:', error);
+    }
+  };
+
+  const handleNavigate = (tab: 'dashboard' | 'financial' | 'clients' | 'satisfaction' | 'profile') => {
     switch (tab) {
       case 'dashboard':
         navigate('/demandas');
@@ -66,6 +76,9 @@ function App() {
         break;
       case 'satisfaction':
         navigate('/feedbacks');
+        break;
+      case 'profile':
+        navigate('/perfil');
         break;
       default:
         navigate('/demandas');
@@ -145,6 +158,17 @@ function App() {
                 <SatisfactionSurvey 
                   onOpenSidebar={() => setIsSidebarOpen(true)} 
                   onLogout={handleLogout} 
+                />
+              }
+            />
+            <Route
+              path="/perfil"
+              element={
+                <ProfileView
+                  currentUser={currentUser}
+                  onOpenSidebar={() => setIsSidebarOpen(true)}
+                  onLogout={handleLogout}
+                  onUpdateUser={handleUpdateUser}
                 />
               }
             />
