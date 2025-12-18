@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { jsonbinClient } from '../utils/jsonbin-client';
+import { supabaseTransactions } from '../utils/supabase-transactions';
 import './FinancialView.css';
 
 export interface Transaction {
@@ -53,7 +54,8 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
         } else {
           // Fallback: carregar da API se não houver dados pré-carregados
           // Isso só acontece quando o usuário atualiza a página
-          loadedTransactions = await jsonbinClient.getTransactions();
+          // Transações agora vêm do Supabase; projetos ainda vêm do JSONBin (config)
+          loadedTransactions = await supabaseTransactions.getTransactions();
           const config = await jsonbinClient.getConfig();
           loadedProjects = config.projects;
         }
@@ -134,17 +136,16 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
   const handleCreateTransaction = async (newTransaction: Omit<Transaction, 'id'>) => {
     setIsCreating(true);
     try {
-      // Criar a transação no JSONBin
-      const createdTransaction = await jsonbinClient.createTransaction(newTransaction);
+      // Criar a transação no Supabase
+      const createdTransaction = await supabaseTransactions.createTransaction(newTransaction);
       
       // Atualizar o estado local
       const updatedTransactions = [...transactions, createdTransaction];
       setTransactions(updatedTransactions);
       
       setIsModalOpen(false);
-      
       // Recarregar as transações para garantir sincronização
-      const allTransactions = await jsonbinClient.getTransactions();
+      const allTransactions = await supabaseTransactions.getTransactions();
       setTransactions(allTransactions);
       
     } catch (error) {
@@ -163,7 +164,7 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
   const handleUpdateTransaction = async (updatedTransaction: Transaction) => {
     setIsEditing(true);
     try {
-      await jsonbinClient.updateTransaction(updatedTransaction);
+      await supabaseTransactions.updateTransaction(updatedTransaction);
       
       // Atualizar estado local
       const updatedTransactions = transactions.map(t => 
@@ -173,9 +174,8 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
       
       setIsEditModalOpen(false);
       setEditingTransaction(null);
-      
       // Recarregar para sincronizar
-      const allTransactions = await jsonbinClient.getTransactions();
+      const allTransactions = await supabaseTransactions.getTransactions();
       setTransactions(allTransactions);
       
     } catch (error) {
@@ -195,7 +195,7 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
     
     setIsDeleting(true);
     try {
-      await jsonbinClient.deleteTransaction(confirmDelete);
+      await supabaseTransactions.deleteTransaction(confirmDelete);
       
       // Atualizar estado local
       const updatedTransactions = transactions.filter(t => t.id !== confirmDelete);
@@ -203,7 +203,7 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
       setConfirmDelete(null);
       
       // Recarregar para sincronizar
-      const allTransactions = await jsonbinClient.getTransactions();
+      const allTransactions = await supabaseTransactions.getTransactions();
       setTransactions(allTransactions);
       
     } catch (error) {
@@ -217,7 +217,7 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
   const refreshTransactions = async () => {
     setIsLoading(true);
     try {
-      const allTransactions = await jsonbinClient.getTransactions();
+      const allTransactions = await supabaseTransactions.getTransactions();
       setTransactions(allTransactions);
     } catch (error) {
       console.error('Erro ao atualizar movimentações:', error);
@@ -233,7 +233,7 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
     setTransactions(prev => prev.map(t => t.id === updated.id ? updated : t));
 
     try {
-      await jsonbinClient.updateTransaction(updated);
+      await supabaseTransactions.updateTransaction(updated);
     } catch (error) {
       console.error('Erro ao atualizar status de pagamento:', error);
       alert('Erro ao atualizar status de pagamento. Tente novamente.');

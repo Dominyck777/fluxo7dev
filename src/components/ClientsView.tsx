@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import './FinancialView.css';
 import { jsonbinClient } from '../utils/jsonbin-client';
+import { supabaseClients } from '../utils/supabase-clients';
 import Modal from './Modal';
 
 interface ClientsViewProps {
@@ -63,17 +64,17 @@ const ClientsView = ({ onOpenSidebar, onLogout }: ClientsViewProps) => {
     };
   }, []);
 
-  // Carrega clientes do JSONBin (com fallback para localStorage)
+  // Carrega clientes do Supabase (com fallback para localStorage)
   useEffect(() => {
     let mounted = true;
 
     (async () => {
-      // 1) Tenta carregar do JSONBin
+      // 1) Tenta carregar do Supabase
       try {
         if (mounted) {
           setIsLoading(true);
         }
-        const remoteClients = await jsonbinClient.getClients();
+        const remoteClients = await supabaseClients.getClients();
         if (!mounted) return;
 
         const normalizedFromBin: Client[] = remoteClients.map((client) => {
@@ -107,7 +108,7 @@ const ClientsView = ({ onOpenSidebar, onLogout }: ClientsViewProps) => {
 
         return; // sucesso, não precisa fallback
       } catch (error) {
-        console.error('Erro ao carregar clientes do JSONBin:', error);
+        console.error('Erro ao carregar clientes do Supabase:', error);
       }
 
       // 2) Fallback: tenta carregar do localStorage
@@ -166,10 +167,13 @@ const ClientsView = ({ onOpenSidebar, onLogout }: ClientsViewProps) => {
         console.error('Erro ao salvar clientes no localStorage ao alternar status:', error);
       }
 
-      // Persiste também no JSONBin (sem bloquear a UI)
-      jsonbinClient
-        .saveClients(updated)
-        .catch((error) => console.error('Erro ao salvar clientes no JSONBin ao alternar status:', error));
+      // Persiste também no Supabase (sem bloquear a UI): PUT apenas do status
+      const changed = updated.find((c) => c.id === clientId);
+      if (changed) {
+        supabaseClients
+          .updateClientStatus(String(changed.id), changed.status)
+          .catch((error) => console.error('Erro ao atualizar status do cliente no Supabase:', error));
+      }
 
       return updated;
     });
@@ -206,10 +210,10 @@ const ClientsView = ({ onOpenSidebar, onLogout }: ClientsViewProps) => {
       console.error('Erro ao salvar clientes no localStorage:', error);
     }
 
-    // Persiste também no JSONBin (sem bloquear a UI)
-    jsonbinClient
+    // Persiste também no Supabase (sem bloquear a UI)
+    supabaseClients
       .saveClients(updated)
-      .catch((error) => console.error('Erro ao salvar clientes no JSONBin ao criar novo cliente:', error));
+      .catch((error) => console.error('Erro ao salvar clientes no Supabase ao criar novo cliente:', error));
 
     setIsModalOpen(false);
   };
