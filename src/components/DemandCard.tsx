@@ -50,6 +50,13 @@ const DemandCard = ({ demand, onEdit, onDelete, onComplete, onUpdate, isCompleti
     }
   };
 
+  const createdAtLabel = (() => {
+    if (!demand.dataCriacao) return null;
+    const date = new Date(demand.dataCriacao);
+    if (Number.isNaN(date.getTime())) return null;
+    return date.toLocaleDateString('pt-BR');
+  })();
+
   return (
     <div 
       className="demand-card" 
@@ -160,6 +167,12 @@ const DemandCard = ({ demand, onEdit, onDelete, onComplete, onUpdate, isCompleti
             {demand.status}
           </span>
         </div>
+
+        {createdAtLabel && (
+          <div className="demand-created-at">
+            Demanda criada em {createdAtLabel}
+          </div>
+        )}
       </div>
       
       {isCompleting && (

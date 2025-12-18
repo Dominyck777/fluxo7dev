@@ -1736,6 +1736,34 @@
   position: relative;
 }
 
+/* Novo gráfico pizza em SVG */
+.pie-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg); /* começa em cima, como gráfico padrão */
+}
+
+.pie-bg {
+  fill: transparent;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 3;
+}
+
+.pie-segment {
+  fill: transparent;
+  stroke-width: 4.5;
+  stroke-linecap: butt; /* borda reta nas extremidades das fatias */
+  transition: stroke-dasharray 0.3s ease, stroke 0.3s ease;
+}
+
+.pie-entrada {
+  stroke: #10B981;
+}
+
+.pie-saida {
+  stroke: #EF4444;
+}
+
 .pie-slice::before {
   content: '';
   position: absolute;

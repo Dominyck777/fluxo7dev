@@ -428,12 +428,49 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
               <h3>Distribuição de Movimentações</h3>
               <div className="pie-chart">
                 <div className="pie-chart-container">
-                  <div 
-                    className="pie-slice entrada-slice"
-                    style={{
-                      '--percentage': `${totalEntradas + totalSaidas > 0 ? (totalEntradas / (totalEntradas + totalSaidas)) * 100 : 50}%`
-                    } as React.CSSProperties}
-                  ></div>
+                  {totalEntradas + totalSaidas === 0 ? (
+                    <div className="pie-empty">Nenhuma movimentação recente</div>
+                  ) : (
+                    <svg viewBox="0 0 36 36" className="pie-svg">
+                      {/* Anel de fundo discreto */}
+                      <circle
+                        className="pie-bg"
+                        cx="18"
+                        cy="18"
+                        r="15.9155"
+                      />
+
+                      {(() => {
+                        const total = totalEntradas + totalSaidas;
+                        const pctEntrada = (totalEntradas / total) * 100;
+                        const pctSaida = 100 - pctEntrada;
+
+                        return (
+                          <>
+                            {/* Arco de Entradas */}
+                            <circle
+                              className="pie-segment pie-entrada"
+                              cx="18"
+                              cy="18"
+                              r="15.9155"
+                              strokeDasharray={`${pctEntrada} ${100 - pctEntrada}`}
+                              strokeDashoffset="25"
+                            />
+
+                            {/* Arco de Saídas, iniciando onde termina Entradas */}
+                            <circle
+                              className="pie-segment pie-saida"
+                              cx="18"
+                              cy="18"
+                              r="15.9155"
+                              strokeDasharray={`${pctSaida} ${100 - pctSaida}`}
+                              strokeDashoffset={`${25 - pctEntrada}`}
+                            />
+                          </>
+                        );
+                      })()}
+                    </svg>
+                  )}
                   <div className="pie-center">
                     <span className="pie-total">{formatCurrency(totalEntradas + totalSaidas)}</span>
                     <span className="pie-label">Total</span>

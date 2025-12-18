@@ -19,6 +19,7 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [editedName, setEditedName] = useState(currentUser.name);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [isDemandsChartOpen, setIsDemandsChartOpen] = useState(false); // controla modal de demandas
 
   useEffect(() => {
     let mounted = true;
@@ -42,27 +43,90 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
     };
   }, []);
 
-  const totalDemands = demands.length;
-  const completedDemands = demands.filter(d => d.status === 'Concluído').length;
-  const pendingDemands = demands.filter(d => d.status === 'Pendente').length;
+  // Filtra demandas apenas do usuário logado
+  const userDemands = demands.filter(d => d.desenvolvedor === currentUser.name);
 
-  const mostActiveDay = (() => {
-    if (demands.length === 0) return null;
+  const totalDemands = userDemands.length;
+  const completedDemands = userDemands.filter(d => d.status === 'Concluído').length;
+  const pendingDemands = userDemands.filter(d => d.status === 'Pendente').length;
 
-    const counts: Record<string, number> = {};
+  // Estatísticas por dia para gráfico (dia x quantidade)
+  const dailyDemandStats = (() => {
+    if (userDemands.length === 0) return [] as { day: string; count: number; sortValue: number }[];
 
-    for (const d of demands) {
+    // Função auxiliar para obter o início da semana (segunda-feira) de uma data
+    const getWeekStart = (date: Date) => {
+      const d = new Date(date);
+      const day = d.getDay(); // 0 = domingo, 1 = segunda, ...
+      const diff = day === 0 ? -6 : 1 - day; // ajusta para segunda-feira
+      d.setDate(d.getDate() + diff);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    };
+
+    const counts: Record<string, { label: string; count: number; sortValue: number }> = {};
+
+    for (const d of userDemands) {
       if (!d.dataCriacao) continue;
-      const day = new Date(d.dataCriacao).toLocaleDateString('pt-BR');
-      counts[day] = (counts[day] || 0) + 1;
+      const originalDate = new Date(d.dataCriacao);
+      if (Number.isNaN(originalDate.getTime())) continue;
+
+      const weekStart = getWeekStart(originalDate);
+      const key = weekStart.toISOString();
+      const label = weekStart.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      const sortValue = weekStart.getTime();
+
+      if (!counts[key]) {
+        counts[key] = { label, count: 0, sortValue };
+      }
+      counts[key].count += 1;
     }
 
-    const entries = Object.entries(counts);
-    if (entries.length === 0) return null;
+    return Object.values(counts)
+      .map(({ label, count, sortValue }) => ({ day: label, count, sortValue }))
+      // Ordena por início da semana (mais antigo para mais recente)
+      .sort((a, b) => a.sortValue - b.sortValue);
+  })();
 
-    entries.sort((a, b) => b[1] - a[1]);
-    const [day, count] = entries[0];
-    return { day, count };
+  // Dados preparados para o gráfico 2D (linha + área) em SVG
+  const demandsChartData = (() => {
+    if (dailyDemandStats.length === 0) return null;
+
+    const maxCount = Math.max(...dailyDemandStats.map((s) => s.count));
+    if (maxCount <= 0) return null;
+
+    // Usa o intervalo real de tempo (início da semana) para distribuir os pontos no eixo X
+    const firstTime = dailyDemandStats[0].sortValue;
+    const lastTime = dailyDemandStats[dailyDemandStats.length - 1].sortValue;
+    const timeRange = Math.max(1, lastTime - firstTime);
+
+    const linePoints = dailyDemandStats
+      .map((stat, index) => {
+        const x = ((stat.sortValue - firstTime) / timeRange) * 100;
+        const y = 100 - (stat.count / maxCount) * 80; // deixa margem no topo
+        return `${x},${y}`;
+      })
+      .join(' ');
+
+    const areaPoints = `0,100 ${linePoints} 100,100`;
+
+    return {
+      linePoints,
+      areaPoints,
+      maxCount,
+    };
+  })();
+
+  // Largura relativa do gráfico detalhado no modal, baseada na quantidade de dias
+  const modalChartWidthPercent = Math.max(100, dailyDemandStats.length * 14);
+
+  const mostActiveDay = (() => {
+    if (dailyDemandStats.length === 0) return null;
+
+    // Dia mais ativo é o que tem maior contagem
+    const sortedByCount = [...dailyDemandStats].sort((a, b) => b.count - a.count);
+    const top = sortedByCount[0];
+    return { day: top.day, count: top.count };
   })();
 
   return (
@@ -127,18 +191,34 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
               <h3>Relatório de Demandas</h3>
               {isLoadingStats ? (
                 <p className="profile-status">Carregando estatísticas...</p>
+              ) : !demandsChartData ? (
+                <p className="profile-status">Você ainda não possui demandas cadastradas.</p>
               ) : (
-                <div className="profile-info">
-                  <p className="profile-role">Total de demandas: {totalDemands}</p>
-                  <p className="profile-status">Concluídas: {completedDemands}</p>
-                  <p className="profile-status">Pendentes: {pendingDemands}</p>
-                  <p className="profile-status">
-                    Dia mais ativo:{' '}
-                    {mostActiveDay
-                      ? `${mostActiveDay.day} (${mostActiveDay.count} demanda${mostActiveDay.count > 1 ? 's' : ''})`
-                      : '—'}
-                  </p>
-                </div>
+                <button
+                  type="button"
+                  className="profile-demands-chart-main"
+                  onClick={() => setIsDemandsChartOpen(true)}
+                >
+                  <span className="profile-demands-chart-hint">
+                    📈 Gráfico de demandas por dia (clique para ver detalhes)
+                  </span>
+                  <div className="profile-demands-chart-preview">
+                    <svg
+                      className="profile-demands-svg"
+                      viewBox="0 0 100 100"
+                      preserveAspectRatio="none"
+                    >
+                      <polygon
+                        className="profile-demands-area"
+                        points={demandsChartData.areaPoints}
+                      />
+                      <polyline
+                        className="profile-demands-line"
+                        points={demandsChartData.linePoints}
+                      />
+                    </svg>
+                  </div>
+                </button>
               )}
             </div>
 
@@ -240,6 +320,58 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
             </button>
           </div>
         </form>
+      </Modal>
+      <Modal
+        isOpen={isDemandsChartOpen}
+        onClose={() => setIsDemandsChartOpen(false)}
+        title="Relatório de Demandas"
+      >
+        {isLoadingStats ? (
+          <p className="profile-status">Carregando estatísticas...</p>
+        ) : (
+          <div className="profile-demands-modal-content">
+            <div className="profile-info">
+              <p className="profile-role">Total de demandas: {totalDemands}</p>
+              <p className="profile-status">Concluídas: {completedDemands}</p>
+              <p className="profile-status">Pendentes: {pendingDemands}</p>
+              <p className="profile-status">
+                Dia mais ativo:{' '}
+                {mostActiveDay
+                  ? `${mostActiveDay.day} (${mostActiveDay.count} demanda${mostActiveDay.count > 1 ? 's' : ''})`
+                  : '—'}
+              </p>
+            </div>
+            {demandsChartData && (
+              <div className="profile-demands-chart-expanded">
+                <div className="profile-demands-chart-scroll">
+                  <svg
+                    className="profile-demands-svg large"
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                    style={{ width: `${modalChartWidthPercent}%` }}
+                  >
+                    <polygon
+                      className="profile-demands-area"
+                      points={demandsChartData.areaPoints}
+                    />
+                    <polyline
+                      className="profile-demands-line"
+                      points={demandsChartData.linePoints}
+                    />
+                  </svg>
+                </div>
+                <div className="profile-demands-x-labels modal">
+                  {dailyDemandStats.map((stat) => (
+                    <div key={stat.day} className="profile-demands-x-item">
+                      <span className="profile-demands-count-label">{stat.count}</span>
+                      <span className="profile-demands-day-label">{stat.day}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </Modal>
     </div>
   );

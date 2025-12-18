@@ -23,6 +23,8 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
     currentTab = 'clients';
   } else if (location.pathname.startsWith('/feedbacks')) {
     currentTab = 'satisfaction';
+  } else if (location.pathname.startsWith('/perfil')) {
+    currentTab = 'profile';
   } else {
     currentTab = 'dashboard';
   }
