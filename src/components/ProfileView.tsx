@@ -101,7 +101,7 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
     const timeRange = Math.max(1, lastTime - firstTime);
 
     const linePoints = dailyDemandStats
-      .map((stat, index) => {
+      .map((stat) => {
         const x = ((stat.sortValue - firstTime) / timeRange) * 100;
         const y = 100 - (stat.count / maxCount) * 80; // deixa margem no topo
         return `${x},${y}`;
