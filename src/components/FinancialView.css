@@ -4,7 +4,6 @@
   min-height: 100dvh;
   background-color: var(--color-black);
   color: var(--color-white);
-  overflow-x: hidden;
 }
 
 /* Loading */
@@ -297,6 +296,7 @@
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
+  overflow-x: hidden;
 }
 
 /* Summary Cards */
@@ -1852,6 +1852,121 @@
   position: relative;
 }
 
+ .bar-container.excel {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: 0.75rem;
+  align-items: start;
+  justify-content: stretch;
+  padding: 1.25rem 1rem 0.75rem;
+ }
+
+ .bar-container.excel::before {
+  display: none;
+ }
+
+ .bar-container.excel .excel-y-axis {
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-right: 0.5rem;
+ }
+
+ .bar-container.excel .excel-y-tick {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: right;
+  line-height: 1;
+ }
+
+ .bar-container.excel .excel-plot {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+ }
+
+ .bar-container.excel .excel-grid {
+  position: relative;
+  height: 200px;
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+ }
+
+ .bar-container.excel .excel-gridline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+ }
+
+ .bar-container.excel .excel-bars {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 2.5rem;
+  padding: 0 1.25rem 0.5rem;
+ }
+
+ .bar-container.excel .excel-bar-item {
+  width: 90px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+ }
+
+ .bar-container.excel .excel-bar-rect {
+  width: 60px;
+  border-radius: 3px 3px 0 0;
+  min-height: 2px;
+  box-shadow: 0 -6px 14px rgba(0, 0, 0, 0.35);
+ }
+
+ .bar-container.excel .excel-bar-entrada {
+  background: #10B981;
+ }
+
+ .bar-container.excel .excel-bar-saida {
+  background: #EF4444;
+ }
+
+ .bar-container.excel .excel-x-axis {
+  display: flex;
+  justify-content: center;
+  gap: 2.5rem;
+  padding-top: 0.75rem;
+ }
+
+ .bar-container.excel .excel-x-item {
+  width: 90px;
+  text-align: center;
+ }
+
+ .bar-container.excel .excel-x-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+ }
+
+ .bar-container.excel .excel-x-value {
+  color: var(--color-white);
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin-top: 0.3rem;
+ }
+
 .bar-container::before {
   content: '';
   position: absolute;
@@ -1933,11 +2048,11 @@
   text-align: center;
 }
 
-/* Responsive Charts */
-@media (max-width: 768px) {
+ /* Responsive Charts */
+ @media (max-width: 768px) {
   .charts-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
   
   .pie-chart-container {
@@ -1957,4 +2072,63 @@
   .bar-container {
     height: 150px;
   }
-}
+
+  /* Gráfico estilo Excel: manter 2 colunas sem estourar a tela */
+  .bar-container.excel {
+    grid-template-columns: 52px 1fr;
+    gap: 0.5rem;
+    padding: 1rem 0.75rem 0.75rem;
+    height: auto;
+    overflow: hidden;
+  }
+
+  .bar-container.excel .excel-y-axis {
+    height: 160px;
+    padding-right: 0.25rem;
+  }
+
+  .bar-container.excel .excel-y-tick {
+    font-size: 0.7rem;
+  }
+
+  .bar-container.excel .excel-grid {
+    height: 160px;
+  }
+
+  .bar-container.excel .excel-bars {
+    gap: 1.25rem;
+    padding: 0 0.5rem 0.5rem;
+  }
+
+  .bar-container.excel .excel-bar-item {
+    width: 70px;
+  }
+
+  .bar-container.excel .excel-bar-rect {
+    width: 44px;
+  }
+
+  .bar-container.excel .excel-x-axis {
+    gap: 1.25rem;
+    padding-top: 0.6rem;
+  }
+
+  .bar-container.excel .excel-x-item {
+    width: 70px;
+  }
+
+  .bar-container.excel .excel-x-label {
+    font-size: 0.7rem;
+  }
+
+  .bar-container.excel .excel-x-value {
+    font-size: 0.85rem;
+  }
+ }
+
+ @media (max-width: 520px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+ }

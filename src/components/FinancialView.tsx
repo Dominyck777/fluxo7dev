@@ -492,30 +492,76 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
             <div className="chart-card">
               <h3>Balanço Mensal</h3>
               <div className="bar-chart">
-                <div className="bar-container">
-                  <div className="bar entrada-bar">
-                    <div 
-                      className="bar-fill entrada-fill"
-                      style={{
-                        height: totalEntradas === 0 ? '0%' : 
-                                totalSaidas === 0 ? '85%' :
-                                `${Math.max((totalEntradas / Math.max(totalEntradas, totalSaidas)) * 85, 20)}%`
-                      }}
-                    ></div>
-                    <span className="bar-label">Entradas</span>
-                    <span className="bar-value">{formatCurrency(totalEntradas)}</span>
+                <div className="bar-container excel">
+                  {(() => {
+                    const maxValue = Math.max(totalEntradas, totalSaidas, 1);
+                    const getHeightPct = (value: number) => {
+                      if (value <= 0) return 0;
+                      return (value / maxValue) * 100;
+                    };
+
+                    const ticks = [1, 0.75, 0.5, 0.25, 0];
+
+                    return (
+                      <>
+                        <div className="excel-y-axis">
+                          {ticks.map((t) => (
+                            <div className="excel-y-tick" key={t}>
+                              {Math.round(maxValue * t)}
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="excel-plot">
+                          <div className="excel-grid">
+                            {ticks.map((t) => (
+                              <div
+                                key={t}
+                                className="excel-gridline"
+                                style={{ bottom: `${t * 100}%` }}
+                              />
+                            ))}
+
+                            <div className="excel-bars">
+                              <div className="excel-bar-item">
+                                <div
+                                  className="excel-bar-rect excel-bar-entrada"
+                                  style={{ height: `${getHeightPct(totalEntradas)}%` }}
+                                />
+                              </div>
+
+                              <div className="excel-bar-item">
+                                <div
+                                  className="excel-bar-rect excel-bar-saida"
+                                  style={{ height: `${getHeightPct(totalSaidas)}%` }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="excel-x-axis">
+                            <div className="excel-x-item">
+                              <div className="excel-x-label">Entradas</div>
+                              <div className="excel-x-value">{Math.round(totalEntradas)}</div>
+                            </div>
+                            <div className="excel-x-item">
+                              <div className="excel-x-label">Saídas</div>
+                              <div className="excel-x-value">{Math.round(totalSaidas)}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+                <div className="pie-legend" style={{ marginTop: '1rem' }}>
+                  <div className="legend-item">
+                    <div className="legend-color entrada-color"></div>
+                    <span>Entradas do mês atual</span>
                   </div>
-                  <div className="bar saida-bar">
-                    <div 
-                      className="bar-fill saida-fill"
-                      style={{
-                        height: totalSaidas === 0 ? '0%' : 
-                                totalEntradas === 0 ? '85%' :
-                                `${Math.max((totalSaidas / Math.max(totalEntradas, totalSaidas)) * 85, 20)}%`
-                      }}
-                    ></div>
-                    <span className="bar-label">Saídas</span>
-                    <span className="bar-value">{formatCurrency(totalSaidas)}</span>
+                  <div className="legend-item">
+                    <div className="legend-color saida-color"></div>
+                    <span>Saídas do mês atual</span>
                   </div>
                 </div>
               </div>

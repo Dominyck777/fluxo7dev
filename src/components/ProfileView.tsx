@@ -200,7 +200,7 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
                   onClick={() => setIsDemandsChartOpen(true)}
                 >
                   <span className="profile-demands-chart-hint">
-                    📈 Gráfico de demandas por dia (clique para ver detalhes)
+                    Gráfico de demandas por dia (clique para ver detalhes)
                   </span>
                   <div className="profile-demands-chart-preview">
                     <svg
