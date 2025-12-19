@@ -51,7 +51,8 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
       setFeedbacks(sessions);
     } catch (err) {
       console.error('Erro ao carregar feedbacks:', err);
-      setError('Erro ao carregar pesquisas de satisfação');
+      const message = err instanceof Error ? err.message : String(err);
+      setError(`Erro ao carregar pesquisas de satisfação${message ? `: ${message}` : ''}`);
     } finally {
       setIsLoading(false);
     }

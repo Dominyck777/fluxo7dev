@@ -3,15 +3,17 @@ import type { FeedbackData } from '../components/SatisfactionSurvey';
 
 interface IsisRow {
   idx?: number;
-  id: string | number;
+  id?: string | number;
   cod_cliente: string | null;
   nome_cliente: string | null;
   empresa: string | null;
   projeto: string | null;
-  nota: number | null;
+  nota?: number | null;
+  estrelas?: number | null;
   comentario: string | null;
   conversa: unknown | null;
-  timestamp: string;
+  timestamp?: string;
+  created_at?: string;
 }
 
 function normalizeConversation(raw: unknown): FeedbackData['conversa'] {
@@ -39,10 +41,12 @@ function normalizeConversation(raw: unknown): FeedbackData['conversa'] {
 }
 
 function mapRowToFeedback(row: IsisRow): FeedbackData {
+  const estrelas = (row.nota ?? row.estrelas) ?? 0;
+  const timestamp = row.timestamp ?? row.created_at ?? new Date().toISOString();
   return {
-    id: String(row.id),
-    timestamp: row.timestamp,
-    estrelas: row.nota ?? 0,
+    id: String(row.id ?? row.idx ?? Date.now()),
+    timestamp,
+    estrelas,
     nome_cliente: row.nome_cliente ?? 'Cliente',
     empresa: row.empresa ?? '',
     projeto: row.projeto ?? '',
@@ -56,8 +60,7 @@ export const supabaseFeedbacks = {
   async getFeedbacks(): Promise<FeedbackData[]> {
     const { data, error } = await supabase
       .from('isis')
-      .select('id, cod_cliente, nome_cliente, empresa, projeto, nota, comentario, conversa, timestamp')
-      .order('timestamp', { ascending: false });
+      .select('*');
 
     if (error) {
       console.error('[supabase-feedbacks] Erro ao buscar feedbacks:', error);
@@ -65,33 +68,47 @@ export const supabaseFeedbacks = {
     }
 
     const rows = (data as IsisRow[] | null) ?? [];
-    // Considera apenas registros que já têm nota preenchida
     return rows
-      .filter((row) => row.nota !== null)
-      .map(mapRowToFeedback);
+      .filter((row) => (row.nota ?? row.estrelas) !== null && (row.nota ?? row.estrelas) !== undefined)
+      .map(mapRowToFeedback)
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   },
 
   async clearAllFeedbacks(): Promise<void> {
-    const { error } = await supabase
+    const attempt1 = await supabase
       .from('isis')
       .update({ nota: null, comentario: null })
       .not('id', 'is', null);
 
-    if (error) {
-      console.error('[supabase-feedbacks] Erro ao limpar todas as notas/comentários:', error);
-      throw error;
+    if (!attempt1.error) return;
+
+    const attempt2 = await supabase
+      .from('isis')
+      .update({ estrelas: null, comentario: null })
+      .not('id', 'is', null);
+
+    if (attempt2.error) {
+      console.error('[supabase-feedbacks] Erro ao limpar todas as notas/comentários:', attempt2.error);
+      throw attempt2.error;
     }
   },
 
   async clearSingleFeedback(id: string): Promise<void> {
-    const { error } = await supabase
+    const attempt1 = await supabase
       .from('isis')
       .update({ nota: null, comentario: null })
       .eq('id', id);
 
-    if (error) {
-      console.error('[supabase-feedbacks] Erro ao limpar nota/comentário do feedback:', error);
-      throw error;
+    if (!attempt1.error) return;
+
+    const attempt2 = await supabase
+      .from('isis')
+      .update({ estrelas: null, comentario: null })
+      .eq('id', id);
+
+    if (attempt2.error) {
+      console.error('[supabase-feedbacks] Erro ao limpar nota/comentário do feedback:', attempt2.error);
+      throw attempt2.error;
     }
   },
 };
