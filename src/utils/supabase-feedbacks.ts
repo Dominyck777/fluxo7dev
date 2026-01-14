@@ -61,7 +61,7 @@ function shouldIncludeRow(row: IsisRow): boolean {
   if (hasRating) return true;
 
   // Inclui sessões sem nota ainda, mas que possuem histórico de conversa
-  const conversa = normalizeConversation(row.conversa);
+  const conversa = normalizeConversation(row.conversa) ?? [];
   return conversa.length > 0;
 }
 
