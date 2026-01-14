@@ -5,20 +5,13 @@ class PushClient {
   private currentUserId: string | null = null;
 
   private getServerUrl(): string {
-    // Em desenvolvimento, usa localhost se disponível
     if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname;
-      if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        // Tenta servidor local primeiro, senão usa Vercel Functions
-        return 'http://localhost:3003';
-      }
-      
-      // Em produção, usa Vercel Functions (mesmo domínio)
+      // Usa sempre o mesmo domínio da aplicação (Vercel Functions em /api)
       return window.location.origin;
     }
-    
-    // Fallback para Vercel
-    return 'https://fluxo7dev.vercel.app';
+
+    // Fallback
+    return '';
   }
 
   async initialize(userId: string): Promise<boolean> {

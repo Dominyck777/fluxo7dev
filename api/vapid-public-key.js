@@ -14,9 +14,15 @@ export default function handler(req, res) {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
-  
+
+  const publicKey = process.env.VAPID_PUBLIC_KEY;
+  if (!publicKey) {
+    res.status(500).json({ error: 'VAPID_PUBLIC_KEY não configurada' });
+    return;
+  }
+
   res.status(200).json({
-    publicKey: 'BEl62iUYgUivxIkv69yViEuiBIa40HuWd94AzZJHkxaXvM_-QX7nNP6RBXq4FVXtdvQGDlO7BmS1wS1NQ3OfgRs',
-    timestamp: new Date().toISOString()
+    publicKey,
+    timestamp: new Date().toISOString(),
   });
 }

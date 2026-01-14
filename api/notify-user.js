@@ -1,20 +1,28 @@
 // Vercel Function - Notify User (Multi-Device)
 import webpush from 'web-push';
+import { createClient } from '@supabase/supabase-js';
 
-// Configuração VAPID
-const vapidKeys = {
-  publicKey: 'BEl62iUYgUivxIkv69yViEuiBIa40HuWd94AzZJHkxaXvM_-QX7nNP6RBXq4FVXtdvQGDlO7BmS1wS1NQ3OfgRs',
-  privateKey: 'UGSiUwNCS1Dfn2SR3dvX3_Hgllq5A_-dvAGBBzZkJ5s'
-};
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-webpush.setVapidDetails(
-  'mailto:admin@fluxo7dev.com',
-  vapidKeys.publicKey,
-  vapidKeys.privateKey
-);
+function getSupabaseAdmin() {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não configurados');
+  }
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+}
 
-// Banco de dados simulado (compartilhado com subscribe.js)
-let userSubscriptions = {}; // { userId: [subscription1, subscription2, ...] }
+function getVapid() {
+  const publicKey = process.env.VAPID_PUBLIC_KEY;
+  const privateKey = process.env.VAPID_PRIVATE_KEY;
+  const subject = process.env.VAPID_SUBJECT || 'mailto:admin@fluxo7dev.com';
+
+  if (!publicKey || !privateKey) {
+    throw new Error('VAPID_PUBLIC_KEY ou VAPID_PRIVATE_KEY não configuradas');
+  }
+
+  return { publicKey, privateKey, subject };
+}
 
 export default async function handler(req, res) {
   // CORS
@@ -39,16 +47,43 @@ export default async function handler(req, res) {
     return;
   }
   
-  // Verifica se usuário tem subscriptions
-  const subscriptions = userSubscriptions[userId];
-  
-  if (!subscriptions || subscriptions.length === 0) {
-    console.log(`⚠️ Usuário ${userId} não possui dispositivos ativos`);
-    return res.status(404).json({
-      error: `Usuário ${userId} não possui dispositivos conectados`,
-      suggestion: 'Usuário precisa fazer login e permitir notificações'
-    });
-  }
+  try {
+    const vapid = getVapid();
+    webpush.setVapidDetails(vapid.subject, vapid.publicKey, vapid.privateKey);
+
+    const supabase = getSupabaseAdmin();
+
+    const { data: rows, error: fetchError } = await supabase
+      .from('push_subscriptions')
+      .select('id, endpoint, p256dh, auth, device_info')
+      .eq('user_id', userId);
+
+    if (fetchError) {
+      console.error('[api/notify-user] Erro ao buscar subscriptions:', fetchError);
+      return res.status(500).json({ error: 'Falha ao buscar subscriptions' });
+    }
+
+    const subscriptions = (rows || [])
+      .filter(r => r.endpoint && r.p256dh && r.auth)
+      .map(r => ({
+        id: r.id,
+        deviceInfo: r.device_info,
+        subscription: {
+          endpoint: r.endpoint,
+          keys: {
+            p256dh: r.p256dh,
+            auth: r.auth,
+          }
+        }
+      }));
+
+    if (subscriptions.length === 0) {
+      console.log(`⚠️ Usuário ${userId} não possui dispositivos ativos`);
+      return res.status(404).json({
+        error: `Usuário ${userId} não possui dispositivos conectados`,
+        suggestion: 'Usuário precisa permitir notificações no Perfil'
+      });
+    }
   
   const payload = JSON.stringify({
     title,
@@ -67,8 +102,9 @@ export default async function handler(req, res) {
   
   // Envia para TODOS os dispositivos do usuário
   for (let i = 0; i < subscriptions.length; i++) {
-    const subscription = subscriptions[i];
-    const deviceInfo = subscription.deviceInfo || `Dispositivo ${i + 1}`;
+    const row = subscriptions[i];
+    const subscription = row.subscription;
+    const deviceInfo = row.deviceInfo || `Dispositivo ${i + 1}`;
     
     try {
       await webpush.sendNotification(subscription, payload);
@@ -85,18 +121,16 @@ export default async function handler(req, res) {
       
       // Remove subscription inválida
       if (error.statusCode === 410 || error.statusCode === 404) {
-        subscriptions.splice(i, 1);
-        i--; // Ajusta índice após remoção
-        console.log(`🗑️ Subscription removida: ${userId} (${deviceInfo})`);
+        try {
+          await supabase.from('push_subscriptions').delete().eq('id', row.id);
+          console.log(`🗑️ Subscription removida do Supabase: ${userId} (${deviceInfo})`);
+        } catch (deleteErr) {
+          console.error('[api/notify-user] Falha ao remover subscription inválida:', deleteErr);
+        }
       }
     }
   }
-  
-  // Atualiza subscriptions (remove as inválidas)
-  if (subscriptions.length === 0) {
-    delete userSubscriptions[userId];
-  }
-  
+
   res.status(200).json({
     success: sent > 0,
     message: `Notificação processada para ${userId}`,
@@ -109,4 +143,8 @@ export default async function handler(req, res) {
     },
     results
   });
+  } catch (err) {
+    console.error('[api/notify-user] Erro inesperado:', err);
+    res.status(500).json({ error: 'Erro interno' });
+  }
 }

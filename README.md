@@ -2,6 +2,15 @@
 
 Sistema de gerenciamento de demandas de desenvolvimento com React + TypeScript + Vite.
 
+## 🔔 Push Notifications
+
+O projeto possui suporte a **Web Push Notifications** (via Service Worker) com persistência de subscriptions no **Supabase**.
+
+Documentação completa:
+
+- `COMO_FUNCIONA_NOTIFICACOES.md`
+- `docs/push-notifications.md`
+
 ## 🚀 Configuração
 
 ### 1. Instalar dependências
@@ -16,6 +25,10 @@ Crie um arquivo `.env` na raiz do projeto:
 ```env
 VITE_JSONBIN_BIN_ID=seu_bin_id_aqui
 VITE_JSONBIN_API_KEY=sua_api_key_aqui
+
+# Supabase (client)
+VITE_SUPABASE_URL=https://SEU_PROJETO.supabase.co
+VITE_SUPABASE_ANON_KEY=sua_chave_anon_publica
 ```
 
 ### 3. Rodar localmente

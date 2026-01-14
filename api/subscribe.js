@@ -1,5 +1,15 @@
 // Vercel Function - Subscribe User (Multi-Device)
-let userSubscriptions = {}; // { userId: [subscription1, subscription2, ...] }
+import { createClient } from '@supabase/supabase-js';
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+function getSupabaseAdmin() {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não configurados');
+  }
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+}
 
 export default function handler(req, res) {
   // CORS
@@ -24,35 +34,40 @@ export default function handler(req, res) {
     return;
   }
   
-  // Inicializa array se não existir
-  if (!userSubscriptions[userId]) {
-    userSubscriptions[userId] = [];
-  }
-  
-  // Adiciona info do dispositivo
-  const subscriptionWithDevice = {
-    ...subscription,
-    deviceInfo: deviceInfo || 'Unknown Device',
-    timestamp: new Date().toISOString(),
-    endpoint: subscription.endpoint // Para identificar duplicatas
-  };
-  
-  // Remove subscription duplicada (mesmo endpoint)
-  userSubscriptions[userId] = userSubscriptions[userId].filter(
-    sub => sub.endpoint !== subscription.endpoint
-  );
-  
-  // Adiciona nova subscription
-  userSubscriptions[userId].push(subscriptionWithDevice);
-  
-  console.log(`✅ Subscription registrada: ${userId} (${deviceInfo || 'Unknown'})`);
-  console.log(`📱 Total dispositivos para ${userId}: ${userSubscriptions[userId].length}`);
-  
-  res.status(200).json({
-    success: true,
-    message: `Subscription registrada para ${userId}`,
-    deviceInfo: deviceInfo || 'Unknown Device',
-    totalDevices: userSubscriptions[userId].length,
-    totalUsers: Object.keys(userSubscriptions).length
-  });
+  (async () => {
+    try {
+      const supabase = getSupabaseAdmin();
+
+      const keys = subscription.keys || {};
+      const endpoint = subscription.endpoint;
+
+      const row = {
+        user_id: userId,
+        endpoint,
+        p256dh: keys.p256dh || null,
+        auth: keys.auth || null,
+        device_info: deviceInfo || 'Unknown Device',
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error } = await supabase
+        .from('push_subscriptions')
+        .upsert(row, { onConflict: 'endpoint' });
+
+      if (error) {
+        console.error('[api/subscribe] Erro ao salvar subscription:', error);
+        res.status(500).json({ error: 'Falha ao salvar subscription' });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        message: `Subscription registrada para ${userId}`,
+        deviceInfo: deviceInfo || 'Unknown Device',
+      });
+    } catch (err) {
+      console.error('[api/subscribe] Erro inesperado:', err);
+      res.status(500).json({ error: 'Erro interno' });
+    }
+  })();
 }

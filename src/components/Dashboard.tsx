@@ -7,6 +7,7 @@ import ConfirmDialog from './ConfirmDialog';
 import Loading from './Loading';
 import { jsonbinClient, type Developer } from '../utils/jsonbin-client';
 import { supabaseDemands } from '../utils/supabase-demands';
+import { notificationService } from '../utils/notification-service';
 import './Dashboard.css';
 
 interface DashboardProps {
@@ -199,6 +200,23 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
       setDemands(prev => [created, ...prev]);
       setIsModalOpen(false);
       showSuccessNotification('Demanda criada com sucesso!');
+
+      // Envia push para o dev selecionado na criação da demanda
+      try {
+        const assignedUser = created.desenvolvedor;
+        await notificationService.sendPushServerNotification(
+          assignedUser,
+          `🚀 Nova Demanda - ${assignedUser}`,
+          `Nova demanda atribuída: "${created.descricao}" no projeto ${created.projeto}`,
+          {
+            demandId: created.id,
+            assignedUser,
+            type: 'new_demand'
+          }
+        );
+      } catch (error) {
+        console.error('[Dashboard] Falha ao enviar push da nova demanda:', error);
+      }
     } finally {
       setIsCreating(false);
     }

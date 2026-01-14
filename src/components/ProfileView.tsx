@@ -4,6 +4,7 @@ import type { Developer } from '../utils/jsonbin-client';
 import type { Demand } from './DemandCard';
 import { supabaseDemands } from '../utils/supabase-demands';
 import { supabaseDevs } from '../utils/supabase-devs';
+import { notificationService } from '../utils/notification-service';
 import Modal from './Modal';
 
 interface ProfileViewProps {
@@ -20,6 +21,8 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
   const [editedName, setEditedName] = useState(currentUser.name);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [isDemandsChartOpen, setIsDemandsChartOpen] = useState(false); // controla modal de demandas
+  const [isEnablingPush, setIsEnablingPush] = useState(false);
+  const [pushStatusMessage, setPushStatusMessage] = useState<string>('');
 
   useEffect(() => {
     let mounted = true;
@@ -219,6 +222,46 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
                     </svg>
                   </div>
                 </button>
+              )}
+            </div>
+
+            <div className="profile-card">
+              <h3>Notificações</h3>
+              <p className="profile-status">
+                Ative as notificações para receber push quando alguém criar uma demanda para você.
+              </p>
+              {pushStatusMessage && (
+                <p className="profile-status">{pushStatusMessage}</p>
+              )}
+              <button
+                type="button"
+                className="profile-edit-button"
+                disabled={isEnablingPush || !notificationService.isPushServerSupported()}
+                onClick={async () => {
+                  setIsEnablingPush(true);
+                  setPushStatusMessage('');
+                  try {
+                    // Importante: usamos o NOME como identificador porque a demanda atribui por nome (campo "desenvolvedor")
+                    const ok = await notificationService.initializePushServer(currentUser.name);
+                    if (ok) {
+                      setPushStatusMessage('✅ Notificações ativadas neste dispositivo.');
+                    } else {
+                      setPushStatusMessage('⚠️ Não foi possível ativar as notificações.');
+                    }
+                  } catch (error) {
+                    console.error('[ProfileView] Erro ao ativar notificações:', error);
+                    setPushStatusMessage('❌ Erro ao ativar notificações.');
+                  } finally {
+                    setIsEnablingPush(false);
+                  }
+                }}
+              >
+                {isEnablingPush ? 'Ativando...' : 'Ativar notificações'}
+              </button>
+              {!notificationService.isPushServerSupported() && (
+                <p className="profile-status">
+                  Seu navegador não suporta Web Push (Service Worker/Push API).
+                </p>
               )}
             </div>
 

@@ -4,6 +4,8 @@
 
 O sistema de notificações do Fluxo7 Dev permite que usuários recebam **notificações em tempo real** quando novas demandas são atribuídas a eles, **mesmo com a aplicação fechada**.
 
+**Status atual:** o sistema utiliza **Web Push** com **Service Worker** no browser e **persistência de subscriptions no Supabase** via tabela `public.push_subscriptions`.
+
 ## 🏗️ Arquitetura do Sistema
 
 ### **Frontend (React + Vite)**
@@ -14,7 +16,11 @@ O sistema de notificações do Fluxo7 Dev permite que usuários recebam **notifi
 ### **Backend (Vercel Functions)**
 - API serverless para gerenciar notificações
 - Endpoints REST para subscription e envio
-- Armazenamento temporário de usuários
+- Persistência de subscriptions no **Supabase** (`push_subscriptions`)
+
+### **Banco (Supabase)**
+- Tabela `public.push_subscriptions` armazena uma subscription por dispositivo (multi-device)
+- `endpoint` é único (usado como chave de upsert)
 
 ### **Browser APIs**
 - **Service Worker**: Roda em background
@@ -30,6 +36,7 @@ O sistema de notificações do Fluxo7 Dev permite que usuários recebam **notifi
 3. Solicita permissão para notificações
 4. Cria subscription única para o usuário
 5. Envia subscription para servidor via /api/subscribe
+6. Servidor faz UPSERT no Supabase em public.push_subscriptions (multi-device)
 ```
 
 ### **2. Criação de Demanda**
@@ -37,7 +44,8 @@ O sistema de notificações do Fluxo7 Dev permite que usuários recebam **notifi
 1. Dominyck cria demanda para Kallew
 2. Sistema chama notificationService.notifyNewDemand()
 3. Envia POST para /api/notify-user
-4. Servidor processa e envia Push Notification
+4. Servidor busca as subscriptions do usuário no Supabase (push_subscriptions)
+5. Servidor processa e envia Push Notification para TODOS os dispositivos
 5. Kallew recebe notificação (mesmo offline!)
 ```
 
@@ -48,6 +56,21 @@ O sistema de notificações do Fluxo7 Dev permite que usuários recebam **notifi
 3. Exibe notificação nativa do sistema
 4. Usuário clica → abre/foca aplicação
 ```
+
+## 🗃️ Estrutura no Supabase (Persistência)
+
+### **Tabela: public.push_subscriptions**
+
+Campos principais:
+- `user_id` (text): identificador do usuário (ex: `kallew`)
+- `endpoint` (text, unique): endpoint do Push Service (chave única)
+- `p256dh` / `auth` (text): chaves do `PushSubscription.keys`
+- `device_info` (text): descrição do dispositivo (desktop/mobile, SO, browser)
+- `updated_at` (timestamptz): atualizado no upsert
+
+Notas:
+- O endpoint `/api/subscribe` faz `upsert(..., { onConflict: 'endpoint' })`.
+- O endpoint `/api/notify-user` remove subscriptions inválidas do Supabase quando o push retorna `410/404`.
 
 ## 📁 Estrutura de Arquivos
 
@@ -234,9 +257,15 @@ https://fluxo7dev.vercel.app/api/health # Backend Functions
 ```
 
 ### **3. Configuração Zero**
-- ✅ **Sem variáveis de ambiente**
-- ✅ **Sem banco de dados externo**
-- ✅ **Sem configuração adicional**
+Este módulo **não é configuração zero**: para push funcionar em produção, você precisa configurar **VAPID** e **credenciais do Supabase** no ambiente do backend.
+
+### **Variáveis de ambiente (Produção - Vercel Functions)**
+
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `VAPID_PUBLIC_KEY`
+- `VAPID_PRIVATE_KEY`
+- `VAPID_SUBJECT` (opcional, ex: `mailto:admin@fluxo7dev.com`)
 
 ## 🔧 Troubleshooting
 
@@ -258,25 +287,29 @@ https://fluxo7dev.vercel.app/api/health # Backend Functions
 
 ## 💡 Limitações Atuais
 
-### **Armazenamento Temporário**
-- **Subscriptions** são perdidas quando função "dorme"
-- **Solução**: Implementar Redis ou banco persistente
+### **Persistência de Subscription**
+- As subscriptions **são persistidas no Supabase**, então não dependem de memória do servidor.
+- Se o dispositivo revogar permissão/desinstalar, o envio pode falhar e o backend remove a subscription inválida.
 
 ### **Escalabilidade**
-- **Vercel Functions**: Stateless por natureza
-- **Solução**: Usar banco de dados para subscriptions
+- **Vercel Functions**: stateless por natureza (OK), mas o envio depende de consultas ao Supabase.
+- Para alto volume, considerar:
+  - paginação/lotes
+  - fila (ex.: worker)
+  - rate-limit por usuário
 
 ### **Offline Real**
-- **Atual**: Funciona se usuário esteve online recentemente
-- **Ideal**: Push Server dedicado 24/7
+- **Atual**: Web Push depende do Push Service do browser (Chrome/Firefox/etc.) e funciona mesmo com a aba fechada.
+- **Observação**: em iOS/Safari existem restrições e requisitos adicionais.
 
 ## 🎯 Próximos Passos
 
 ### **Melhorias Futuras**
-1. **Banco de dados**: Redis para subscriptions persistentes
-2. **Push Server dedicado**: Railway/Render para 24/7
-3. **Notificações ricas**: Ações, imagens, sons
-4. **Analytics**: Métricas de entrega e cliques
+1. **Segurança**: proteger `/api/subscribe` e `/api/notify-user` (evitar alguém registrar subscription para outro user)
+2. **Broadcast real**: revisar `/api/notify-all` para usar Supabase (hoje ele não está integrado)
+3. **Remover secrets hardcoded**: evitar VAPID keys no código (usar somente env vars)
+4. **Notificações ricas**: ações, deep links e tela/rota específica ao clicar
+5. **Analytics**: métricas de entrega, falhas e cliques
 
 ### **Implementação Completa**
 ```javascript

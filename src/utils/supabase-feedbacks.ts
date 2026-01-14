@@ -56,6 +56,15 @@ function mapRowToFeedback(row: IsisRow): FeedbackData {
   };
 }
 
+function shouldIncludeRow(row: IsisRow): boolean {
+  const hasRating = (row.nota ?? row.estrelas) !== null && (row.nota ?? row.estrelas) !== undefined;
+  if (hasRating) return true;
+
+  // Inclui sessões sem nota ainda, mas que possuem histórico de conversa
+  const conversa = normalizeConversation(row.conversa);
+  return conversa.length > 0;
+}
+
 export const supabaseFeedbacks = {
   async getFeedbacks(): Promise<FeedbackData[]> {
     const { data, error } = await supabase
@@ -69,7 +78,7 @@ export const supabaseFeedbacks = {
 
     const rows = (data as IsisRow[] | null) ?? [];
     return rows
-      .filter((row) => (row.nota ?? row.estrelas) !== null && (row.nota ?? row.estrelas) !== undefined)
+      .filter(shouldIncludeRow)
       .map(mapRowToFeedback)
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   },
