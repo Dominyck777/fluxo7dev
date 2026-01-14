@@ -136,7 +136,7 @@ const ExpandedDescriptionModal = ({
                     className="btn-confirm-item"
                     title="Adicionar item (Enter)"
                   >
-                    ✓
+                    <img className="check-icon-img" src="/check-icon.png" alt="Confirmar" />
                   </button>
                   <button
                     type="button"
@@ -164,7 +164,7 @@ const ExpandedDescriptionModal = ({
               className="btn-save-expanded"
               title="Salvar e fechar (Ctrl+Enter)"
             >
-              ✓ Salvar
+              <img className="check-icon-img" src="/check-icon.png" alt="Salvar" /> Salvar
             </button>
           </div>
         </div>

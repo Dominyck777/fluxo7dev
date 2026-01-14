@@ -377,14 +377,14 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
                       className="transaction-action-btn edit-btn"
                       title="Editar movimentação"
                     >
-                      ✏️
+                      <img className="edit-icon-img" src="/edit-icon.png" alt="Editar" />
                     </button>
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleDeleteTransaction(transaction.id); }}
                       className="transaction-action-btn delete-btn"
                       title="Excluir movimentação"
                     >
-                      ❌
+                      <img className="delete-icon-img" src="/delete-icon.png" alt="Excluir" />
                     </button>
                   </div>
                   
@@ -592,14 +592,14 @@ const FinancialView = ({ onOpenSidebar, onLogout }: FinancialViewProps) => {
                       className="transaction-action-btn edit-btn"
                       title="Editar movimentação"
                     >
-                      ✏️
+                      <img className="edit-icon-img" src="/edit-icon.png" alt="Editar" />
                     </button>
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleDeleteTransaction(transaction.id); }}
                       className="transaction-action-btn delete-btn"
                       title="Excluir movimentação"
                     >
-                      ❌
+                      <img className="delete-icon-img" src="/delete-icon.png" alt="Excluir" />
                     </button>
                   </div>
                   <div className="transaction-icon">

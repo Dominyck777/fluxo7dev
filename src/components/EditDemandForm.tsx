@@ -221,7 +221,7 @@ const EditDemandForm = ({ demand, onSubmit, onCancel, devs, projects, priorities
                   className="btn-confirm-item"
                   title="Adicionar item (Enter)"
                 >
-                  ✓
+                  <img className="check-icon-img" src="/check-icon.png" alt="Confirmar" />
                 </button>
                 <button
                   type="button"

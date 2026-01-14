@@ -193,7 +193,9 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
   if (error) {
     return (
       <div className="satisfaction-error">
-        <div className="error-icon">❌</div>
+        <div className="error-icon">
+          <img className="delete-icon-img" src="/delete-icon.png" alt="Erro" />
+        </div>
         <p>{error}</p>
         <button onClick={loadFeedbacks} className="retry-btn">
           🔄 Tentar novamente

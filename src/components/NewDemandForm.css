@@ -232,6 +232,28 @@
   box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
 }
 
+.btn-confirm-item {
+  border-color: rgba(255, 107, 0, 0.6);
+  color: var(--color-orange);
+}
+
+.btn-confirm-item:hover {
+  background: rgba(255, 107, 0, 0.12);
+  transform: scale(1.05);
+}
+
+.check-icon-img {
+  width: 18px;
+  height: 18px;
+  display: block;
+  filter: brightness(0) saturate(100%) invert(48%) sepia(97%) saturate(2903%) hue-rotate(3deg) brightness(101%) contrast(101%);
+  transition: filter 0.2s ease;
+}
+
+.btn-confirm-item:hover .check-icon-img {
+  filter: brightness(0) saturate(100%) invert(61%) sepia(71%) saturate(1256%) hue-rotate(348deg) brightness(103%) contrast(101%);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .new-demand-form {

@@ -149,19 +149,22 @@
 .btn-save-expanded {
   padding: 0.6rem 1.25rem;
   border-radius: 8px;
-  border: 2px solid #00ff99;
-  background: linear-gradient(135deg, #00ff99 0%, #00cc77 100%);
-  color: #000;
+  border: 2px solid var(--color-orange);
+  background: linear-gradient(135deg, #f05902 0%, #ff6b00 100%);
+  color: var(--color-white);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .btn-save-expanded:hover {
-  background: linear-gradient(135deg, #00cc77 0%, #00aa55 100%);
+  background: linear-gradient(135deg, #ff6b00 0%, #ff8533 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 255, 153, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
 }
 
 /* Responsividade */
@@ -319,13 +322,26 @@
 }
 
 .btn-confirm-item {
-  border-color: #00ff99;
-  color: #00ff99;
+  border-color: rgba(255, 107, 0, 0.6);
+  color: var(--color-orange);
 }
 
 .btn-confirm-item:hover {
-  background: rgba(0, 255, 153, 0.1);
+  background: rgba(255, 107, 0, 0.12);
   transform: scale(1.05);
+}
+
+.check-icon-img {
+  width: 18px;
+  height: 18px;
+  display: block;
+  filter: brightness(0) saturate(100%) invert(48%) sepia(97%) saturate(2903%) hue-rotate(3deg) brightness(101%) contrast(101%);
+  transition: filter 0.2s ease;
+}
+
+.btn-save-expanded:hover .check-icon-img,
+.btn-confirm-item:hover .check-icon-img {
+  filter: brightness(0) saturate(100%) invert(61%) sepia(71%) saturate(1256%) hue-rotate(348deg) brightness(103%) contrast(101%);
 }
 
 .btn-cancel-item {

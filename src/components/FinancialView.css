@@ -207,7 +207,7 @@
 
 /* Header */
 .financial-header {
-  background-color: var(--color-dark-gray);
+  background-color: #000000;
   border-bottom: 2px solid var(--color-orange);
   padding: 1rem 0;
   position: sticky;
@@ -883,6 +883,22 @@
   line-height: 1;
 }
 
+.edit-icon-img {
+  width: 18px;
+  height: 18px;
+  display: block;
+  filter: brightness(0) saturate(100%) invert(48%) sepia(97%) saturate(2903%) hue-rotate(3deg) brightness(101%) contrast(101%);
+  transition: filter 0.2s ease;
+}
+
+.delete-icon-img {
+  width: 18px;
+  height: 18px;
+  display: block;
+  filter: brightness(0) saturate(100%) invert(48%) sepia(97%) saturate(2903%) hue-rotate(3deg) brightness(101%) contrast(101%);
+  transition: filter 0.2s ease;
+}
+
 .transaction-action-btn:hover {
   background-color: rgba(255, 107, 0, 0.1);
   transform: scale(1.1);
@@ -892,9 +908,17 @@
   color: var(--color-orange-hover);
 }
 
+.transaction-action-btn.edit-btn:hover .edit-icon-img {
+  filter: brightness(0) saturate(100%) invert(61%) sepia(71%) saturate(1256%) hue-rotate(348deg) brightness(103%) contrast(101%);
+}
+
 .transaction-action-btn.delete-btn:hover {
   color: #FF1744;
   background-color: rgba(255, 23, 68, 0.1);
+}
+
+.transaction-action-btn.delete-btn:hover .delete-icon-img {
+  filter: brightness(0) saturate(100%) invert(61%) sepia(71%) saturate(1256%) hue-rotate(348deg) brightness(103%) contrast(101%);
 }
 
 /* Formulário Nova Transação */

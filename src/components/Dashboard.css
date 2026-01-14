@@ -16,7 +16,7 @@
 
 /* Header */
 .dashboard-header {
-  background-color: var(--color-dark-gray);
+  background-color: #000000;
   border-bottom: 2px solid var(--color-orange);
   padding: 1rem 0;
   position: sticky;
@@ -629,6 +629,16 @@
   font-weight: 600;
   z-index: 1001;
   animation: slideInRight 0.3s ease-out;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.success-notification .check-icon-img {
+  width: 18px;
+  height: 18px;
+  display: block;
+  filter: brightness(0) saturate(100%) invert(48%) sepia(97%) saturate(2903%) hue-rotate(3deg) brightness(101%) contrast(101%);
 }
 
 @keyframes slideInRight {

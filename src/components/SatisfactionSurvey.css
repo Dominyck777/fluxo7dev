@@ -1,7 +1,7 @@
 /* Satisfaction Survey */
 .satisfaction-survey {
   min-height: 100dvh;
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  background: #000000;
   color: var(--color-white);
 }
 
@@ -27,7 +27,7 @@
 
 /* Header */
 .satisfaction-header {
-  background-color: var(--color-dark-gray);
+  background-color: #000000;
   border-bottom: 2px solid var(--color-orange);
   padding: 1rem 0;
   position: sticky;
@@ -170,6 +170,19 @@
 .loading-spinner,
 .error-icon {
   font-size: 3rem;
+}
+
+.error-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-icon .delete-icon-img {
+  width: 42px;
+  height: 42px;
+  display: block;
+  filter: brightness(0) saturate(100%) invert(48%) sepia(97%) saturate(2903%) hue-rotate(3deg) brightness(101%) contrast(101%);
 }
 
 .retry-btn {

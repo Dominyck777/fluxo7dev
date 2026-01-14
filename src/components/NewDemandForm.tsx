@@ -221,7 +221,7 @@ Implementar sistema de login
                   className="btn-confirm-item"
                   title="Adicionar item (Enter)"
                 >
-                  ✓
+                  <img className="check-icon-img" src="/check-icon.png" alt="Confirmar" />
                 </button>
                 <button
                   type="button"

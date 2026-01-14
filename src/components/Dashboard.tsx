@@ -723,7 +723,7 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
       {/* Mensagem de Sucesso */}
       {showSuccess && (
         <div className="success-notification">
-          ✓ {successMessage}
+          <img className="check-icon-img" src="/check-icon.png" alt="Sucesso" /> {successMessage}
         </div>
       )}
     </div>

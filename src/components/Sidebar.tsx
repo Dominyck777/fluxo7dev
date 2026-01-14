@@ -69,7 +69,7 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
                 className="sidebar-avatar"
               />
             ) : (
-              <span className="logo-icon">👨‍💻</span>
+              <span className="logo-icon" />
             )}
             <div className="sidebar-user-text">
               <span className="sidebar-user-name">{user.name}</span>
@@ -90,7 +90,6 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
             className={`sidebar-tab ${currentTab === 'dashboard' ? 'active' : ''}`}
             onClick={() => handleTabClick('dashboard')}
           >
-            <span className="tab-icon">📊</span>
             <span className="tab-label">Dashboard</span>
           </button>
           
@@ -98,7 +97,6 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
             className={`sidebar-tab ${currentTab === 'financial' ? 'active' : ''}`}
             onClick={() => handleTabClick('financial')}
           >
-            <span className="tab-icon">💰</span>
             <span className="tab-label">Financeiro</span>
           </button>
 
@@ -106,7 +104,6 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
             className={`sidebar-tab ${currentTab === 'clients' ? 'active' : ''}`}
             onClick={() => handleTabClick('clients')}
           >
-            <span className="tab-icon">👥</span>
             <span className="tab-label">Clientes</span>
           </button>
           
@@ -114,7 +111,6 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
             className={`sidebar-tab ${currentTab === 'satisfaction' ? 'active' : ''}`}
             onClick={() => handleTabClick('satisfaction')}
           >
-            <span className="tab-icon">⭐</span>
             <span className="tab-label">Feedbacks</span>
           </button>
         </nav>
@@ -125,7 +121,7 @@ const Sidebar = ({ isOpen, onClose, user, onLogout, onNavigate }: SidebarProps) 
             onClick={onLogout}
             title="Sair"
           >
-            🚪
+            Sair
           </button>
         </div>
       </div>

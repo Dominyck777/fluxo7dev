@@ -83,7 +83,7 @@ const DemandCard = ({ demand, onEdit, onDelete, onComplete, onUpdate, isCompleti
               aria-label="Concluir demanda"
               title="Concluir"
             >
-              ✓
+              <img className="check-icon-img" src="/check-icon.png" alt="Concluir" />
             </button>
           )}
           {onEdit && (
@@ -96,7 +96,7 @@ const DemandCard = ({ demand, onEdit, onDelete, onComplete, onUpdate, isCompleti
               aria-label="Editar demanda"
               title="Editar"
             >
-              ✏️
+              <img className="edit-icon-img" src="/edit-icon.png" alt="Editar" />
             </button>
           )}
           {onDelete && (
@@ -109,7 +109,7 @@ const DemandCard = ({ demand, onEdit, onDelete, onComplete, onUpdate, isCompleti
               aria-label="Excluir demanda"
               title="Excluir"
             >
-              ❌
+              <img className="delete-icon-img" src="/delete-icon.png" alt="Excluir" />
             </button>
           )}
         </div>
@@ -191,7 +191,7 @@ const DemandCard = ({ demand, onEdit, onDelete, onComplete, onUpdate, isCompleti
           border: '2px solid #10B981',
           zIndex: 10
         }}>
-          ✓ Concluindo...
+          Concluindo...
         </div>
       )}
     </div>
