@@ -18,4 +18,3 @@ const Loading = ({ message = 'Carregando...' }: LoadingProps) => {
 };
 
 export default Loading;
-;
