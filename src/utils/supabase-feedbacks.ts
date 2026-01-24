@@ -103,21 +103,33 @@ export const supabaseFeedbacks = {
   },
 
   async clearSingleFeedback(id: string): Promise<void> {
-    const attempt1 = await supabase
-      .from('isis')
-      .update({ nota: null, comentario: null })
-      .eq('id', id);
+    try {
+      // Primeiro tenta deletar usando o campo 'id' como string
+      const { error: deleteError } = await supabase
+        .from('isis')
+        .delete()
+        .eq('id', id);
 
-    if (!attempt1.error) return;
+      if (!deleteError) return;
 
-    const attempt2 = await supabase
-      .from('isis')
-      .update({ estrelas: null, comentario: null })
-      .eq('id', id);
+      // Se falhar, tenta com o campo 'idx' como número
+      const idAsNumber = Number(id);
+      if (!isNaN(idAsNumber)) {
+        const { error: deleteByIdxError } = await supabase
+          .from('isis')
+          .delete()
+          .eq('idx', idAsNumber);
 
-    if (attempt2.error) {
-      console.error('[supabase-feedbacks] Erro ao limpar nota/comentário do feedback:', attempt2.error);
-      throw attempt2.error;
+        if (deleteByIdxError) {
+          console.error('[supabase-feedbacks] Erro ao deletar feedback:', deleteByIdxError);
+          throw deleteByIdxError;
+        }
+      } else {
+        throw deleteError;
+      }
+    } catch (error) {
+      console.error('[supabase-feedbacks] Erro ao deletar feedback:', error);
+      throw error;
     }
   },
 };

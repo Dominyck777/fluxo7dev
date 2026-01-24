@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 import './SatisfactionSurvey.css';
 import { supabaseFeedbacks } from '../utils/supabase-feedbacks';
 
@@ -29,14 +30,12 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
   const [feedbacks, setFeedbacks] = useState<FeedbackData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filter, setFilter] = useState({
+  const [filters, setFilters] = useState({
     empresa: '',
     projeto: '',
-    estrelas: 0
+    estrelas: '',
   });
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [deletingFeedbackId, setDeletingFeedbackId] = useState<string | null>(null);
+  const [feedbackToDelete, setFeedbackToDelete] = useState<{ id: string; name: string } | null>(null);
   const [expandedConversations, setExpandedConversations] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -74,14 +73,14 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
     )
   ).sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
-  const filteredFeedbacks = feedbacks.filter(feedback => {
-    if (filter.empresa && feedback.empresa !== filter.empresa) {
+  const filteredFeedbacks = feedbacks.filter((feedback) => {
+    if (filters.empresa && feedback.empresa !== filters.empresa) {
       return false;
     }
-    if (filter.projeto && feedback.projeto !== filter.projeto) {
+    if (filters.projeto && feedback.projeto !== filters.projeto) {
       return false;
     }
-    if (filter.estrelas > 0 && feedback.estrelas !== filter.estrelas) {
+    if (filters.estrelas && feedback.estrelas !== parseInt(filters.estrelas)) {
       return false;
     }
     return true;
@@ -99,7 +98,7 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
 
   const getRatingDistribution = () => {
     const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-    filteredFeedbacks.forEach(feedback => {
+    filteredFeedbacks.forEach((feedback) => {
       if (feedback.estrelas >= 1 && feedback.estrelas <= 5) {
         distribution[feedback.estrelas]++;
       }
@@ -110,34 +109,33 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
   const getRecentFeedbacks = () => {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    
-    return filteredFeedbacks.filter(feedback => {
+
+    return filteredFeedbacks.filter((feedback) => {
       const feedbackDate = new Date(feedback.timestamp);
       return feedbackDate >= oneWeekAgo;
     });
   };
 
   const recentFeedbacks = getRecentFeedbacks();
-  const recentPercentage = filteredFeedbacks.length > 0 
+  const recentPercentage = filteredFeedbacks.length > 0
     ? ((recentFeedbacks.length / filteredFeedbacks.length) * 100).toFixed(0)
     : 0;
 
   const renderStars = (rating: number) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <span
-          key={i}
-          style={{
-            color: i <= rating ? '#ffd700' : 'rgba(255, 255, 255, 0.3)',
-            fontSize: '1rem'
-          }}
-        >
-          ⭐
-        </span>
-      );
-    }
-    return stars;
+    return (
+      <div className="stars-container" title={`${rating} de 5 estrelas`}>
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span
+            key={star}
+            className={`star ${star <= rating ? 'filled' : ''}`}
+            aria-hidden="true"
+          >
+            {star <= rating ? '★' : '☆'}
+          </span>
+        ))}
+        <span className="rating-text">({rating.toFixed(1)})</span>
+      </div>
+    );
   };
 
   const formatDate = (timestamp: string) => {
@@ -160,33 +158,46 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
     });
   };
 
-  const handleDeleteAllFeedbacks = async () => {
-    try {
-      setIsDeleting(true);
-      setError('');
-      await supabaseFeedbacks.clearAllFeedbacks();
-      setFeedbacks([]);
-      setShowDeleteConfirm(false);
-    } catch (err) {
-      console.error('Erro ao deletar feedbacks:', err);
-      setError('Erro ao deletar pesquisas de satisfação');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
+  const handleDeleteClick = useCallback((feedbackId: string, feedbackName: string) => {
+    setFeedbackToDelete({ id: feedbackId, name: feedbackName });
+  }, []);
 
-  const handleDeleteSingleFeedback = async (feedbackId: string) => {
+  const handleConfirmDelete = useCallback(async () => {
+    if (!feedbackToDelete) return;
+
     try {
-      setDeletingFeedbackId(feedbackId);
       setError('');
-      await supabaseFeedbacks.clearSingleFeedback(feedbackId);
-      const updatedFeedbacks = feedbacks.filter(f => f.id !== feedbackId);
-      setFeedbacks(updatedFeedbacks);
+      await supabaseFeedbacks.clearSingleFeedback(feedbackToDelete.id);
+      setFeedbacks((prev) => prev.filter((f) => f.id !== feedbackToDelete.id));
+
+      // Fecha a conversa se estiver aberta
+      setExpandedConversations((prev) => {
+        const newState = { ...prev };
+        delete newState[feedbackToDelete.id];
+        return newState;
+      });
     } catch (err) {
       console.error('Erro ao deletar feedback:', err);
-      setError('Erro ao deletar pesquisa de satisfação');
+      setError('Erro ao excluir o feedback. Tente novamente.');
     } finally {
-      setDeletingFeedbackId(null);
+      setFeedbackToDelete(null);
+    }
+  }, [feedbackToDelete]);
+
+  const handleCancelDelete = useCallback(() => {
+    setFeedbackToDelete(null);
+  }, []);
+
+  // Função para lidar com a exclusão de todos os feedbacks
+  const handleDeleteAllFeedbacks = async () => {
+    if (window.confirm('Tem certeza que deseja excluir TODOS os feedbacks? Esta ação não pode ser desfeita.')) {
+      try {
+        await supabaseFeedbacks.clearAllFeedbacks();
+        setFeedbacks([]);
+      } catch (err) {
+        console.error('Erro ao deletar todos os feedbacks:', err);
+        setError('Erro ao excluir todas as pesquisas de satisfação');
+      }
     }
   };
 
@@ -203,13 +214,14 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
       </div>
     );
   }
+
   const distribution = getRatingDistribution();
 
   return (
     <div className="satisfaction-survey">
       <header className="satisfaction-header">
         <div className="header-content">
-          <span 
+          <span
             className={`header-icon ${onOpenSidebar ? 'clickable' : ''}`}
             onClick={onOpenSidebar}
             title={onOpenSidebar ? 'Abrir menu' : ''}
@@ -225,7 +237,7 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
           </span>
           <h1 className="satisfaction-title">Feedbacks</h1>
           <div className="header-user-section">
-            <button 
+            <button
               className="logout-button"
               onClick={onLogout}
               title="Sair do sistema"
@@ -322,83 +334,83 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
 
           {/* Filtros */}
           <h2 className="feedbacks-section-title">Filtros</h2>
-          <div className="satisfaction-filters">
-            <div className="filter-group">
-              <label>Empresa:</label>
-              <select
-                value={filter.empresa}
-                onChange={(e) =>
-                  setFilter((prev) => ({
-                    ...prev,
-                    empresa: e.target.value,
-                  }))
-                }
-              >
-                <option value="">Todas</option>
-                {empresas.map((empresa) => (
-                  <option key={empresa} value={empresa}>
-                    {empresa}
-                  </option>
-                ))}
-              </select>
+          <div className="filters-container">
+            <div className="filters">
+              <div className="filter-group">
+                <label htmlFor="empresa">Empresa:</label>
+                <select
+                  id="empresa"
+                  value={filters.empresa}
+                  onChange={(e) => setFilters({ ...filters, empresa: e.target.value })}
+                >
+                  <option value="">Todas</option>
+                  {empresas.map((empresa) => (
+                    <option key={empresa} value={empresa}>
+                      {empresa}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="filter-group">
+                <label htmlFor="projeto">Projeto:</label>
+                <select
+                  id="projeto"
+                  value={filters.projeto}
+                  onChange={(e) => setFilters({ ...filters, projeto: e.target.value })}
+                >
+                  <option value="">Todos</option>
+                  {projetos.map((projeto) => (
+                    <option key={projeto} value={projeto}>
+                      {projeto}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="filter-group">
+                <label htmlFor="estrelas">Avaliação:</label>
+                <select
+                  id="estrelas"
+                  value={filters.estrelas}
+                  onChange={(e) =>
+                    setFilters({ ...filters, estrelas: e.target.value })
+                  }
+                >
+                  <option value="">Todas</option>
+                  <option value="5">5 estrelas</option>
+                  <option value="4">4 estrelas</option>
+                  <option value="3">3 estrelas</option>
+                  <option value="2">2 estrelas</option>
+                  <option value="1">1 estrela</option>
+                </select>
+              </div>
             </div>
+          </div>
 
-            <div className="filter-group">
-              <label>Projeto:</label>
-              <select
-                value={filter.projeto}
-                onChange={(e) =>
-                  setFilter((prev) => ({
-                    ...prev,
-                    projeto: e.target.value,
-                  }))
-                }
-              >
-                <option value="">Todos</option>
-                {projetos.map((projeto) => (
-                  <option key={projeto} value={projeto}>
-                    {projeto}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <button onClick={loadFeedbacks} className="refresh-btn">
+            🔄 Atualizar
+          </button>
 
-            <div className="filter-group">
-              <label>Estrelas:</label>
-              <select
-                value={filter.estrelas}
-                onChange={(e) =>
-                  setFilter((prev) => ({
-                    ...prev,
-                    estrelas: parseInt(e.target.value) || 0,
-                  }))
-                }
-              >
-                <option value={0}>Todas</option>
-                <option value={5}>5 ⭐</option>
-                <option value={4}>4 ⭐</option>
-                <option value={3}>3 ⭐</option>
-                <option value={2}>2 ⭐</option>
-                <option value={1}>1 ⭐</option>
-              </select>
-            </div>
-
-            <button onClick={loadFeedbacks} className="refresh-btn">
-              🔄 Atualizar
-            </button>
-
+          <div className="actions">
             <button
-              onClick={() => setShowDeleteConfirm(true)}
               className="delete-all-btn"
-              disabled={filteredFeedbacks.length === 0}
-              title="Apagar todas as pesquisas"
+              onClick={handleDeleteAllFeedbacks}
+              disabled={isLoading}
             >
-              🗑️ Apagar Todas
+              Excluir todos os feedbacks
             </button>
           </div>
 
           {/* Lista de feedbacks */}
           <h2 className="feedbacks-section-title">Feedbacks</h2>
+          <DeleteConfirmationModal
+            isOpen={!!feedbackToDelete}
+            onClose={handleCancelDelete}
+            onConfirm={handleConfirmDelete}
+            itemName={feedbackToDelete?.name || ''}
+          />
+
           <div className="feedbacks-list">
             {isLoading ? (
               <div className="no-feedbacks">
@@ -427,12 +439,11 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
                         {renderStars(feedback.estrelas)}
                       </div>
                       <button
-                        onClick={() => handleDeleteSingleFeedback(feedback.id)}
                         className="delete-feedback-btn"
-                        disabled={deletingFeedbackId === feedback.id}
-                        title="Apagar esta pesquisa"
+                        onClick={() => handleDeleteClick(feedback.id, feedback.nome_cliente || 'este feedback')}
+                        disabled={!!feedbackToDelete}
                       >
-                        {deletingFeedbackId === feedback.id ? '⏳' : '🗑️'}
+                        Excluir
                       </button>
                     </div>
                   </div>
@@ -491,40 +502,6 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
               ))
             )}
           </div>
-
-          {/* Modal de confirmação para deletar */}
-          {showDeleteConfirm && (
-            <div className="delete-confirm-overlay">
-              <div className="delete-confirm-modal">
-                <div className="delete-confirm-header">
-                  <h3>⚠️ Confirmar Exclusão</h3>
-                </div>
-                <div className="delete-confirm-content">
-                  <p>
-                    Tem certeza que deseja apagar <strong>todas as {feedbacks.length} pesquisas</strong> de
-                    satisfação?
-                  </p>
-                  <p className="warning-text">Esta ação não pode ser desfeita!</p>
-                </div>
-                <div className="delete-confirm-actions">
-                  <button
-                    onClick={() => setShowDeleteConfirm(false)}
-                    className="cancel-delete-btn"
-                    disabled={isDeleting}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleDeleteAllFeedbacks}
-                    className="confirm-delete-btn"
-                    disabled={isDeleting}
-                  >
-                    {isDeleting ? '⏳ Apagando...' : '🗑️ Apagar Todas'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </main>
     </div>
