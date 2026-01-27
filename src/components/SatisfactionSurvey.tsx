@@ -335,7 +335,7 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
           {/* Filtros */}
           <h2 className="feedbacks-section-title">Filtros</h2>
           <div className="filters-container">
-            <div className="filters">
+            <div className="satisfaction-filters">
               <div className="filter-group">
                 <label htmlFor="empresa">Empresa:</label>
                 <select
@@ -388,9 +388,7 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
             </div>
           </div>
 
-          <button onClick={loadFeedbacks} className="refresh-btn">
-            🔄 Atualizar
-          </button>
+          
 
           <div className="actions">
             <button
@@ -403,7 +401,10 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
           </div>
 
           {/* Lista de feedbacks */}
-          <h2 className="feedbacks-section-title">Feedbacks</h2>
+          <div className="feedbacks-header">
+            <h2 className="feedbacks-section-title">Feedbacks</h2>
+            <button onClick={loadFeedbacks} className="refresh-btn" aria-label="Atualizar" title="Atualizar">🔄</button>
+          </div>
           <DeleteConfirmationModal
             isOpen={!!feedbackToDelete}
             onClose={handleCancelDelete}
@@ -426,25 +427,21 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
               filteredFeedbacks.map((feedback) => (
                 <div key={feedback.id} className="feedback-card">
                   <div className="feedback-header">
-                    <div className="feedback-info">
-                      <h3>{feedback.nome_cliente}</h3>
-                      <div className="feedback-meta">
-                        <span className="empresa">{feedback.empresa}</span>
-                        <span className="projeto">{feedback.projeto}</span>
+                    <div className="feedback-header-row">
+                      <div className="feedback-title-container">
+                        <div className="title-row">
+                          <h3>{feedback.nome_cliente}</h3>
+                          <div className="feedback-rating">
+                            {renderStars(feedback.estrelas)}
+                          </div>
+                        </div>
                         <span className="date">{formatDate(feedback.timestamp)}</span>
                       </div>
                     </div>
-                    <div className="feedback-actions">
-                      <div className="feedback-rating">
-                        {renderStars(feedback.estrelas)}
-                      </div>
-                      <button
-                        className="delete-feedback-btn"
-                        onClick={() => handleDeleteClick(feedback.id, feedback.nome_cliente || 'este feedback')}
-                        disabled={!!feedbackToDelete}
-                      >
-                        Excluir
-                      </button>
+                    
+                    <div className="feedback-meta">
+                      <span className="empresa">{feedback.empresa}</span>
+                      <span className="projeto">{feedback.projeto}</span>
                     </div>
                   </div>
 
@@ -454,11 +451,7 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
                     </div>
                   )}
 
-                  <div
-                    className={`feedback-conversation ${
-                      expandedConversations[feedback.id] ? 'expanded' : ''
-                    }`}
-                  >
+                  <div className="feedback-actions">
                     <button
                       type="button"
                       className="conversation-toggle-btn"
@@ -468,6 +461,25 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
                         ? '📖 Esconder conversa completa'
                         : '📋 Abrir conversa completa'}
                     </button>
+                    <button
+                      className="delete-feedback-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClick(feedback.id, feedback.nome_cliente || 'este feedback');
+                      }}
+                      disabled={!!feedbackToDelete}
+                      aria-label="Excluir feedback"
+                      title="Excluir"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+
+                  <div
+                    className={`feedback-conversation ${
+                      expandedConversations[feedback.id] ? 'expanded' : ''
+                    }`}
+                  >
                     <div className="conversation-body">
                       {feedback.conversa && feedback.conversa.length > 0 ? (
                         feedback.conversa.map((message) => (

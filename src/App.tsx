@@ -8,6 +8,7 @@ import SatisfactionSurvey from './components/SatisfactionSurvey';
 import Sidebar from './components/Sidebar';
 import ProfileView from './components/ProfileView';
 import { type Developer } from './utils/jsonbin-client';
+import { notificationService } from './utils/notification-service';
 
 const AUTH_KEY = 'fluxo7dev_auth';
 const USER_KEY = 'fluxo7dev_user';
@@ -118,6 +119,21 @@ function App() {
       document.removeEventListener('touchend', handleTouchEnd);
     };
   }, [isAuthenticated]);
+
+  // Inicializa Web Push (inscrição) quando autenticado
+  useEffect(() => {
+    const initPush = async () => {
+      try {
+        if (isAuthenticated && currentUser) {
+          // Usa o nome do dev como userId para manter consistência com assignedUser
+          await notificationService.initializePushServer(currentUser.name);
+        }
+      } catch (err) {
+        console.error('Falha ao inicializar notificações:', err);
+      }
+    };
+    initPush();
+  }, [isAuthenticated, currentUser]);
 
   return (
     <>

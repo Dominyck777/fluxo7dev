@@ -25,6 +25,22 @@
   padding-bottom: 0.35rem;
 }
 
+/* Header da seção de feedbacks com título e botão de refresh à direita */
+.feedbacks-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.feedbacks-header .feedbacks-section-title {
+  margin: 0;
+}
+
+.feedbacks-header .refresh-btn {
+  margin: 0;
+}
+
 /* Header */
 .satisfaction-header {
   background-color: #000000;
@@ -428,22 +444,27 @@
 }
 
 .refresh-btn {
-  padding: 0.75rem 1.5rem;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: linear-gradient(135deg, rgba(0, 255, 153, 0.1) 0%, rgba(0, 255, 153, 0.05) 100%);
-  border: 2px solid rgba(0, 255, 153, 0.3);
+  border: 1.5px solid rgba(0, 255, 153, 0.3);
   border-radius: 8px;
   color: #00ff99;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .refresh-btn:hover {
   background: linear-gradient(135deg, rgba(0, 255, 153, 0.2) 0%, rgba(0, 255, 153, 0.1) 100%);
   border-color: #00ff99;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 255, 153, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 255, 153, 0.25);
 }
 
 .delete-all-btn {
@@ -514,7 +535,7 @@
   right: 0;
   height: 4px;
   background: linear-gradient(90deg, var(--color-orange) 0%, #ffd700 100%);
-  opacity: 0;
+  opacity: 0.7;
   transition: opacity 0.3s ease;
 }
 
@@ -525,15 +546,45 @@
 }
 
 .feedback-card:hover::before {
-  opacity: 1;
+  opacity: 0.9;
 }
 
 .feedback-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 1.5rem 1.75rem 1rem;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem 1.5rem 1rem;
   border-bottom: 1px solid rgba(255, 107, 0, 0.15);
+}
+
+.feedback-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.feedback-title-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex-direction: column;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Esconde o texto numérico (ex: (4.0)) quando as estrelas estão ao lado do nome */
+.feedback-title-container .rating-text {
+  display: inline;
+}
+
+/* Ajuste de espaçamento da data abaixo do nome */
+.feedback-title-container .date {
+  margin-top: 0.25rem;
 }
 
 .feedback-info {
@@ -559,8 +610,8 @@
 
 .delete-feedback-btn {
   padding: 0.5rem;
-  background: transparent;
-  border: 1px solid rgba(255, 77, 77, 0.3);
+  background: rgba(255, 77, 77, 0.1);
+  border: 1px solid rgba(255, 77, 77, 0.4);
   border-radius: 8px;
   color: #ff4d4d;
   font-size: 1rem;
@@ -571,6 +622,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .delete-feedback-btn:hover:not(:disabled) {
@@ -622,10 +674,12 @@
 .feedback-rating {
   display: flex;
   gap: 0.25rem;
-  padding: 0.5rem 0.75rem;
-  background: rgba(255, 215, 0, 0.1);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 215, 0, 0.3);
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
 }
 
 .feedback-comment {
@@ -644,27 +698,28 @@
 }
 
 .feedback-conversation {
-  padding: 0.75rem 1.75rem 1.25rem;
-  border-top: 1px solid rgba(255, 107, 0, 0.15);
+  padding: 0 1.75rem 1.25rem;
   background: radial-gradient(circle at top left, rgba(255, 107, 0, 0.12), transparent 55%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .conversation-toggle-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.75rem;
-  margin-bottom: 0.5rem;
-  border-radius: 999px;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
   border: 1px solid rgba(255, 107, 0, 0.4);
   background: rgba(0, 0, 0, 0.35);
   color: var(--color-orange);
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-size: 0.85rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
+  margin: 0;
+  white-space: nowrap;
 }
 
 .conversation-toggle-btn:hover {
@@ -797,32 +852,33 @@
 }
 
 .feedback-actions {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
   display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   gap: 0.5rem;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 107, 0, 0.1);
+  justify-content: center;
+  width: 100%;
 }
 
-.feedback-card:hover .feedback-actions {
-  opacity: 1;
-}
+/* Removendo o hover que afetava a visibilidade */
 
 .delete-feedback-btn {
   background: rgba(255, 77, 77, 0.1);
-  border: 1px solid rgba(255, 77, 77, 0.3);
+  border: 1px solid rgba(255, 77, 77, 0.4);
   color: #ff4d4d;
   border-radius: 6px;
-  padding: 0.35rem 0.65rem;
+  padding: 0.4rem 0.8rem;
   cursor: pointer;
   font-size: 0.85rem;
   display: flex;
   align-items: center;
   gap: 0.35rem;
   transition: all 0.2s ease;
-  backdrop-filter: blur(4px);
+  white-space: nowrap;
 }
 
 .delete-feedback-btn:hover {
@@ -893,9 +949,15 @@
   }
   
   .feedback-actions {
-    flex-direction: row;
+    position: relative;
+    top: auto;
+    right: auto;
+    margin-top: 0.75rem;
     width: 100%;
-    justify-content: space-between;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 0;
     align-items: center;
   }
   

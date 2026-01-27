@@ -15,7 +15,7 @@ export default function handler(req, res) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-API-KEY');
   
   if (req.method === 'OPTIONS') {
     res.status(200).end();
@@ -24,6 +24,14 @@ export default function handler(req, res) {
   
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
+  // Auth simples via header
+  const serverApiKey = process.env.NOTIFICATIONS_API_KEY;
+  const clientApiKey = req.headers['x-api-key'];
+  if (!serverApiKey || clientApiKey !== serverApiKey) {
+    res.status(401).json({ error: 'Unauthorized' });
     return;
   }
   

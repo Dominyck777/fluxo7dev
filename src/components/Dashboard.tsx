@@ -211,7 +211,8 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
           {
             demandId: created.id,
             assignedUser,
-            type: 'new_demand'
+            type: 'new_demand',
+            route: `/#/demandas?demandId=${created.id}`
           }
         );
       } catch (error) {
@@ -232,6 +233,27 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
     try {
       const saved = await supabaseDemands.updateDemand(updatedDemand);
       setDemands(prev => prev.map(d => d.id === saved.id ? saved : d));
+      // Se houve mudança de status, notifica o responsável
+      try {
+        if (editingDemand && editingDemand.status !== saved.status) {
+          const assignedUser = saved.desenvolvedor;
+          await notificationService.sendPushServerNotification(
+            assignedUser,
+            `🔄 Status atualizado - ${assignedUser}`,
+            `A demanda "${saved.descricao}" mudou de ${editingDemand.status} para ${saved.status}`,
+            {
+              demandId: saved.id,
+              assignedUser,
+              type: 'status_change',
+              from: editingDemand.status,
+              to: saved.status,
+              route: `/#/demandas?demandId=${saved.id}`
+            }
+          );
+        }
+      } catch (notifyErr) {
+        console.error('[Dashboard] Falha ao enviar push de mudança de status:', notifyErr);
+      }
       setIsEditModalOpen(false);
       setEditingDemand(null);
       showSuccessNotification('Demanda atualizada com sucesso!');

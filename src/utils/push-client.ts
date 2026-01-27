@@ -63,6 +63,7 @@ class PushClient {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-API-KEY': (import.meta as any).env?.VITE_NOTIFICATIONS_API_KEY || ''
         },
         body: JSON.stringify({
           userId: this.currentUserId,
@@ -90,6 +91,7 @@ class PushClient {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-API-KEY': (import.meta as any).env?.VITE_NOTIFICATIONS_API_KEY || ''
         },
         body: JSON.stringify({
           userId,
@@ -123,6 +125,7 @@ class PushClient {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-API-KEY': (import.meta as any).env?.VITE_NOTIFICATIONS_API_KEY || ''
         },
         body: JSON.stringify({
           title,

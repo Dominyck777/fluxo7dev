@@ -61,24 +61,24 @@ self.addEventListener('notificationclick', (event) => {
   console.log('🖱️ Clique na notificação:', event);
   
   event.notification.close();
+  const route = event.notification?.data?.route || '/#/demandas';
 
-  if (event.action === 'view') {
-    // Abre ou foca na aplicação
-    event.waitUntil(
-      self.clients.matchAll({ type: 'window', includeUncontrolled: true })
-        .then((clients) => {
-          // Se já há uma janela aberta, foca nela
-          for (const client of clients) {
-            if (client.url.includes('fluxo7dev') && 'focus' in client) {
-              return client.focus();
-            }
+  // Abre ou foca na aplicação
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clients) => {
+        // Se já há uma janela aberta, foca nela e navega
+        for (const client of clients) {
+          if ('focus' in client) {
+            client.navigate ? client.navigate(route) : null;
+            return client.focus();
           }
-          // Senão, abre uma nova janela
-          if (self.clients.openWindow) {
-            return self.clients.openWindow('/');
-          }
-        })
-    );
-  }
+        }
+        // Senão, abre uma nova janela na rota
+        if (self.clients.openWindow) {
+          return self.clients.openWindow(route);
+        }
+      })
+  );
   // Action 'dismiss' apenas fecha a notificação (já feito acima)
 });
