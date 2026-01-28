@@ -23,6 +23,7 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
   const [isDemandsChartOpen, setIsDemandsChartOpen] = useState(false); // controla modal de demandas
   const [isEnablingPush, setIsEnablingPush] = useState(false);
   const [pushStatusMessage, setPushStatusMessage] = useState<string>('');
+  const [isTestingPush, setIsTestingPush] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -257,6 +258,36 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
                 }}
               >
                 {isEnablingPush ? 'Ativando...' : 'Ativar notificações'}
+              </button>
+              <button
+                type="button"
+                className="profile-edit-button"
+                disabled={isTestingPush || !notificationService.isPushServerSupported()}
+                onClick={async () => {
+                  setIsTestingPush(true);
+                  setPushStatusMessage('');
+                  try {
+                    const ok = await notificationService.sendPushServerNotification(
+                      currentUser.name,
+                      '🔔 Teste Fluxo7 Dev',
+                      'Notificações ativas neste dispositivo!',
+                      { route: '/#/demandas', type: 'test' }
+                    );
+                    if (ok) {
+                      setPushStatusMessage('✅ Notificação de teste enviada.');
+                    } else {
+                      setPushStatusMessage('⚠️ Falha ao enviar notificação de teste.');
+                    }
+                  } catch (error) {
+                    console.error('[ProfileView] Erro ao enviar notificação de teste:', error);
+                    setPushStatusMessage('❌ Erro ao enviar notificação de teste.');
+                  } finally {
+                    setIsTestingPush(false);
+                  }
+                }}
+                style={{ marginLeft: '0.5rem' }}
+              >
+                {isTestingPush ? 'Enviando...' : 'Testar notificação'}
               </button>
               {!notificationService.isPushServerSupported() && (
                 <p className="profile-status">
