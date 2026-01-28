@@ -58,9 +58,11 @@ export default function handler(req, res) {
         updated_at: new Date().toISOString(),
       };
 
-      const { error } = await supabase
+      const { data: upserted, error } = await supabase
         .from('push_subscriptions')
-        .upsert(row, { onConflict: 'endpoint' });
+        .upsert(row, { onConflict: 'endpoint' })
+        .select('id, user_id, endpoint, updated_at')
+        .limit(1);
 
       if (error) {
         console.error('[api/subscribe] Erro ao salvar subscription:', error);
@@ -68,10 +70,12 @@ export default function handler(req, res) {
         return;
       }
 
+      console.log('[api/subscribe] Subscription salva para', userId, 'endpoint prefix:', endpoint?.slice(0, 50));
       res.status(200).json({
         success: true,
         message: `Subscription registrada para ${userId}`,
         deviceInfo: deviceInfo || 'Unknown Device',
+        saved: upserted && upserted[0] ? upserted[0] : null
       });
     } catch (err) {
       console.error('[api/subscribe] Erro inesperado:', err);
