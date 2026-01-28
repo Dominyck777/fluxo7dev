@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+﻿import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     
-    // Configurações de desenvolvimento
+    // ConfiguraÃ§Ãµes de desenvolvimento
     server: isProduction ? undefined : {
       proxy: {
         // Rota para a API
@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
           secure: isProduction,
           rewrite: (path: string) => path.replace(/^\/api/, isProduction ? '/api' : '')
         },
-        // Rota para notificações push
+        // Rota para notificaÃ§Ãµes push
         '/notify-user': {
           target: isProduction ? 'https://fluxo7dev.vercel.app' : 'http://localhost:3000',
           changeOrigin: true,
@@ -29,28 +29,28 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: isProduction
         },
-        // Rota de saúde
+        // Rota de saÃºde
         '/health': {
           target: isProduction ? 'https://fluxo7dev.vercel.app' : 'http://localhost:3000',
           changeOrigin: true,
           secure: isProduction
         }
       },
-      // Configuração de CORS para desenvolvimento
+      // ConfiguraÃ§Ã£o de CORS para desenvolvimento
       cors: {
         origin: '*',
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
         preflightContinue: false,
         optionsSuccessStatus: 204
       },
-      // Configuração para permitir acesso de qualquer host
+      // ConfiguraÃ§Ã£o para permitir acesso de qualquer host
       host: true,
-      // Configuração para exibir erros detalhados
+      // ConfiguraÃ§Ã£o para exibir erros detalhados
       strictPort: true,
       open: !isProduction
     },
     
-    // Configurações de build para produção
+    // ConfiguraÃ§Ãµes de build para produÃ§Ã£o
     build: {
       outDir: 'dist',
       assetsDir: 'assets',
@@ -60,13 +60,13 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: {
             react: ['react', 'react-dom'],
-            vendor: ['@supabase/supabase-js', 'web-push']
+            vendor: ['@supabase/supabase-js']
           }
         }
       }
     },
     
-    // Configurações gerais
+    // ConfiguraÃ§Ãµes gerais
     define: {
       'process.env': {}
     }
