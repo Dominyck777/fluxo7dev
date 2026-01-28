@@ -46,7 +46,19 @@ function getSupabaseAdmin() {
 function getVapid() {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;
-  const subject = process.env.VAPID_SUBJECT || 'mailto:admin@fluxo7dev.com';
+  let subject = process.env.VAPID_SUBJECT || 'mailto:admin@fluxo7dev.com';
+
+  // Normaliza subject: se parecer um e-mail sem prefixo, adiciona 'mailto:'
+  try {
+    const looksLikeEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(subject);
+    const hasMailto = /^mailto:/i.test(subject);
+    const hasHttp = /^https?:\/\//i.test(subject);
+    if (looksLikeEmail && !hasMailto && !hasHttp) {
+      subject = `mailto:${subject}`;
+    }
+  } catch (_) {
+    // ignora falha na regex
+  }
 
   if (!publicKey || !privateKey) {
     const error = new Error('VAPID_PUBLIC_KEY ou VAPID_PRIVATE_KEY não configuradas');
