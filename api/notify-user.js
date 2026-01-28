@@ -212,7 +212,8 @@ export default async function handler(req, res) {
           const payload = JSON.stringify({
             title,
             body,
-            icon: '/favicon.svg',
+            icon: '/check-icon.png',
+            badge: '/check-icon.png',
             ...(data || {})
           });
 

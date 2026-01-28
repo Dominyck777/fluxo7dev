@@ -16,15 +16,15 @@ self.addEventListener('push', (event) => {
   let notificationData = {
     title: 'Fluxo7 Dev',
     body: 'Nova notificação',
-    icon: '/favicon.svg',
-    badge: '/favicon.svg',
+    icon: '/check-icon.png',
+    badge: '/check-icon.png',
     tag: 'fluxo7-notification',
     requireInteraction: true,
     actions: [
       {
         action: 'view',
         title: 'Ver Demanda',
-        icon: '/favicon.svg'
+        icon: '/check-icon.png'
       },
       {
         action: 'dismiss',
