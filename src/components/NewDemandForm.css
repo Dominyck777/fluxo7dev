@@ -32,19 +32,19 @@
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 107, 0, 0.4);
-  background: linear-gradient(135deg, rgba(255, 107, 0, 0.1) 0%, rgba(255, 107, 0, 0.05) 100%);
-  color: var(--color-orange);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.4);
+  background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.1) 0%, rgba(var(--color-primary-rgb), 0.05) 100%);
+  color: var(--color-primary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
 }
 
 .expand-btn:hover {
-  border-color: var(--color-orange);
-  background: linear-gradient(135deg, rgba(255, 107, 0, 0.2) 0%, rgba(255, 107, 0, 0.1) 100%);
+  border-color: var(--color-primary);
+  background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.2) 0%, rgba(var(--color-primary-rgb), 0.1) 100%);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(255, 107, 0, 0.2);
+  box-shadow: 0 2px 8px var(--color-button-glow);
 }
 
 .form-field label {
@@ -56,46 +56,26 @@
 }
 
 .required {
-  color: var(--color-orange);
+  color: var(--color-primary);
   font-weight: 700;
 }
 
 .form-field input,
 .form-field textarea,
-.form-field select {
+.form-field select,
+.description-viewer {
   width: 100%;
   padding: 0.85rem;
   font-size: 1rem;
   border-radius: 8px;
-  border: 2px solid rgba(255, 107, 0, 0.3);
+  border: 2px solid rgba(var(--color-primary-rgb), 0.3);
   background-color: rgba(20, 20, 20, 0.8);
   color: var(--color-white);
   transition: all 0.3s ease;
   font-weight: 500;
 }
 
-.form-field textarea {
-  resize: none;
-  min-height: 120px;
-  font-family: inherit;
-  line-height: 1.5;
-}
-
-.description-viewer {
-  width: 100%;
-  min-height: 120px;
-  padding: 0.85rem;
-  border-radius: 8px;
-  border: 2px solid rgba(255, 107, 0, 0.3);
-  background-color: rgba(20, 20, 20, 0.8);
-  cursor: text;
-  transition: all 0.3s ease;
-}
-
-.description-viewer:hover {
-  border-color: rgba(255, 107, 0, 0.5);
-  background-color: rgba(30, 30, 30, 0.9);
-}
+/* description-viewer hover remvido por redundância acima */
 
 /* Container para textarea com botão de tela cheia */
 .textarea-container {
@@ -127,7 +107,7 @@
 
 .fullscreen-btn:hover {
   background: rgba(0, 0, 0, 0.9);
-  color: var(--color-orange);
+  color: var(--color-primary);
   transform: scale(1.1);
 }
 
@@ -137,8 +117,9 @@
 
 .form-field input:hover,
 .form-field textarea:hover,
-.form-field select:hover {
-  border-color: rgba(255, 107, 0, 0.5);
+.form-field select:hover,
+.description-viewer:hover {
+  border-color: rgba(var(--color-primary-rgb), 0.5);
   background-color: rgba(30, 30, 30, 0.9);
 }
 
@@ -146,9 +127,9 @@
 .form-field textarea:focus,
 .form-field select:focus {
   outline: none;
-  border-color: var(--color-orange);
+  border-color: var(--color-primary);
   background-color: rgba(30, 30, 30, 0.95);
-  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.15);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
 }
 
 .form-field input.error,
@@ -219,26 +200,26 @@
 }
 
 .btn-submit {
-  background: linear-gradient(135deg, #f05902 0%, #ff6b00 100%);
-  border-color: var(--color-orange);
+  background: linear-gradient(135deg, var(--color-logo-fluxo) 0%, var(--color-primary) 100%);
+  border-color: var(--color-primary);
   color: var(--color-white);
-  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+  box-shadow: 0 4px 12px var(--color-button-glow);
 }
 
 .btn-submit:hover {
-  background: linear-gradient(135deg, #ff6b00 0%, #ff8533 100%);
-  border-color: var(--color-orange-hover);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  border-color: var(--color-primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
+  box-shadow: 0 6px 20px var(--color-button-glow);
 }
 
 .btn-confirm-item {
-  border-color: rgba(255, 107, 0, 0.6);
-  color: var(--color-orange);
+  border-color: rgba(var(--color-primary-rgb), 0.6);
+  color: var(--color-primary);
 }
 
 .btn-confirm-item:hover {
-  background: rgba(255, 107, 0, 0.12);
+  background: rgba(var(--color-primary-rgb), 0.12);
   transform: scale(1.05);
 }
 

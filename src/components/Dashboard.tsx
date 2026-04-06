@@ -313,11 +313,11 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
             style={{ cursor: onOpenSidebar ? 'pointer' : 'default' }}
           >
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="3" y="3" width="18" height="18" rx="2" stroke="#f05902" strokeWidth="2"/>
-              <path d="M8 8L10 10L8 12" stroke="#ffaa33" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <rect x="3" y="3" width="18" height="18" rx="2" stroke="var(--color-logo-fluxo)" strokeWidth="2"/>
+              <path d="M8 8L10 10L8 12" stroke="var(--color-logo-7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M12 12H16" stroke="#91b0b0" strokeWidth="2" strokeLinecap="round"/>
-              <circle cx="18" cy="18" r="4" fill="#1a1a1a" stroke="#f05902" strokeWidth="1.5"/>
-              <path d="M18 16V20M16 18H20" stroke="#ffaa33" strokeWidth="1.5" strokeLinecap="round"/>
+              <circle cx="18" cy="18" r="4" fill="#1a1a1a" stroke="var(--color-logo-fluxo)" strokeWidth="1.5"/>
+              <path d="M18 16V20M16 18H20" stroke="var(--color-logo-7)" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
           </span>
           <h1 className="header-logo">
@@ -333,8 +333,13 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
               onClick={onLogout} 
               className="logout-button"
               aria-label="Sair do sistema"
+              title="Sair do sistema"
             >
-              🚪 Sair
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
             </button>
           </div>
         </div>

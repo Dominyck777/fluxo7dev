@@ -1,10 +1,22 @@
 :root {
-  /* Fluxo7 Dev Color Palette */
+  /* Default Theme (Orange) */
   --color-black: #000000;
   --color-dark-gray: #1a1a1a;
-  --color-orange: #FF6B00;
-  --color-orange-hover: #FF8533;
   --color-white: #ffffff;
+  --color-white-soft: #f8f8f8;
+  
+  /* Themeable Colors */
+  --color-primary: #FF6B00;
+  --color-primary-hover: #FF8533;
+  --color-primary-rgb: 255, 107, 0;
+  
+  /* Logo Colors */
+  --color-logo-fluxo: #f05902;
+  --color-logo-7: #ffaa33;
+  --color-logo-dev: #91b0b0;
+  
+  --color-button-glow: rgba(255, 107, 0, 0.3);
+  --color-card-border: rgba(255, 107, 0, 0.3);
   
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
@@ -20,10 +32,32 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+[data-theme='blue'] {
+  /* Blue Theme Colors */
+  --color-primary: #1E90FF;
+  --color-primary-hover: #1CA7EC;
+  --color-primary-rgb: 30, 144, 255;
+  
+  /* Logo Colors from Palette */
+  --color-logo-fluxo: #1E90FF; /* Azul principal lado do F */
+  --color-logo-7: #00E5FF;     /* Ciano lado do 7 */
+  --color-logo-dev: #EAEAEA;    /* TEAM (branco suave) */
+  
+  --color-white-soft: #EAEAEA;
+  
+  --color-button-glow: rgba(30, 144, 255, 0.4);
+  --color-card-border: rgba(0, 229, 255, 0.3);
+  
+  /* Transition Helpers from Palette */
+  --color-intermediate: #1CA7EC;
+  --color-transition: #00B4D8;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease, fill 0.4s ease, stroke 0.4s ease;
 }
 
 body {
@@ -46,32 +80,33 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 a {
-  color: var(--color-orange);
+  color: var(--color-primary);
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 a:hover {
-  color: var(--color-orange-hover);
+  color: var(--color-primary-hover);
 }
 
 button {
   border-radius: 8px;
-  border: 2px solid var(--color-orange);
+  border: 2px solid var(--color-primary);
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
   font-weight: 500;
   font-family: inherit;
-  background-color: var(--color-orange);
+  background-color: var(--color-primary);
   color: var(--color-white);
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 button:hover {
-  background-color: var(--color-orange-hover);
-  border-color: var(--color-orange-hover);
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--color-button-glow);
 }
 
 button:active {
@@ -89,7 +124,7 @@ input, textarea, select {
   font-size: 1rem;
   padding: 0.75rem;
   border-radius: 8px;
-  border: 2px solid var(--color-orange);
+  border: 2px solid var(--color-primary);
   background-color: var(--color-black);
   color: var(--color-white);
   transition: all 0.3s ease;
@@ -97,8 +132,8 @@ input, textarea, select {
 
 input:focus, textarea:focus, select:focus {
   outline: none;
-  border-color: var(--color-orange-hover);
-  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+  border-color: var(--color-primary-hover);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
 }
 
 input::placeholder, textarea::placeholder {

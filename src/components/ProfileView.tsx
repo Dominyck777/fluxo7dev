@@ -4,7 +4,6 @@ import type { Developer } from '../utils/jsonbin-client';
 import type { Demand } from './DemandCard';
 import { supabaseDemands } from '../utils/supabase-demands';
 import { supabaseDevs } from '../utils/supabase-devs';
-import { notificationService } from '../utils/notification-service';
 import Modal from './Modal';
 
 interface ProfileViewProps {
@@ -21,9 +20,6 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
   const [editedName, setEditedName] = useState(currentUser.name);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [isDemandsChartOpen, setIsDemandsChartOpen] = useState(false); // controla modal de demandas
-  const [isEnablingPush, setIsEnablingPush] = useState(false);
-  const [pushStatusMessage, setPushStatusMessage] = useState<string>('');
-  const [isTestingPush, setIsTestingPush] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -133,6 +129,8 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
     return { day: top.day, count: top.count };
   })();
 
+  const [theme, setTheme] = useState(document.documentElement.getAttribute('data-theme') || 'orange');
+
   return (
     <div className="dashboard profile-view">
       <header className="dashboard-header" role="banner">
@@ -144,11 +142,11 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
             style={{ cursor: onOpenSidebar ? 'pointer' : 'default' }}
           >
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="3" y="3" width="18" height="18" rx="2" stroke="#f05902" strokeWidth="2" />
-              <path d="M8 8L10 10L8 12" stroke="#ffaa33" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <rect x="3" y="3" width="18" height="18" rx="2" stroke="var(--color-logo-fluxo)" strokeWidth="2" />
+              <path d="M8 8L10 10L8 12" stroke="var(--color-logo-7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               <path d="M12 12H16" stroke="#91b0b0" strokeWidth="2" strokeLinecap="round" />
-              <circle cx="18" cy="18" r="4" fill="#1a1a1a" stroke="#f05902" strokeWidth="1.5" />
-              <path d="M18 16V20M16 18H20" stroke="#ffaa33" strokeWidth="1.5" strokeLinecap="round" />
+              <circle cx="18" cy="18" r="4" fill="#1a1a1a" stroke="var(--color-logo-fluxo)" strokeWidth="1.5" />
+              <path d="M18 16V20M16 18H20" stroke="var(--color-logo-7)" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </span>
 
@@ -163,11 +161,44 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
               <span className="user-name">Perfil: {currentUser.name}</span>
             </div>
             <button
+              type="button"
+              className="theme-toggle-header"
+              title="Alternar Tema"
+              onClick={() => {
+                const newTheme = theme === 'orange' ? 'blue' : 'orange';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('fluxo7dev_theme', newTheme);
+                setTheme(newTheme);
+              }}
+            >
+              <svg 
+                width="18" 
+                height="18" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ 
+                  transform: theme === 'blue' ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+              >
+                <path d="M17 2l4 4-4 4" stroke="#FF6B00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M3 11V9a4 4 0 0 1 4-4h14" stroke="#FF6B00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M7 22l-4-4 4-4" stroke="#1E90FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M21 13v2a4 4 0 0 1-4 4H3" stroke="#1E90FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            <button
               className="logout-button"
               onClick={onLogout}
+              aria-label="Sair do sistema"
               title="Sair do sistema"
             >
-              🚪 Sair
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
             </button>
           </div>
         </div>
@@ -226,78 +257,8 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
               )}
             </div>
 
-            <div className="profile-card">
-              <h3>Notificações</h3>
-              <p className="profile-status">
-                Ative as notificações para receber push quando alguém criar uma demanda para você.
-              </p>
-              {pushStatusMessage && (
-                <p className="profile-status">{pushStatusMessage}</p>
-              )}
-              <button
-                type="button"
-                className="profile-edit-button"
-                disabled={isEnablingPush || !notificationService.isPushServerSupported()}
-                onClick={async () => {
-                  setIsEnablingPush(true);
-                  setPushStatusMessage('');
-                  try {
-                    // Importante: usamos o NOME como identificador porque a demanda atribui por nome (campo "desenvolvedor")
-                    const ok = await notificationService.initializePushServer(currentUser.name);
-                    if (ok) {
-                      setPushStatusMessage('✅ Notificações ativadas neste dispositivo.');
-                    } else {
-                      setPushStatusMessage('⚠️ Não foi possível ativar as notificações.');
-                    }
-                  } catch (error) {
-                    console.error('[ProfileView] Erro ao ativar notificações:', error);
-                    setPushStatusMessage('❌ Erro ao ativar notificações.');
-                  } finally {
-                    setIsEnablingPush(false);
-                  }
-                }}
-              >
-                {isEnablingPush ? 'Ativando...' : 'Ativar notificações'}
-              </button>
-              <button
-                type="button"
-                className="profile-edit-button"
-                disabled={isTestingPush || !notificationService.isPushServerSupported()}
-                onClick={async () => {
-                  setIsTestingPush(true);
-                  setPushStatusMessage('');
-                  try {
-                    const ok = await notificationService.sendPushServerNotification(
-                      currentUser.name,
-                      '🔔 Teste Fluxo7 Dev',
-                      'Notificações ativas neste dispositivo!',
-                      { route: '/#/demandas', type: 'test' }
-                    );
-                    if (ok) {
-                      setPushStatusMessage('✅ Notificação de teste enviada.');
-                    } else {
-                      setPushStatusMessage('⚠️ Falha ao enviar notificação de teste.');
-                    }
-                  } catch (error) {
-                    console.error('[ProfileView] Erro ao enviar notificação de teste:', error);
-                    setPushStatusMessage('❌ Erro ao enviar notificação de teste.');
-                  } finally {
-                    setIsTestingPush(false);
-                  }
-                }}
-                style={{ marginLeft: '0.5rem' }}
-              >
-                {isTestingPush ? 'Enviando...' : 'Testar notificação'}
-              </button>
-              {!notificationService.isPushServerSupported() && (
-                <p className="profile-status">
-                  Seu navegador não suporta Web Push (Service Worker/Push API).
-                </p>
-              )}
-            </div>
-
-            <div className="profile-card">
-              <h3>Patch Notes</h3>
+             <div className="profile-card">
+               <h3>Patch Notes</h3>
               <p className="profile-patch-note">
                 Houve uma atualização recente no Fluxo7 Dev. Caso algo pareça estranho, deslogue e entre novamente
                 para garantir que você está usando a versão mais recente da aplicação.
@@ -382,9 +343,6 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
               }}
             />
           </div>
-          <p className="profile-edit-note">
-            Em breve novas opções de personalização vão ser aplicadas aqui (avatar, tema, notificações e muito mais).
-          </p>
           <div className="profile-edit-actions">
             <button type="button" onClick={() => setIsEditProfileOpen(false)}>
               Cancelar

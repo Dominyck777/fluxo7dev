@@ -17,7 +17,7 @@
 /* Header */
 .dashboard-header {
   background-color: #000000;
-  border-bottom: 2px solid var(--color-orange);
+  border-bottom: 2px solid var(--color-primary);
   padding: 1rem 0;
   position: sticky;
   top: 0;
@@ -32,7 +32,7 @@
   transform: translateX(-50%);
   max-width: 960px;
   width: calc(100% - 2rem);
-  background: linear-gradient(135deg, rgba(255, 107, 0, 0.95) 0%, rgba(255, 159, 64, 0.95) 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
   color: #ffffff;
   padding: 0.75rem 1rem;
   border-radius: 0 0 12px 12px;
@@ -115,16 +115,16 @@
 }
 
 .user-role {
-  color: var(--color-orange);
+  color: var(--color-primary);
   font-weight: 500;
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.logo-fluxo { color: #f05902; }
-.logo-7 { color: #ffaa33; }
-.logo-dev { color: #91b0b0; }
+.logo-fluxo { color: var(--color-logo-fluxo); }
+.logo-7 { color: var(--color-logo-7); }
+.logo-dev { color: var(--color-logo-dev); }
 
 .header-icon.clickable {
   transition: all 0.3s ease;
@@ -133,7 +133,7 @@
 }
 
 .header-icon.clickable:hover {
-  background: rgba(255, 107, 0, 0.1);
+  background: rgba(var(--color-primary-rgb), 0.1);
   transform: scale(1.1);
 }
 
@@ -154,29 +154,28 @@
 }
 
 .financial-button:hover {
-  background-color: var(--color-orange);
+  background-color: var(--color-primary);
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+  box-shadow: 0 4px 12px var(--color-button-glow);
 }
 
 .logout-button {
-  padding: 0.5rem 1.25rem;
-  font-size: 0.95rem;
+  padding: 0;
   background-color: transparent;
-  border: 2px solid var(--color-orange);
-  color: var(--color-orange);
-  border-radius: 8px;
+  border: none;
+  color: var(--color-primary);
   cursor: pointer;
   transition: all 0.3s ease;
-  font-weight: 600;
-  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
 }
 
 .logout-button:hover {
-  background-color: var(--color-orange);
-  color: var(--color-white);
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+  color: var(--color-primary-hover);
+  transform: scale(1.1);
 }
 
 /* Main Content */
@@ -197,7 +196,7 @@
 
 .page-title {
   font-size: 2rem;
-  color: var(--color-orange);
+  color: var(--color-primary);
   margin-bottom: 1.5rem;
 }
 
@@ -211,7 +210,7 @@
 
 .summary-card {
   background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
-  border: 2px solid rgba(255, 107, 0, 0.3);
+  border: 2px solid rgba(var(--color-primary-rgb), 0.3);
   border-radius: 12px;
   padding: 1.5rem;
   display: flex;
@@ -369,9 +368,9 @@
 }
 
 .counter-item:hover {
-  border-color: var(--color-orange);
+  border-color: var(--color-primary);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(255, 107, 0, 0.25), 0 0 0 1px rgba(255, 107, 0, 0.15) inset;
+  box-shadow: 0 8px 24px var(--color-button-glow), 0 0 0 1px rgba(var(--color-primary-rgb), 0.15) inset;
 }
 
 .counter-item.total {
@@ -559,10 +558,10 @@
 .section-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-orange);
+  color: var(--color-primary);
   margin: 0;
   padding-bottom: 0.75rem;
-  border-bottom: 2px solid rgba(255, 107, 0, 0.3);
+  border-bottom: 2px solid rgba(var(--color-primary-rgb), 0.3);
   flex: 1;
 }
 

@@ -32,7 +32,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3px solid var(--color-orange);
+  border: 3px solid var(--color-primary);
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.7);
 }
 
@@ -195,8 +195,8 @@
   font-size: 0.95rem;
   font-weight: 600;
   background-color: transparent;
-  border: 2px solid var(--color-orange);
-  color: var(--color-orange);
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -204,10 +204,43 @@
 }
 
 .profile-edit-button:hover {
-  background-color: var(--color-orange);
+  background-color: var(--color-primary);
   color: var(--color-white);
   transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+  box-shadow: 0 4px 12px var(--color-button-glow);
+}
+
+.theme-toggle-header {
+  background: none !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  cursor: pointer;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+  transition: transform 0.2s ease;
+  margin-right: 0.75rem;
+  width: auto;
+  height: auto;
+}
+
+.theme-toggle-header:hover {
+  transform: scale(1.15);
+  background: none !important;
+  background-color: transparent !important;
+}
+
+.theme-toggle-header:active {
+  transform: scale(0.9);
+  background: none !important;
+  background-color: transparent !important;
+}
+
+.theme-toggle-header svg {
+  display: block;
 }
 
 .profile-edit-form {
@@ -252,16 +285,16 @@
   min-width: 120px;
   padding: 0.5rem 1.25rem;
   border-radius: 8px;
-  border: 2px solid var(--color-orange);
+  border: 2px solid var(--color-primary);
   background: transparent;
-  color: var(--color-orange);
+  color: var(--color-primary);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .profile-edit-actions button:hover {
-  background: var(--color-orange);
+  background: var(--color-primary);
   color: var(--color-white);
 }
 

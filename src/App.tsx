@@ -19,12 +19,36 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Carrega estado de autenticação do localStorage ao montar
-  // Mantém o usuário logado mesmo após fechar o navegador
-  // Só é limpo ao fazer logout ou limpar o cache do navegador
+  // Carrega estado de autenticação e tema do localStorage ao montar
   useEffect(() => {
     const auth = localStorage.getItem(AUTH_KEY);
     const userStr = localStorage.getItem(USER_KEY);
+    const savedTheme = localStorage.getItem('fluxo7dev_theme') || 'orange';
+    
+    // Aplica o tema salvo
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    // Função para atualizar favicon
+    const updateFavicon = (theme: string) => {
+      const favicon = document.querySelector('link[rel="icon"]');
+      if (favicon) {
+        favicon.setAttribute('href', `/favicon-${theme}.svg`);
+      }
+    };
+
+    updateFavicon(savedTheme);
+
+    // Observer para detectar mudanças manuais no data-theme (vinda de outros componentes)
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+          const newTheme = document.documentElement.getAttribute('data-theme') || 'orange';
+          updateFavicon(newTheme);
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, { attributes: true });
     
     if (auth === 'true' && userStr) {
       try {
@@ -37,6 +61,8 @@ function App() {
         localStorage.removeItem(USER_KEY);
       }
     }
+
+    return () => observer.disconnect();
   }, []);
 
   const handleLogin = (user: Developer) => {
