@@ -28,22 +28,39 @@ function App() {
     // Aplica o tema salvo
     document.documentElement.setAttribute('data-theme', savedTheme);
     
-    // Função para atualizar favicon
-    const updateFavicon = (theme: string) => {
+    // Função para atualizar metadados de tema (favicon, cor da barra de endereço e ícone mobile)
+    const updateThemeMetadata = (theme: string) => {
+      // 1. Atualizar Favicon padrão
       const favicon = document.querySelector('link[rel="icon"]');
       if (favicon) {
         favicon.setAttribute('href', `/favicon-${theme}.svg`);
       }
+
+      // 2. Atualizar Apple Touch Icon (para atalhos na home do iOS)
+      let appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
+      if (!appleIcon) {
+        appleIcon = document.createElement('link');
+        appleIcon.setAttribute('rel', 'apple-touch-icon');
+        document.head.appendChild(appleIcon);
+      }
+      appleIcon.setAttribute('href', `/favicon-${theme}.svg`);
+
+      // 3. Atualizar Cor da Barra de Endereço (Android/iOS)
+      const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeColorMeta) {
+        // No azul tech, podemos usar um preto puro para um look mais OLED
+        themeColorMeta.setAttribute('content', theme === 'blue' ? '#000000' : '#0a0a0a');
+      }
     };
 
-    updateFavicon(savedTheme);
+    updateThemeMetadata(savedTheme);
 
     // Observer para detectar mudanças manuais no data-theme (vinda de outros componentes)
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
           const newTheme = document.documentElement.getAttribute('data-theme') || 'orange';
-          updateFavicon(newTheme);
+          updateThemeMetadata(newTheme);
         }
       });
     });
