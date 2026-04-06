@@ -139,3 +139,28 @@ input:focus, textarea:focus, select:focus {
 input::placeholder, textarea::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
+
+/* View Transition API - Circular Reveal Effect */
+::view-transition-group(root) {
+  animation-duration: 0.7s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-new(root) {
+  animation-name: reveal-theme;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+@keyframes reveal-theme {
+  from {
+    clip-path: circle(0% at var(--reveal-x, 50%) var(--reveal-y, 50%));
+  }
+  to {
+    clip-path: circle(200% at var(--reveal-x, 50%) var(--reveal-y, 50%));
+  }
+}

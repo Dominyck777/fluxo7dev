@@ -164,11 +164,28 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
               type="button"
               className="theme-toggle-header"
               title="Alternar Tema"
-              onClick={() => {
+              onClick={(e) => {
+                const x = e.clientX;
+                const y = e.clientY;
                 const newTheme = theme === 'orange' ? 'blue' : 'orange';
-                document.documentElement.setAttribute('data-theme', newTheme);
-                localStorage.setItem('fluxo7dev_theme', newTheme);
-                setTheme(newTheme);
+                
+                const performTransition = () => {
+                  document.documentElement.setAttribute('data-theme', newTheme);
+                  localStorage.setItem('fluxo7dev_theme', newTheme);
+                  setTheme(newTheme);
+                };
+
+                // Fallback para navegadores sem suporte à View Transitions API
+                if (!(document as any).startViewTransition) {
+                  performTransition();
+                  return;
+                }
+
+                // Define as coordenadas para o CSS utilizar no clip-path
+                document.documentElement.style.setProperty('--reveal-x', `${x}px`);
+                document.documentElement.style.setProperty('--reveal-y', `${y}px`);
+
+                (document as any).startViewTransition(performTransition);
               }}
             >
               <svg 
