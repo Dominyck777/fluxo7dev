@@ -86,10 +86,13 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
     return true;
   });
 
+  // Apenas feedbacks que realmente possuem uma avaliação (nota > 0)
+  const ratedFeedbacks = filteredFeedbacks.filter(f => f.estrelas > 0);
+
   const getAverageRating = () => {
-    if (filteredFeedbacks.length === 0) return 0;
-    const sum = filteredFeedbacks.reduce((acc, feedback) => acc + feedback.estrelas, 0);
-    return sum / filteredFeedbacks.length;
+    if (ratedFeedbacks.length === 0) return 0;
+    const sum = ratedFeedbacks.reduce((acc, feedback) => acc + feedback.estrelas, 0);
+    return sum / ratedFeedbacks.length;
   };
 
   const getAverageRatingFormatted = () => {
@@ -110,15 +113,15 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-    return filteredFeedbacks.filter((feedback) => {
+    return ratedFeedbacks.filter((feedback) => {
       const feedbackDate = new Date(feedback.timestamp);
       return feedbackDate >= oneWeekAgo;
     });
   };
 
   const recentFeedbacks = getRecentFeedbacks();
-  const recentPercentage = filteredFeedbacks.length > 0
-    ? ((recentFeedbacks.length / filteredFeedbacks.length) * 100).toFixed(0)
+  const recentPercentage = ratedFeedbacks.length > 0
+    ? ((recentFeedbacks.length / ratedFeedbacks.length) * 100).toFixed(0)
     : 0;
 
   const renderStars = (rating: number) => {
@@ -276,7 +279,7 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
                   <div className="stat-icon">📈</div>
                   <div className="stat-content">
                     <h3>Total de Feedbacks</h3>
-                    <span className="stat-number">{filteredFeedbacks.length}</span>
+                    <span className="stat-number">{ratedFeedbacks.length}</span>
                     <div className="stat-details">
                       <div className="stat-detail-item">
                         <span className="stat-detail-label">Recentes (7 dias)</span>
@@ -316,8 +319,8 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
                               className="bar-fill"
                               style={{
                                 width:
-                                  filteredFeedbacks.length > 0
-                                    ? `${(count / filteredFeedbacks.length) * 100}%`
+                                  ratedFeedbacks.length > 0
+                                    ? `${(count / ratedFeedbacks.length) * 100}%`
                                     : '0%',
                               }}
                             />
