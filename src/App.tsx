@@ -51,6 +51,13 @@ function App() {
         // No azul tech, podemos usar um preto puro para um look mais OLED
         themeColorMeta.setAttribute('content', theme === 'blue' ? '#000000' : '#0a0a0a');
       }
+
+      // 4. Atualizar Manifesto PWA dinamicamente
+      // Isso ajuda navegadores modernos a detectarem a mudança de ícone e cor de fundo
+      const manifest = document.querySelector('link[rel="manifest"]');
+      if (manifest) {
+        manifest.setAttribute('href', `/manifest-${theme}.json`);
+      }
     };
 
     updateThemeMetadata(savedTheme);
