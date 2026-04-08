@@ -30,33 +30,33 @@ function App() {
     
     // Função para atualizar metadados de tema (favicon, cor da barra de endereço e ícone mobile)
     const updateThemeMetadata = (theme: string) => {
+      const version = Date.now(); // Cache buster
+
       // 1. Atualizar Favicon padrão
       const favicon = document.querySelector('link[rel="icon"]');
       if (favicon) {
-        favicon.setAttribute('href', `/favicon-${theme}.svg`);
+        favicon.setAttribute('href', `/favicon-${theme}.svg?v=${version}`);
       }
 
-      // 2. Atualizar Apple Touch Icon (para atalhos na home do iOS)
+      // 2. Atualizar Apple Touch Icon
       let appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
       if (!appleIcon) {
         appleIcon = document.createElement('link');
         appleIcon.setAttribute('rel', 'apple-touch-icon');
         document.head.appendChild(appleIcon);
       }
-      appleIcon.setAttribute('href', `/favicon-${theme}.svg`);
+      appleIcon.setAttribute('href', `/favicon-${theme}.svg?v=${version}`);
 
       // 3. Atualizar Cor da Barra de Endereço (Android/iOS)
       const themeColorMeta = document.querySelector('meta[name="theme-color"]');
       if (themeColorMeta) {
-        // No azul tech, podemos usar um preto puro para um look mais OLED
         themeColorMeta.setAttribute('content', theme === 'blue' ? '#000000' : '#0a0a0a');
       }
 
-      // 4. Atualizar Manifesto PWA dinamicamente
-      // Isso ajuda navegadores modernos a detectarem a mudança de ícone e cor de fundo
+      // 4. Atualizar Manifesto PWA dinamicamente com Cache Buster
       const manifest = document.querySelector('link[rel="manifest"]');
       if (manifest) {
-        manifest.setAttribute('href', `/manifest-${theme}.json`);
+        manifest.setAttribute('href', `/manifest-${theme}.json?v=${version}`);
       }
     };
 
