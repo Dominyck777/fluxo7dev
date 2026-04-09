@@ -121,7 +121,6 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
     });
   };
 
-  const recentFeedbacksRated = getRecentFeedbacks(true);
   const recentFeedbacksAll = getRecentFeedbacks(false);
 
   const renderStars = (rating: number) => {
