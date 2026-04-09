@@ -109,20 +109,20 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
     return distribution;
   };
 
-  const getRecentFeedbacks = () => {
+  const getRecentFeedbacks = (onlyRated = true) => {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-    return ratedFeedbacks.filter((feedback) => {
+    const targetList = onlyRated ? ratedFeedbacks : filteredFeedbacks;
+
+    return targetList.filter((feedback) => {
       const feedbackDate = new Date(feedback.timestamp);
       return feedbackDate >= oneWeekAgo;
     });
   };
 
-  const recentFeedbacks = getRecentFeedbacks();
-  const recentPercentage = ratedFeedbacks.length > 0
-    ? ((recentFeedbacks.length / ratedFeedbacks.length) * 100).toFixed(0)
-    : 0;
+  const recentFeedbacksRated = getRecentFeedbacks(true);
+  const recentFeedbacksAll = getRecentFeedbacks(false);
 
   const renderStars = (rating: number) => {
     return (
@@ -284,15 +284,19 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
                   <div className="stat-icon">📈</div>
                   <div className="stat-content">
                     <h3>Total de Feedbacks</h3>
-                    <span className="stat-number">{ratedFeedbacks.length}</span>
+                    <span className="stat-number">{filteredFeedbacks.length}</span>
                     <div className="stat-details">
                       <div className="stat-detail-item">
                         <span className="stat-detail-label">Recentes (7 dias)</span>
-                        <span className="stat-detail-value">{recentFeedbacks.length}</span>
+                        <span className="stat-detail-value">{recentFeedbacksAll.length}</span>
                       </div>
                       <div className="stat-detail-item">
                         <span className="stat-detail-label">% Recentes</span>
-                        <span className="stat-detail-value">{recentPercentage}%</span>
+                        <span className="stat-detail-value">
+                          {filteredFeedbacks.length > 0
+                            ? ((getRecentFeedbacks(false).length / filteredFeedbacks.length) * 100).toFixed(0)
+                            : 0}%
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -391,6 +395,7 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
                   <option value="3">3 estrelas</option>
                   <option value="2">2 estrelas</option>
                   <option value="1">1 estrela</option>
+                  <option value="0">Sem avaliação</option>
                 </select>
               </div>
             </div>
