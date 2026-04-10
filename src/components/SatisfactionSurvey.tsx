@@ -237,7 +237,7 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
               <path d="M18 16V20M16 18H20" stroke="var(--color-logo-7)" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </span>
-          <h1 className="satisfaction-title">Feedbacks</h1>
+          <div className="header-logo-container"></div>
           <div className="header-user-section">
             <button
               className="logout-button"

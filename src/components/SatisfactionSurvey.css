@@ -45,11 +45,28 @@
 .satisfaction-header {
   background-color: #000000;
   border-bottom: 2px solid var(--color-primary);
-  padding: 1rem 0;
+  padding: 0.75rem 0;
   position: sticky;
   top: 0;
   z-index: 100;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.satisfaction-header::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100px;
+  background-image: url('/logo-full.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: -1;
 }
 
 .dev-menu-button {
@@ -100,16 +117,26 @@
   box-shadow: 0 4px 12px var(--color-button-glow);
 }
 
-.satisfaction-title {
+.satisfaction-header .header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+
+.header-logo-container {
+  display: flex;
+  align-items: center;
+  height: 45px;
   justify-self: center;
-  font-size: 1.75rem;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  margin: 0;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-logo-7) 50%, #4da6ff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+}
+
+.header-logo-img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
 }
 
 .logout-button {
@@ -197,7 +224,7 @@
   width: 42px;
   height: 42px;
   display: block;
-  filter: brightness(0) saturate(100%) invert(48%) sepia(97%) saturate(2903%) hue-rotate(3deg) brightness(101%) contrast(101%);
+  filter: brightness(0) saturate(100%) invert(41%) sepia(85%) saturate(3065%) hue-rotate(196deg) brightness(101%) contrast(105%);
 }
 
 .retry-btn {
@@ -241,7 +268,7 @@
 .stat-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  border-color: rgba(255, 107, 0, 0.5);
+  border-color: rgba(var(--color-primary-rgb), 0.5);
 }
 
 .stat-icon {

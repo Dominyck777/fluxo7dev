@@ -23,6 +23,7 @@
   top: 0;
   z-index: 100;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
 }
 
 .update-note-banner {
@@ -122,9 +123,38 @@
   letter-spacing: 0.5px;
 }
 
-.logo-fluxo { color: var(--color-logo-fluxo); }
-.logo-7 { color: var(--color-logo-7); }
-.logo-dev { color: var(--color-logo-dev); }
+.dashboard-header {
+  background-color: #000000;
+  border-bottom: 2px solid var(--color-primary);
+  padding: 0.75rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.dashboard-header::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100px;
+  background-image: url('/logo-full.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.header-logo-container {
+  display: flex;
+  align-items: center;
+  height: 45px;
+  justify-self: center;
+}
 
 .header-icon.clickable {
   transition: all 0.3s ease;
@@ -141,8 +171,8 @@
   padding: 0.5rem;
   font-size: 1.2rem;
   background-color: transparent;
-  border: 2px solid var(--color-orange);
-  color: var(--color-orange);
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -357,7 +387,7 @@
 
 .counter-item {
   background: linear-gradient(180deg, #0b0b0b 0%, #111111 100%);
-  border: 1px solid rgba(255, 107, 0, 0.35);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.35);
   border-radius: 10px;
   padding: 1rem;
   display: flex;
@@ -374,7 +404,7 @@
 }
 
 .counter-item.total {
-  border-color: var(--color-orange);
+  border-color: var(--color-primary);
 }
 
 .counter-item.pendente {
@@ -455,7 +485,7 @@
   padding: 0.75rem 1rem;
   font-size: 0.95rem;
   background-color: rgba(20, 20, 20, 0.8);
-  border: 2px solid rgba(255, 107, 0, 0.3);
+  border: 2px solid rgba(var(--color-primary-rgb), 0.3);
   border-radius: 8px;
   color: var(--color-white);
   font-weight: 500;
@@ -467,7 +497,7 @@
 .project-filter:hover,
 .status-filter:hover,
 .priority-filter:hover {
-  border-color: var(--color-orange);
+  border-color: var(--color-primary);
   background-color: rgba(30, 30, 30, 0.9);
 }
 
@@ -476,8 +506,8 @@
 .status-filter:focus,
 .priority-filter:focus {
   outline: none;
-  border-color: var(--color-orange);
-  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
 }
 
 /* Search Container */
@@ -490,7 +520,7 @@
   padding: 0.75rem 1rem;
   font-size: 0.95rem;
   background-color: rgba(20, 20, 20, 0.8);
-  border: 2px solid rgba(255, 107, 0, 0.3);
+  border: 2px solid rgba(var(--color-primary-rgb), 0.3);
   border-radius: 8px;
   color: var(--color-white);
   font-weight: 500;
@@ -498,14 +528,14 @@
 }
 
 .search-input:hover {
-  border-color: var(--color-orange);
+  border-color: var(--color-primary);
   background-color: rgba(30, 30, 30, 0.9);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: var(--color-orange);
-  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
 }
 
 .search-input::placeholder {
@@ -599,7 +629,7 @@
 /* Footer */
 .dashboard-footer {
   background-color: var(--color-dark-gray);
-  border-top: 2px solid var(--color-orange);
+  border-top: 2px solid var(--color-primary);
   padding: 1.5rem;
   text-align: center;
 }
@@ -610,7 +640,7 @@
 }
 
 .version {
-  color: var(--color-orange);
+  color: var(--color-primary);
   font-weight: 600;
   margin-left: 0.5rem;
 }
@@ -637,7 +667,7 @@
   width: 18px;
   height: 18px;
   display: block;
-  filter: brightness(0) saturate(100%) invert(48%) sepia(97%) saturate(2903%) hue-rotate(3deg) brightness(101%) contrast(101%);
+  filter: brightness(0) saturate(100%) invert(41%) sepia(85%) saturate(3065%) hue-rotate(196deg) brightness(101%) contrast(105%);
 }
 
 @keyframes slideInRight {
@@ -861,7 +891,7 @@
 .skeleton-icon {
   width: 32px;
   height: 32px;
-  background: rgba(255, 107, 0, 0.3);
+  background: rgba(var(--color-primary-rgb), 0.3);
   border-radius: 4px;
   animation: pulse 1.5s ease-in-out infinite alternate;
 }

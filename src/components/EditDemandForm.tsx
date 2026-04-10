@@ -297,13 +297,13 @@ const EditDemandForm = ({ demand, onSubmit, onCancel, devs, projects, priorities
           transform: 'translate(-50%, -50%)',
           fontSize: '1.5rem',
           fontWeight: 700,
-          color: 'var(--color-orange)',
+          color: 'var(--color-primary)',
           textAlign: 'center',
           background: 'rgba(0, 0, 0, 0.9)',
           padding: '2rem 3rem',
           borderRadius: '12px',
-          border: '2px solid var(--color-orange)',
-          boxShadow: '0 8px 32px rgba(255, 107, 0, 0.4)',
+          border: '2px solid var(--color-primary)',
+          boxShadow: '0 8px 32px rgba(var(--color-primary-rgb), 0.4)',
           zIndex: 10
         }}>
           ⏳ Salvando alterações...

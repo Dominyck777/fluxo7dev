@@ -9,15 +9,15 @@
   gap: 0.75rem;
   margin-bottom: 1rem;
   padding: 0.5rem;
-  background: rgba(255, 107, 0, 0.1);
-  border: 1px solid rgba(255, 107, 0, 0.3);
+  background: rgba(var(--color-primary-rgb), 0.1);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.3);
   border-radius: 6px;
 }
 
 .progress-text {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--color-orange);
+  color: var(--color-primary);
   white-space: nowrap;
 }
 
@@ -31,7 +31,7 @@
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-orange) 0%, #ffb347 100%);
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-logo-7) 100%);
   border-radius: 3px;
   transition: width 0.3s ease;
 }
@@ -47,11 +47,11 @@
 .project-header .progress-text-compact {
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--color-orange);
+  color: var(--color-primary);
   white-space: nowrap;
   padding: 0.25rem 0.5rem;
-  background: rgba(255, 107, 0, 0.1);
-  border: 1px solid rgba(255, 107, 0, 0.3);
+  background: rgba(var(--color-primary-rgb), 0.1);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.3);
   border-radius: 12px;
 }
 
@@ -85,13 +85,13 @@
   padding: 0.5rem;
   background: rgba(255, 255, 255, 0.02);
   border-radius: 6px;
-  border-left: 3px solid rgba(255, 107, 0, 0.3);
+  border-left: 3px solid rgba(var(--color-primary-rgb), 0.3);
   transition: all 0.2s ease;
 }
 
 .checklist-item:hover {
   background: rgba(255, 255, 255, 0.05);
-  border-left-color: var(--color-orange);
+  border-left-color: var(--color-primary);
 }
 
 .checklist-label {
@@ -120,8 +120,8 @@
 }
 
 .checklist-checkbox:checked + .checklist-checkmark {
-  background: var(--color-orange);
-  border-color: var(--color-orange);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .checklist-checkbox:checked + .checklist-checkmark::after {
@@ -136,8 +136,8 @@
 }
 
 .checklist-checkmark:hover {
-  border-color: var(--color-orange);
-  background: rgba(255, 107, 0, 0.1);
+  border-color: var(--color-primary);
+  background: rgba(var(--color-primary-rgb), 0.1);
 }
 
 .checklist-text {

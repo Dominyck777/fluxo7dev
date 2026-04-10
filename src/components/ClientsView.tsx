@@ -243,7 +243,7 @@ const ClientsView = ({ onOpenSidebar, onLogout }: ClientsViewProps) => {
               <path d="M18 16V20M16 18H20" stroke="var(--color-logo-7)" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
           </span>
-          <h1 className="financial-title">Clientes</h1>
+          <div className="header-logo-container"></div>
           <div className="header-user-section">
             <button 
               onClick={onLogout}

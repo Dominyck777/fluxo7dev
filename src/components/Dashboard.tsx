@@ -320,11 +320,7 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
               <path d="M18 16V20M16 18H20" stroke="var(--color-logo-7)" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
           </span>
-          <h1 className="header-logo">
-            <span className="logo-fluxo">Fluxo</span>
-            <span className="logo-7">7</span>
-            <span className="logo-dev"> Dev</span>
-          </h1>
+          <div className="header-logo-container"></div>
           <div className="header-user-section">
             <div className="user-info">
               <span className="user-name">Olá, {currentUser.name}</span>
@@ -696,13 +692,13 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
                 transform: 'translate(-50%, -50%)',
                 fontSize: '1.5rem',
                 fontWeight: 700,
-                color: 'var(--color-orange)',
+                color: 'var(--color-primary)',
                 textAlign: 'center',
                 background: 'rgba(0, 0, 0, 0.9)',
                 padding: '2rem 3rem',
                 borderRadius: '12px',
-                border: '2px solid var(--color-orange)',
-                boxShadow: '0 8px 32px rgba(255, 107, 0, 0.4)',
+                border: '2px solid var(--color-primary)',
+                boxShadow: '0 8px 32px rgba(var(--color-primary-rgb), 0.4)',
                 zIndex: 10
               }}>
                 ⏳ Criando demanda...

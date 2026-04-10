@@ -23,51 +23,46 @@ function App() {
   useEffect(() => {
     const auth = localStorage.getItem(AUTH_KEY);
     const userStr = localStorage.getItem(USER_KEY);
-    const savedTheme = localStorage.getItem('fluxo7dev_theme') || 'orange';
+    const savedTheme = localStorage.getItem('fluxo7dev_theme') || 'blue';
     
     // Aplica o tema salvo
     document.documentElement.setAttribute('data-theme', savedTheme);
     
-    // Função para atualizar metadados de tema (favicon, cor da barra de endereço e ícone mobile)
-    const updateThemeMetadata = (theme: string) => {
+    const updateThemeMetadata = () => {
       const version = Date.now(); // Cache buster
 
-      // 1. Atualizar Favicon padrão
+      // Agora usamos as versões azuis por padrão
       const favicon = document.querySelector('link[rel="icon"]');
       if (favicon) {
-        favicon.setAttribute('href', `/favicon-${theme}.svg?v=${version}`);
+        favicon.setAttribute('href', `/favicon-blue.svg?v=${version}`);
       }
 
-      // 2. Atualizar Apple Touch Icon
       let appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
       if (!appleIcon) {
         appleIcon = document.createElement('link');
         appleIcon.setAttribute('rel', 'apple-touch-icon');
         document.head.appendChild(appleIcon);
       }
-      appleIcon.setAttribute('href', `/favicon-${theme}.svg?v=${version}`);
+      appleIcon.setAttribute('href', `/favicon-blue.svg?v=${version}`);
 
-      // 3. Atualizar Cor da Barra de Endereço (Android/iOS)
       const themeColorMeta = document.querySelector('meta[name="theme-color"]');
       if (themeColorMeta) {
-        themeColorMeta.setAttribute('content', theme === 'blue' ? '#000000' : '#0a0a0a');
+        themeColorMeta.setAttribute('content', '#000000');
       }
 
-      // 4. Atualizar Manifesto PWA dinamicamente com Cache Buster
       const manifest = document.querySelector('link[rel="manifest"]');
       if (manifest) {
-        manifest.setAttribute('href', `/manifest-${theme}.json?v=${version}`);
+        manifest.setAttribute('href', `/manifest-blue.json?v=${version}`);
       }
     };
 
-    updateThemeMetadata(savedTheme);
+    updateThemeMetadata();
 
     // Observer para detectar mudanças manuais no data-theme (vinda de outros componentes)
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
-          const newTheme = document.documentElement.getAttribute('data-theme') || 'orange';
-          updateThemeMetadata(newTheme);
+          updateThemeMetadata();
         }
       });
     });

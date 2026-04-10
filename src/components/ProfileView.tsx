@@ -129,7 +129,7 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
     return { day: top.day, count: top.count };
   })();
 
-  const [theme, setTheme] = useState(document.documentElement.getAttribute('data-theme') || 'orange');
+
 
   return (
     <div className="dashboard profile-view">
@@ -150,61 +150,12 @@ const ProfileView = ({ currentUser, onOpenSidebar, onLogout, onUpdateUser }: Pro
             </svg>
           </span>
 
-          <h1 className="header-logo">
-            <span className="logo-fluxo">Fluxo</span>
-            <span className="logo-7">7</span>
-            <span className="logo-dev"> Dev</span>
-          </h1>
+          <div className="header-logo-container"></div>
 
           <div className="header-user-section">
             <div className="user-info">
               <span className="user-name">Perfil: {currentUser.name}</span>
             </div>
-            <button
-              type="button"
-              className="theme-toggle-header"
-              title="Alternar Tema"
-              onClick={(e) => {
-                const x = e.clientX;
-                const y = e.clientY;
-                const newTheme = theme === 'orange' ? 'blue' : 'orange';
-                
-                const performTransition = () => {
-                  document.documentElement.setAttribute('data-theme', newTheme);
-                  localStorage.setItem('fluxo7dev_theme', newTheme);
-                  setTheme(newTheme);
-                };
-
-                // Fallback para navegadores sem suporte à View Transitions API
-                if (!(document as any).startViewTransition) {
-                  performTransition();
-                  return;
-                }
-
-                // Define as coordenadas para o CSS utilizar no clip-path
-                document.documentElement.style.setProperty('--reveal-x', `${x}px`);
-                document.documentElement.style.setProperty('--reveal-y', `${y}px`);
-
-                (document as any).startViewTransition(performTransition);
-              }}
-            >
-              <svg 
-                width="18" 
-                height="18" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                xmlns="http://www.w3.org/2000/svg"
-                style={{ 
-                  transform: theme === 'blue' ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-                }}
-              >
-                <path d="M17 2l4 4-4 4" stroke="#FF6B00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M3 11V9a4 4 0 0 1 4-4h14" stroke="#FF6B00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M7 22l-4-4 4-4" stroke="#1E90FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M21 13v2a4 4 0 0 1-4 4H3" stroke="#1E90FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
             <button
               className="logout-button"
               onClick={onLogout}

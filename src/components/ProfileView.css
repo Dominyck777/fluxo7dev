@@ -72,7 +72,7 @@
   width: 100%;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: radial-gradient(circle at top left, rgba(240, 89, 2, 0.18), rgba(0, 0, 0, 0.9));
+  background: radial-gradient(circle at top left, rgba(var(--color-primary-rgb), 0.18), rgba(0, 0, 0, 0.9));
   padding: 0.9rem 1rem 1rem;
   cursor: pointer;
   display: flex;
@@ -84,7 +84,7 @@
 .profile-demands-chart-main:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
-  border-color: rgba(240, 89, 2, 0.6);
+  border-color: rgba(var(--color-primary-rgb), 0.6);
 }
 
 .profile-demands-chart-hint {
@@ -111,13 +111,13 @@
 }
 
 .profile-demands-area {
-  fill: rgba(240, 89, 2, 0.35);
+  fill: rgba(var(--color-primary-rgb), 0.35);
   stroke: none;
 }
 
 .profile-demands-line {
   fill: none;
-  stroke: #ffae42;
+  stroke: var(--color-logo-7);
   stroke-width: 1.5;
 }
 
@@ -147,7 +147,7 @@
 .profile-demands-count-label {
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--color-orange);
+  color: var(--color-primary);
   margin-bottom: 0.15rem;
 }
 

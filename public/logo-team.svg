@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="280" viewBox="0 0 500 280">
+  <defs>
+    <linearGradient id="fluxoGradient" x1="85" y1="125" x2="405" y2="125" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0088FF" />
+      <stop offset="72%" stop-color="#00BFFF" />
+      <stop offset="100%" stop-color="#00F5FF" />
+    </linearGradient>
+  </defs>
+
+  <!-- Texto FLUXO7 -->
+  <text
+    x="250"
+    y="125"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="'Arial Black', sans-serif"
+    font-size="88"
+    font-weight="900"
+    letter-spacing="-3.8px"
+    fill="url(#fluxoGradient)">
+    FLUXO7
+  </text>
+
+  <!-- Slash estilizado no "7" (ciano, diagonal) -->
+  <line
+    x1="355" y1="157"
+    x2="398" y2="88"
+    stroke="#00F5FF"
+    stroke-width="7.5"
+    stroke-linecap="round" />
+
+  <!-- Texto TEAM (branco) -->
+  <text
+    x="250"
+    y="195"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="'Arial Black', sans-serif"
+    font-size="43"
+    font-weight="900"
+    letter-spacing="5.5px"
+    fill="#FFFFFF">
+    TEAM
+  </text>
+</svg>

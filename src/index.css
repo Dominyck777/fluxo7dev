@@ -1,23 +1,26 @@
 :root {
-  /* Default Theme (Orange) */
+  /* Default Theme (Blue) */
   --color-black: #000000;
   --color-dark-gray: #1a1a1a;
   --color-white: #ffffff;
-  --color-white-soft: #f8f8f8;
+  --color-white-soft: #EAEAEA;
   
-  /* Themeable Colors */
-  --color-primary: #FF6B00;
-  --color-primary-hover: #FF8533;
-  --color-primary-rgb: 255, 107, 0;
+  /* Themeable Colors (Now Blue by Default) */
+  --color-primary: #1E90FF;
+  --color-primary-hover: #1CA7EC;
+  --color-primary-rgb: 30, 144, 255;
   
-  /* Logo Colors */
-  --color-logo-fluxo: #f05902;
-  --color-logo-7: #ffaa33;
-  --color-logo-dev: #91b0b0;
+  /* Logo Colors from Palette */
+  --color-logo-fluxo: #1E90FF;
+  --color-logo-7: #00E5FF;
+  --color-logo-dev: #EAEAEA;
   
-  --color-button-glow: rgba(255, 107, 0, 0.3);
-  --color-card-border: rgba(255, 107, 0, 0.3);
+  --color-button-glow: rgba(30, 144, 255, 0.4);
+  --color-card-border: rgba(0, 229, 255, 0.3);
   
+  --color-intermediate: #1CA7EC;
+  --color-transition: #00B4D8;
+
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -32,32 +35,18 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-[data-theme='blue'] {
-  /* Blue Theme Colors */
-  --color-primary: #1E90FF;
-  --color-primary-hover: #1CA7EC;
-  --color-primary-rgb: 30, 144, 255;
-  
-  /* Logo Colors from Palette */
-  --color-logo-fluxo: #1E90FF; /* Azul principal lado do F */
-  --color-logo-7: #00E5FF;     /* Ciano lado do 7 */
-  --color-logo-dev: #EAEAEA;    /* TEAM (branco suave) */
-  
-  --color-white-soft: #EAEAEA;
-  
-  --color-button-glow: rgba(30, 144, 255, 0.4);
-  --color-card-border: rgba(0, 229, 255, 0.3);
-  
-  /* Transition Helpers from Palette */
-  --color-intermediate: #1CA7EC;
-  --color-transition: #00B4D8;
-}
+/* O tema azul agora é o padrão no :root. O seletor [data-theme='blue'] não é mais necessário, 
+   mas mantemos aqui caso deseje adicionar variações no futuro. */
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease, fill 0.4s ease, stroke 0.4s ease;
+}
+
+/* Transições suaves aplicadas apenas em elementos específicos para performance */
+body, .dashboard, .card, .stat-card, .btn, button, input, select, .sidebar {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
 body {
