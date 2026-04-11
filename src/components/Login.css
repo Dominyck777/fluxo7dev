@@ -44,13 +44,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 60px;
+  height: 120px;
+  width: 100%;
+  margin-bottom: 0.5rem;
 }
 
 .login-logo-img {
   height: 100%;
   width: auto;
   object-fit: contain;
+  /* Melhora a mesclagem se a imagem tiver fundo preto/escuro */
+  mix-blend-mode: screen; 
+  filter: brightness(1.1) contrast(1.1) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
 }
 
 .login-form {
