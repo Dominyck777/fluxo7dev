@@ -47,17 +47,8 @@ const Login = ({ onLogin }: LoginProps) => {
     <div className="login-container">
       <div className="login-box">
         <div className="login-header">
-          <div className="login-icon">
-            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="3" y="3" width="18" height="18" rx="2" stroke="var(--color-logo-fluxo)" strokeWidth="2"/>
-              <path d="M8 8L10 10L8 12" stroke="var(--color-logo-7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M12 12H16" stroke="var(--color-white-soft)" strokeWidth="2" strokeLinecap="round"/>
-              <circle cx="18" cy="18" r="4" fill="#000000" stroke="var(--color-logo-fluxo)" strokeWidth="1.5"/>
-              <path d="M18 16V20M16 18H20" stroke="var(--color-logo-7)" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-          </div>
           <div className="login-logo-img-container">
-            <img src="/logo-team.svg" alt="Fluxo7 Team" className="login-logo-img" />
+            <img src="/logo-full.png" alt="Fluxo7 Team" className="login-logo-img" />
           </div>
         </div>
         

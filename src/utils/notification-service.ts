@@ -173,8 +173,8 @@ class NotificationService {
       const success = await webPushService.showNotification({
         title: payload.title,
         body: payload.body,
-        icon: '/favicon.svg',
-        badge: '/favicon.svg',
+        icon: '/logo-full.png',
+        badge: '/logo-full.png',
         tag: payload.tag || 'fluxo7-notification',
         requireInteraction: true,
         data: payload.data

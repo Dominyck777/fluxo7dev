@@ -59,8 +59,8 @@ app.post('/notify-user', async (req, res) => {
   const payload = JSON.stringify({
     title,
     body,
-    icon: '/favicon.svg',
-    badge: '/favicon.svg',
+    icon: '/logo-full.png',
+    badge: '/logo-full.png',
     tag: 'fluxo7-notification',
     requireInteraction: true,
     data: data || {}
@@ -108,8 +108,8 @@ app.post('/notify-all', async (req, res) => {
   const payload = JSON.stringify({
     title,
     body,
-    icon: '/favicon.svg',
-    badge: '/favicon.svg',
+    icon: '/logo-full.png',
+    badge: '/logo-full.png',
     tag: 'fluxo7-broadcast',
     requireInteraction: true,
     data: data || {}

@@ -84,7 +84,7 @@ app.post('/notify-user', async (req, res) => {
   const payload = JSON.stringify({
     title,
     body,
-    icon: '/favicon.svg',
+    icon: '/logo-full.png',
     tag: 'fluxo7-notification',
     data: data || {}
   });

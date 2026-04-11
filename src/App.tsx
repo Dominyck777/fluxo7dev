@@ -34,7 +34,7 @@ function App() {
       // Agora usamos as versões azuis por padrão
       const favicon = document.querySelector('link[rel="icon"]');
       if (favicon) {
-        favicon.setAttribute('href', `/favicon-blue.svg?v=${version}`);
+        favicon.setAttribute('href', `/logo-full.png?v=${version}`);
       }
 
       let appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
@@ -43,7 +43,7 @@ function App() {
         appleIcon.setAttribute('rel', 'apple-touch-icon');
         document.head.appendChild(appleIcon);
       }
-      appleIcon.setAttribute('href', `/favicon-blue.svg?v=${version}`);
+      appleIcon.setAttribute('href', `/logo-full.png?v=${version}`);
 
       const themeColorMeta = document.querySelector('meta[name="theme-color"]');
       if (themeColorMeta) {

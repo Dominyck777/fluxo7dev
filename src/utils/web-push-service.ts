@@ -109,8 +109,8 @@ class WebPushService {
       // Envia notificação via Service Worker
       await this.registration!.showNotification(payload.title, {
         body: payload.body,
-        icon: payload.icon || '/favicon.svg',
-        badge: payload.badge || '/favicon.svg',
+        icon: payload.icon || '/logo-full.png',
+        badge: payload.badge || '/logo-full.png',
         tag: payload.tag || 'fluxo7-notification',
         requireInteraction: payload.requireInteraction || true,
         data: payload.data || {},
@@ -134,7 +134,7 @@ class WebPushService {
       if (Notification.permission === 'granted') {
         new Notification(payload.title, {
           body: payload.body,
-          icon: payload.icon || '/favicon.svg'
+          icon: payload.icon || '/logo-full.png'
         });
         console.log('✅ Notificação fallback enviada:', payload.title);
         return true;
