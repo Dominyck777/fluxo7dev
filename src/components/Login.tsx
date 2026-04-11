@@ -48,7 +48,7 @@ const Login = ({ onLogin }: LoginProps) => {
       <div className="login-box">
         <div className="login-header">
           <div className="login-logo-img-container">
-            <img src="/logo-full.png" alt="Fluxo7 Team" className="login-logo-img" />
+            <img src="/logo-header.png" alt="Fluxo7 Team" className="login-logo-img" />
           </div>
         </div>
         
