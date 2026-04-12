@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import './FinancialView.css';
 import { jsonbinClient } from '../utils/jsonbin-client';
-import { supabaseClients } from '../utils/supabase-clients';
+import { supabaseClients, type ClientRow, mapRowToClient } from '../utils/supabase-clients';
+import { supabase } from '../utils/supabase-client';
 import Modal from './Modal';
 
 interface ClientsViewProps {
@@ -150,6 +151,61 @@ const ClientsView = ({ onOpenSidebar, onLogout }: ClientsViewProps) => {
     };
   }, []);
 
+  // Listener para Realtime no Supabase
+  useEffect(() => {
+    const channel = supabase
+      .channel('clientes-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', table: 'clientes', schema: 'public' },
+        (payload) => {
+          console.log('[ClientsView] Mudança Realtime detectada:', payload);
+
+          if (payload.eventType === 'INSERT') {
+            const newClient = mapRowToClient(payload.new as ClientRow);
+            // Normalização local (status baseado em data)
+            const status: 'ativo' | 'pendente' = isPastDate(newClient.endDate) ? 'pendente' : (newClient.status as any);
+            const normalized = {
+              ...newClient,
+              id: String(newClient.id),
+              status
+            };
+            setClients((prev) => {
+              if (prev.some(c => c.id === normalized.id)) return prev;
+              const updated = [normalized, ...prev];
+              localStorage.setItem(CLIENTS_STORAGE_KEY, JSON.stringify(updated));
+              return updated;
+            });
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedClient = mapRowToClient(payload.new as ClientRow);
+            const status: 'ativo' | 'pendente' = isPastDate(updatedClient.endDate) ? 'pendente' : (updatedClient.status as any);
+            const normalized = {
+              ...updatedClient,
+              id: String(updatedClient.id),
+              status
+            };
+            setClients((prev) => {
+              const updated = prev.map((c) => (c.id === normalized.id ? normalized : c));
+              localStorage.setItem(CLIENTS_STORAGE_KEY, JSON.stringify(updated));
+              return updated;
+            });
+          } else if (payload.eventType === 'DELETE') {
+            const deletedId = String(payload.old.id);
+            setClients((prev) => {
+              const updated = prev.filter((c) => c.id !== deletedId);
+              localStorage.setItem(CLIENTS_STORAGE_KEY, JSON.stringify(updated));
+              return updated;
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   const handleToggleClientStatus = (clientId: string) => {
     setClients((prev) => {
       const updated = prev.map((client) =>
@@ -210,10 +266,10 @@ const ClientsView = ({ onOpenSidebar, onLogout }: ClientsViewProps) => {
       console.error('Erro ao salvar clientes no localStorage:', error);
     }
 
-    // Persiste também no Supabase (sem bloquear a UI)
+    // Persiste também no Supabase (individualmente)
     supabaseClients
-      .saveClients(updated)
-      .catch((error) => console.error('Erro ao salvar clientes no Supabase ao criar novo cliente:', error));
+      .createClient(newClient)
+      .catch((error) => console.error('Erro ao criar cliente no Supabase:', error));
 
     setIsModalOpen(false);
   };

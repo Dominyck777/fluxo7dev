@@ -2,7 +2,7 @@ import { supabase } from './supabase-client';
 import type { ClientRecord } from './jsonbin-client';
 
 // Mapeia a tabela `clientes` do Supabase para o tipo ClientRecord usado no front
-interface ClientRow {
+export interface ClientRow {
   id: string;
   code: string;
   name: string;
@@ -12,7 +12,7 @@ interface ClientRow {
   end_date: string;        // date -> string ISO
 }
 
-function mapRowToClient(row: ClientRow): ClientRecord {
+export function mapRowToClient(row: ClientRow): ClientRecord {
   return {
     id: row.id,
     code: row.code,
@@ -39,39 +39,47 @@ export const supabaseClients = {
     return (data ?? []).map(mapRowToClient);
   },
 
-  async saveClients(clients: ClientRecord[]): Promise<void> {
-    // Estratégia simples: substituir todos os registros atuais pelo array recebido
-    // 1) apagar todos
-    const { error: deleteError } = await supabase
-      .from('clientes')
-      .delete()
-      .neq('id', '');
+  // Insere um único cliente (seguro para multi-software)
+  async createClient(client: ClientRecord): Promise<void> {
+    const row: ClientRow = {
+      id: String(client.id),
+      code: client.code,
+      name: client.name,
+      project: client.project,
+      status: client.status,
+      activation_date: client.activationDate,
+      end_date: client.endDate,
+    };
 
-    if (deleteError) {
-      console.error('[supabase-clients] Erro ao limpar clientes:', deleteError);
-      throw deleteError;
+    const { error } = await supabase
+      .from('clientes')
+      .insert(row);
+
+    if (error) {
+      console.error('[supabase-clients] Erro ao criar cliente:', error);
+      throw error;
     }
+  },
 
-    if (clients.length === 0) return;
+  // Atualiza ou insere (seguro para sincronização)
+  async upsertClient(client: ClientRecord): Promise<void> {
+    const row: ClientRow = {
+      id: String(client.id),
+      code: client.code,
+      name: client.name,
+      project: client.project,
+      status: client.status,
+      activation_date: client.activationDate,
+      end_date: client.endDate,
+    };
 
-    // 2) inserir todos
-    const rows: ClientRow[] = clients.map((c) => ({
-      id: String(c.id),
-      code: c.code,
-      name: c.name,
-      project: c.project,
-      status: c.status,
-      activation_date: c.activationDate,
-      end_date: c.endDate,
-    }));
-
-    const { error: insertError } = await supabase
+    const { error } = await supabase
       .from('clientes')
-      .insert(rows);
+      .upsert(row);
 
-    if (insertError) {
-      console.error('[supabase-clients] Erro ao salvar clientes:', insertError);
-      throw insertError;
+    if (error) {
+      console.error('[supabase-clients] Erro ao dar upsert no cliente:', error);
+      throw error;
     }
   },
 
