@@ -282,7 +282,7 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
                 <div className="stat-card stat-card-total">
                   <div className="stat-icon">📈</div>
                   <div className="stat-content">
-                    <h3>Total de Feedbacks</h3>
+                    <h3>Total de Interações</h3>
                     <span className="stat-number">{filteredFeedbacks.length}</span>
                     <div className="stat-details">
                       <div className="stat-detail-item">
@@ -459,7 +459,13 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
 
                   {feedback.comentario && (
                     <div className="feedback-comment">
-                      <p>"{feedback.comentario}"</p>
+                      <p>
+                        "{feedback.comentario.split(/(\*\*.*?\*\*)/).map((part, i) => 
+                          part.startsWith('**') && part.endsWith('**') 
+                            ? <strong key={i}>{part.slice(2, -2)}</strong> 
+                            : part
+                        )}"
+                      </p>
                     </div>
                   )}
 
@@ -512,7 +518,13 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
                                 })}
                               </span>
                             </div>
-                            <p className="conversation-text">{message.text}</p>
+                            <p className="conversation-text">
+                              {message.text.split(/(\*\*.*?\*\*)/).map((part, i) => 
+                                part.startsWith('**') && part.endsWith('**') 
+                                  ? <strong key={i}>{part.slice(2, -2)}</strong> 
+                                  : part
+                              )}
+                            </p>
                           </div>
                         ))
                       ) : (

@@ -58,4 +58,17 @@ export const supabaseDevs = {
 
     return avatarUrl;
   },
+
+  async getDevelopers(): Promise<Developer[]> {
+    const { data, error } = await supabase
+      .from('usuarios')
+      .select('*');
+
+    if (error) {
+      console.error('[supabase-devs] Erro ao carregar desenvolvedores:', error);
+      return [];
+    }
+
+    return (data || []) as Developer[];
+  },
 };

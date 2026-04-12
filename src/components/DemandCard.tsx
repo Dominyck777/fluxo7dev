@@ -19,9 +19,10 @@ interface DemandCardProps {
   onComplete?: (demand: Demand) => void;
   onUpdate?: (demand: Demand) => void;
   isCompleting?: boolean;
+  developerAvatar?: string;
 }
 
-const DemandCard = ({ demand, onEdit, onDelete, onComplete, onUpdate, isCompleting }: DemandCardProps) => {
+const DemandCard = ({ demand, onEdit, onDelete, onComplete, onUpdate, isCompleting, developerAvatar }: DemandCardProps) => {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   const getStatusClass = (status: string) => {
@@ -71,7 +72,14 @@ const DemandCard = ({ demand, onEdit, onDelete, onComplete, onUpdate, isCompleti
       }}
     >
       <div className="card-header">
-        <span className="developer-badge">{demand.desenvolvedor}</span>
+        <div className="developer-badge">
+          {developerAvatar ? (
+            <img src={developerAvatar} alt={demand.desenvolvedor} className="developer-avatar" />
+          ) : (
+            <div className="developer-avatar-placeholder">👨‍💻</div>
+          )}
+          <span>{demand.desenvolvedor}</span>
+        </div>
         <div className="card-actions">
           {demand.status !== 'Concluído' && onComplete && (
             <button

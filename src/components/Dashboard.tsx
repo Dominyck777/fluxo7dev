@@ -7,6 +7,7 @@ import ConfirmDialog from './ConfirmDialog';
 import Loading from './Loading';
 import { jsonbinClient, type Developer } from '../utils/jsonbin-client';
 import { supabaseDemands } from '../utils/supabase-demands';
+import { supabaseDevs } from '../utils/supabase-devs';
 import { notificationService } from '../utils/notification-service';
 import './Dashboard.css';
 
@@ -23,6 +24,7 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
   const [searchDescription, setSearchDescription] = useState<string>('');
   const [demands, setDemands] = useState<Demand[]>([]);
   const [devs, setDevs] = useState<string[]>([]);
+  const [allDevs, setAllDevs] = useState<Developer[]>([]);
   const [projects, setProjects] = useState<string[]>([]);
   const [priorities, setPriorities] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -63,18 +65,25 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
           // Limpar dados pré-carregados após uso
           localStorage.removeItem('preloaded_config');
           localStorage.removeItem('preloaded_demands');
+
+          // Carregar desenvolvedores completos em background para avatares
+          supabaseDevs.getDevelopers().then(fullDevs => {
+            if (mounted) setAllDevs(fullDevs);
+          });
         } else {
           // Fallback: carregar da API se não houver dados pré-carregados
           // Isso só acontece quando o usuário atualiza a página
-          const [config, demands] = await Promise.all([
+          const [config, demandsData, fullDevs] = await Promise.all([
             jsonbinClient.getConfig(),
             supabaseDemands.getDemands(),
+            supabaseDevs.getDevelopers()
           ]);
           if (!mounted) return;
           setDevs(config.devs || []);
+          setAllDevs(fullDevs);
           setProjects(config.projects || []);
           setPriorities(config.priorities || []);
-          setDemands(demands);
+          setDemands(demandsData);
           setIsLoading(false);
         }
       } catch (error) {
@@ -302,6 +311,11 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
       }
     }
   };
+
+  const getDevAvatar = (name: string) => {
+    return allDevs.find(d => d.name === name)?.avatar;
+  };
+
   return (
     <div className="dashboard">
       <header className="dashboard-header" role="banner">
@@ -617,6 +631,7 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
                       onComplete={handleCompleteDemand}
                       onUpdate={handleUpdateDescription}
                       isCompleting={completingId === demand.id}
+                      developerAvatar={getDevAvatar(demand.desenvolvedor)}
                     />
                   ))
                 ) : (
@@ -656,6 +671,7 @@ const Dashboard = ({ onLogout, currentUser, onOpenSidebar }: DashboardProps) => 
                     onComplete={handleCompleteDemand}
                     onUpdate={handleUpdateDescription}
                     isCompleting={completingId === demand.id}
+                    developerAvatar={getDevAvatar(demand.desenvolvedor)}
                   />
                 ))}
               </div>

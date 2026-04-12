@@ -239,96 +239,56 @@
 }
 
 .summary-card {
-  background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
-  border: 2px solid rgba(var(--color-primary-rgb), 0.3);
+  background: #0d0d0d !important;
+  border: 1.5px solid var(--color-primary) !important;
   border-radius: 12px;
   padding: 1.5rem;
   display: flex;
   align-items: center;
   gap: 1rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6), 0 0 10px rgba(var(--color-primary-rgb), 0.1) !important;
+  position: relative;
+  overflow: hidden;
 }
 
 .summary-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border-color: var(--color-primary-hover) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7), 0 0 20px rgba(var(--color-primary-rgb), 0.2) !important;
 }
 
-/* Card Total - Roxo/Violeta */
-.card-total {
-  border-color: #8B5CF6;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.05) 100%);
+/* Card Completion - Azul */
+.card-completion .card-icon {
+  color: var(--color-primary);
+  filter: drop-shadow(0 0 8px rgba(var(--color-primary-rgb), 0.4));
 }
 
-.card-total:hover {
-  border-color: #A78BFA;
-  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
-}
-
-.card-total .card-icon {
-  color: #8B5CF6;
-}
-
-/* Card Pendente - Amarelo */
+/* Card Pending - Azul (Padronizado) */
 .card-pending {
-  border-color: #F59E0B;
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.05) 100%);
-}
-
-.card-pending:hover {
-  border-color: #FBBF24;
-  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+  border-color: var(--color-primary) !important;
 }
 
 .card-pending .card-icon {
-  color: #F59E0B;
+  color: var(--color-primary);
+  filter: drop-shadow(0 0 8px rgba(var(--color-primary-rgb), 0.4));
 }
 
-/* Card Em Andamento - Roxo */
-.card-andamento {
-  border-color: #8B5CF6;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.05) 100%);
-}
-
-.card-andamento:hover {
-  border-color: #A78BFA;
-  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
-}
-
-.card-andamento .card-icon {
-  color: #8B5CF6;
-}
-
-/* Card Concluídas - Verde */
+/* Card Completed - Verde (Sutil) */
 .card-completed {
-  border-color: #10B981;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
+  border-color: #10B981 !important;
 }
 
 .card-completed:hover {
-  border-color: #34D399;
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+  border-color: #34D399 !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7), 0 0 20px rgba(16, 185, 129, 0.2) !important;
 }
 
 .card-completed .card-icon {
   color: #10B981;
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
 }
 
-/* Card Taxa de Conclusão - Azul */
-.card-completion {
-  border-color: #3B82F6;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
-}
-
-.card-completion:hover {
-  border-color: #60A5FA;
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
-}
-
-.card-completion .card-icon {
-  color: #3B82F6;
-}
 
 .summary-card .card-icon {
   font-size: 2rem;
@@ -342,19 +302,21 @@
 }
 
 .summary-card .card-content h3 {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0 0 0.5rem 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 0.25rem 0;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1.5px;
 }
 
 .summary-card .card-number {
-  font-size: 2.25rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 800;
   color: var(--color-white);
-  margin: 0;
+  line-height: 1;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  letter-spacing: -1px;
 }
 
 .card-loading {
