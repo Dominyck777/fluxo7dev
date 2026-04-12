@@ -28,7 +28,7 @@
   "projects": [
     "F7 Arena",
     "F7 Dev",
-    "F7 Salon"
+    "Ísis Agenda"
   ],
   "priorities": [
     "Baixa",
@@ -138,8 +138,8 @@
     },
     {
       "desenvolvedor": "Dominyck",
-      "projeto": "F7 Salon",
-      "descricao": "Oferecer sobre o f7 salon",
+      "projeto": "Ísis Agenda",
+      "descricao": "Oferecer sobre o Ísis Agenda",
       "status": "Concluído",
       "prioridade": "Urgente",
       "dataCriacao": "2025-11-13T02:34:44.545Z",
