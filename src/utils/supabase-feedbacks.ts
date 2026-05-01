@@ -67,17 +67,33 @@ function shouldIncludeRow(row: IsisRow): boolean {
 
 export const supabaseFeedbacks = {
   async getFeedbacks(): Promise<FeedbackData[]> {
-    const { data, error } = await supabase
-      .from('isis')
-      .select('*');
+    let allData: IsisRow[] = [];
+    let from = 0;
+    const step = 1000;
+    let fetchMore = true;
 
-    if (error) {
-      console.error('[supabase-feedbacks] Erro ao buscar feedbacks:', error);
-      throw error;
+    while (fetchMore) {
+      const { data, error } = await supabase
+        .from('isis')
+        .select('*')
+        .range(from, from + step - 1);
+
+      if (error) {
+        console.error('[supabase-feedbacks] Erro ao buscar feedbacks:', error);
+        throw error;
+      }
+
+      const rows = (data as IsisRow[] | null) ?? [];
+      allData = allData.concat(rows);
+
+      if (rows.length < step) {
+        fetchMore = false;
+      } else {
+        from += step;
+      }
     }
 
-    const rows = (data as IsisRow[] | null) ?? [];
-    return rows
+    return allData
       .filter(shouldIncludeRow)
       .map(mapRowToFeedback)
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
