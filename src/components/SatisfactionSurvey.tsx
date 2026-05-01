@@ -500,9 +500,9 @@ const SatisfactionSurvey = ({ onOpenSidebar, onLogout }: SatisfactionSurveyProps
                   >
                     <div className="conversation-body">
                       {feedback.conversa && feedback.conversa.length > 0 ? (
-                        feedback.conversa.map((message) => (
+                        feedback.conversa.map((message, idx) => (
                           <div
-                            key={message.ts}
+                            key={`${message.ts}-${idx}`}
                             className={`conversation-message ${
                               message.from === 'user' ? 'from-user' : 'from-assistant'
                             }`}

@@ -67,29 +67,41 @@ function shouldIncludeRow(row: IsisRow): boolean {
 
 export const supabaseFeedbacks = {
   async getFeedbacks(): Promise<FeedbackData[]> {
-    let allData: IsisRow[] = [];
-    let from = 0;
+    // 1. Obter o total exato de registros primeiro para paralelizar as requisições
+    const { count, error: countError } = await supabase
+      .from('isis')
+      .select('*', { count: 'exact', head: true });
+
+    if (countError) {
+      console.error('[supabase-feedbacks] Erro ao buscar total de feedbacks:', countError);
+      throw countError;
+    }
+
+    const total = count || 0;
     const step = 1000;
-    let fetchMore = true;
+    const promises = [];
 
-    while (fetchMore) {
-      const { data, error } = await supabase
-        .from('isis')
-        .select('*')
-        .range(from, from + step - 1);
+    // 2. Criar as requisições em paralelo
+    for (let i = 0; i < total; i += step) {
+      promises.push(
+        supabase
+          .from('isis')
+          .select('*')
+          .range(i, i + step - 1)
+      );
+    }
 
+    // 3. Executar todas as requisições simultaneamente
+    const results = await Promise.all(promises);
+
+    let allData: IsisRow[] = [];
+    for (const { data, error } of results) {
       if (error) {
-        console.error('[supabase-feedbacks] Erro ao buscar feedbacks:', error);
+        console.error('[supabase-feedbacks] Erro ao buscar página de feedbacks:', error);
         throw error;
       }
-
-      const rows = (data as IsisRow[] | null) ?? [];
-      allData = allData.concat(rows);
-
-      if (rows.length < step) {
-        fetchMore = false;
-      } else {
-        from += step;
+      if (data) {
+        allData = allData.concat(data);
       }
     }
 
